@@ -1,0 +1,5 @@
+data
+static
+tests
+__pycache__
+*.pyc

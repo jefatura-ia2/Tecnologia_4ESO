@@ -1,0 +1,585 @@
+id: m8
+number: 8
+trimestre: 2
+icon: "🔁"
+title: "Secuencias de varios cilindros"
+subtitle: "Notación de movimientos, diagrama espacio-fase y secuencias por sensores"
+weeks: [22, 23, 24]
+hours: 9
+objectives:
+  - Describir el funcionamiento de una máquina con la notación de movimientos (A+ B+ B- A-) y el diagrama espacio-fase.
+  - Comprobar que una secuencia es válida antes de ejecutarla.
+  - Programar secuencias de dos cilindros, primero por tiempo y después por finales de carrera.
+  - Calcular el tiempo de ciclo y la producción de una máquina.
+materials:
+  - Placa, 4 módulos MOSFET, 4 electroválvulas 3/2 NC (o 3 si un cilindro es de simple efecto)
+  - Dos cilindros (A y B) con sus finales de carrera a0, a1, b0, b1
+criteria:
+  - Representa y programa secuencias de funcionamiento de sistemas automáticos con varios actuadores.
+  - Evalúa el rendimiento de un sistema automático calculando su tiempo de ciclo y su producción.
+schedule:
+  - {week: 22, session: 1, title: "Notación A+ B+ … y diagrama espacio-fase", section: m8s1}
+  - {week: 22, session: 2, title: "Secuencias válidas e imposibles", section: m8s1}
+  - {week: 22, session: 3, title: "Ejecutar secuencias por tiempo", section: m8s2}
+  - {week: 23, session: 1, title: "Dos cilindros con el diccionario de cilindros", section: m8s2}
+  - {week: 23, session: 2, title: "Secuencias por sensores: la máquina de pasos", section: m8s3}
+  - {week: 23, session: 3, title: "Secuencia por sensores en el banco", section: m8s3}
+  - {week: 24, session: 1, title: "Proyecto corto: estampadora A+ B+ B- A- (montaje)", section: m8s4}
+  - {week: 24, session: 2, title: "Proyecto corto: programa por sensores", section: m8s4}
+  - {week: 24, session: 3, title: "Proyecto corto: tiempo de ciclo, producción y presentación", section: m8s4}
+sections:
+  - id: m8s1
+    title: "Notación de movimientos y diagrama espacio-fase"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Escribir lo que hace la máquina
+
+      Cada cilindro se nombra con una letra mayúscula y cada movimiento con `+` (sale) o `-` (entra).
+      Una **estampadora** que sujeta la pieza con A y la marca con B:
+
+      ```
+      A+  B+  B-  A-
+      ```
+
+      1. A sale (sujeta) · 2. B sale (marca) · 3. B entra · 4. A entra (suelta).
+
+      ## Diagrama espacio-fase
+
+      Una fila por cilindro; en horizontal, las **fases** (pasos); en vertical, la posición (0 dentro, 1 fuera):
+
+      ```
+            fase: 1    2    3    4    1
+      A   1      ____________
+          0  ___/            \_______
+      B   1           ____
+          0  ________/    \__________
+      ```
+
+      ## ¿Es válida la secuencia?
+
+      Comprobaciones que haremos con un programa antes de ejecutar nada:
+
+      1. Cada cilindro **alterna** `+` y `-` (no puede salir si ya está fuera).
+      2. Todos empiezan **dentro**, así que el primer movimiento de cada cilindro es `+`.
+      3. Al terminar, todos vuelven **dentro**, para que el ciclo se pueda repetir.
+
+      `A+ A+ A-` ✗ (sale dos veces) · `A+ B+ B-` ✗ (A termina fuera) · `A+ B+ A- B-` ✓
+    examples:
+      - title: "Analizador de secuencias"
+        explanation: "Convierte el texto en una lista de movimientos y la muestra paso a paso."
+        pico_w: |
+          SECUENCIA = "A+ B+ B- A-"
+          pasos = [(m[0], m[1]) for m in SECUENCIA.split()]
+          estado = {}
+          for n, (cil, sentido) in enumerate(pasos, 1):
+              estado[cil] = 1 if sentido == "+" else 0
+              print("Fase", n, ":", cil + sentido, " posiciones:", estado)
+        esp32_s3: |
+          SECUENCIA = "A+ B+ B- A-"
+          pasos = [(m[0], m[1]) for m in SECUENCIA.split()]
+          estado = {}
+          for n, (cil, sentido) in enumerate(pasos, 1):
+              estado[cil] = 1 if sentido == "+" else 0
+              print("Fase", n, ":", cil + sentido, " posiciones:", estado)
+    practice: |
+      ### Práctica en clase
+
+      1. Escribe la secuencia y dibuja el diagrama espacio-fase de: un alimentador (A empuja la pieza, B la expulsa), una taladradora (A sujeta, B taladra) y una puerta doble.
+      2. Intercambia tus secuencias con un compañero y busca errores.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué secuencia es válida si los cilindros empiezan dentro?"
+          options:
+            - {id: a, text: "A+ B+ A- B-"}
+            - {id: b, text: "A+ A+ B+ B-", feedback: "A no puede salir dos veces seguidas."}
+            - {id: c, text: "A- B+ B- A+", feedback: "A empieza dentro: no puede entrar."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "En A+ B+ B- A-, ¿cuántas fases tiene el ciclo?"
+          options:
+            - {id: a, text: "4"}
+            - {id: b, text: "2", feedback: "Hay una fase por cada movimiento."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `parse_secuencia(texto)` que convierta `"A+ B+ B- A-"` en la lista de tuplas
+            `[("A", "+"), ("B", "+"), ("B", "-"), ("A", "-")]`.
+          starter: |
+            def parse_secuencia(texto):
+                pass
+          solution: |
+            def parse_secuencia(texto):
+                pasos = []
+                for mov in texto.split():
+                    pasos.append((mov[0], mov[1]))
+                return pasos
+          tests:
+            - {desc: "Estampadora", call: "parse_secuencia('A+ B+ B- A-')", expected: [["A", "+"], ["B", "+"], ["B", "-"], ["A", "-"]]}
+            - {desc: "Un cilindro", call: "parse_secuencia('A+ A-')", expected: [["A", "+"], ["A", "-"]]}
+            - {desc: "Texto vacío", call: "parse_secuencia('')", expected: []}
+        - id: c2
+          type: code
+          points: 5
+          prompt: |
+            Escribe `es_valida(pasos)` (lista de tuplas como la anterior) que devuelva `True` si cumple las tres
+            reglas de la teoría: alterna `+`/`-`, empieza con `+` desde dentro y termina con todos dentro.
+            Una secuencia vacía es válida.
+          starter: |
+            def es_valida(pasos):
+                pass
+          solution: |
+            def es_valida(pasos):
+                estado = {}
+                for cil, sentido in pasos:
+                    actual = estado.get(cil, "-")
+                    if actual == sentido:
+                        return False
+                    estado[cil] = sentido
+                for sentido in estado.values():
+                    if sentido != "-":
+                        return False
+                return True
+          tests:
+            - {desc: "A+ B+ B- A- ✓", call: "es_valida([('A', '+'), ('B', '+'), ('B', '-'), ('A', '-')])", expected: true}
+            - {desc: "A+ A+ A- ✗", call: "es_valida([('A', '+'), ('A', '+'), ('A', '-')])", expected: false}
+            - {desc: "A+ B+ B- ✗ (A termina fuera)", call: "es_valida([('A', '+'), ('B', '+'), ('B', '-')])", expected: false}
+            - {desc: "A- … ✗ (empieza dentro)", call: "es_valida([('A', '-'), ('A', '+')])", expected: false}
+            - {desc: "Vacía ✓", call: "es_valida([])", expected: true}
+          hints:
+            wrong_result: "Lleva un diccionario con la última posición de cada cilindro (por defecto \"-\", dentro). Si el movimiento coincide con la posición actual, no es válida. Al final, todos deben estar en \"-\"."
+
+  - id: m8s2
+    title: "Ejecutar secuencias por tiempo"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Un diccionario de cilindros
+
+      ```python
+      cilindros = {
+          "A": CilindroDE(Pin(10, Pin.OUT), Pin(11, Pin.OUT)),
+          "B": CilindroDE(Pin(12, Pin.OUT), Pin(13, Pin.OUT)),
+      }
+      ```
+
+      Con la secuencia ya convertida en lista, ejecutarla es recorrerla:
+
+      ```python
+      def ejecutar(pasos, cilindros, t):
+          for cil, sentido in pasos:
+              if sentido == "+":
+                  cilindros[cil].avanzar()
+              else:
+                  cilindros[cil].retroceder()
+              time.sleep(t)
+      ```
+
+      ¡Cambiar el funcionamiento de la máquina es tan fácil como cambiar el texto de la secuencia!
+      Pero, igual que en la misión 6, temporizar es "a ciegas": en la sección siguiente lo haremos por
+      sensores.
+
+      > Con 4 electroválvulas tenemos dos cilindros de doble efecto. Si un cilindro es de **simple efecto**,
+      > puedes crear una clase `CilindroSE` con los mismos métodos (`avanzar` activa su 3/2 y `retroceder`
+      > la desactiva) y el resto del programa no cambia. Eso es la **programación orientada a objetos**.
+    examples:
+      - title: "Secuencia configurable por texto"
+        explanation: "EV1-EV2 = cilindro A, EV3-EV4 = cilindro B. Cambia SECUENCIA y vuelve a ejecutar."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          SECUENCIA = "A+ B+ B- A-"
+          cilindros = {"A": CilindroDE(Pin(10, Pin.OUT), Pin(11, Pin.OUT)),
+                       "B": CilindroDE(Pin(12, Pin.OUT), Pin(13, Pin.OUT))}
+          pasos = [(m[0], m[1]) for m in SECUENCIA.split()]
+          try:
+              for c in cilindros.values():
+                  c.retroceder()
+              time.sleep(1)
+              for cil, sentido in pasos:
+                  print(cil + sentido)
+                  cilindros[cil].avanzar() if sentido == "+" else cilindros[cil].retroceder()
+                  time.sleep(1.0)
+          finally:
+              for c in cilindros.values():
+                  c.retroceder()
+        esp32_s3: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          SECUENCIA = "A+ B+ B- A-"
+          cilindros = {"A": CilindroDE(Pin(4, Pin.OUT), Pin(5, Pin.OUT)),
+                       "B": CilindroDE(Pin(6, Pin.OUT), Pin(7, Pin.OUT))}
+          pasos = [(m[0], m[1]) for m in SECUENCIA.split()]
+          try:
+              for c in cilindros.values():
+                  c.retroceder()
+              time.sleep(1)
+              for cil, sentido in pasos:
+                  print(cil + sentido)
+                  cilindros[cil].avanzar() if sentido == "+" else cilindros[cil].retroceder()
+                  time.sleep(1.0)
+          finally:
+              for c in cilindros.values():
+                  c.retroceder()
+    practice: |
+      ### Práctica en el taller
+
+      1. Monta los dos cilindros de doble efecto con EV1-EV4.
+      2. Ejecuta `A+ B+ B- A-` y después `A+ B+ A- B-`. Describe la diferencia.
+      3. Crea la clase `CilindroSE` y prueba una secuencia con un simple efecto y un doble efecto.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué ventaja tiene guardar la secuencia como texto (\"A+ B+ B- A-\")?"
+          options:
+            - {id: a, text: "Se cambia el funcionamiento de la máquina sin reescribir el programa."}
+            - {id: b, text: "El programa va más rápido.", feedback: "La ventaja es la flexibilidad."}
+            - {id: c, text: "No hace falta montar los cilindros.", feedback: "Los cilindros siguen siendo necesarios."}
+          answer: a
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `ejecutar(pasos, cilindros, t)` como en la teoría. `cilindros` es un diccionario
+            letra → objeto con `avanzar()` y `retroceder()`. Espera `t` segundos tras cada movimiento.
+          starter: |
+            import time
+
+            def ejecutar(pasos, cilindros, t):
+                pass
+          solution: |
+            import time
+
+            def ejecutar(pasos, cilindros, t):
+                for cil, sentido in pasos:
+                    if sentido == "+":
+                        cilindros[cil].avanzar()
+                    else:
+                        cilindros[cil].retroceder()
+                    time.sleep(t)
+          tests:
+            - desc: "A+ B+ B- A- en orden"
+              before:
+                - "_h = []"
+                - "class _Cil:\n    def __init__(self, n):\n        self.n = n\n    def avanzar(self):\n        _h.append(self.n + '+')\n    def retroceder(self):\n        _h.append(self.n + '-')"
+                - "_clock.sleeps.clear()"
+                - "ejecutar([('A', '+'), ('B', '+'), ('B', '-'), ('A', '-')], {'A': _Cil('A'), 'B': _Cil('B')}, 0.5)"
+              check: "_h == ['A+', 'B+', 'B-', 'A-']"
+            - {desc: "Espera t después de cada movimiento (4 × 0,5 s)", check: "abs(sum(_clock.sleeps) - 2.0) < 0.01"}
+
+  - id: m8s3
+    title: "Secuencias por sensores: la máquina de pasos"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Cada paso termina cuando su sensor lo confirma
+
+      A cada movimiento le corresponde un final de carrera:
+
+      | Movimiento | Sensor que lo confirma |
+      |---|---|
+      | `A+` | `a1` |
+      | `A-` | `a0` |
+      | `B+` | `b1` |
+      | `B-` | `b0` |
+
+      Regla: letra en minúscula + `1` si es `+`, o `0` si es `-`.
+
+      ## La máquina de pasos (sin bloquear)
+
+      Guardamos el **número de paso** actual. En cada vuelta del bucle:
+
+      1. Leemos todos los sensores en un diccionario `{"a0": True, "a1": False, ...}` (`True` = pisado).
+      2. Si el sensor del paso actual está pisado → pasamos al **siguiente paso** y damos su orden.
+      3. Al terminar el último paso, volvemos al 0 (ciclo continuo) o paramos (ciclo único).
+
+      ```python
+      def siguiente_paso(paso, pasos, sensores):
+          cil, sentido = pasos[paso]
+          if sensores.get(sensor_de(cil, sentido)):
+              return (paso + 1) % len(pasos)
+          return paso
+      ```
+
+      Esta es la idea del **GRAFCET** que usan los autómatas industriales: etapas (pasos), acciones
+      (movimientos) y transiciones (sensores).
+    examples:
+      - title: "Estampadora por sensores (ciclo continuo con PARO)"
+        explanation: "La secuencia avanza cuando el sensor del paso se pisa. PARO detiene al terminar el ciclo. Requiere los 4 finales de carrera."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          pasos = [(m[0], m[1]) for m in "A+ B+ B- A-".split()]
+          cil = {"A": CilindroDE(Pin(10, Pin.OUT), Pin(11, Pin.OUT)),
+                 "B": CilindroDE(Pin(12, Pin.OUT), Pin(13, Pin.OUT))}
+          fc = {"a0": Pin(18, Pin.IN, Pin.PULL_UP), "a1": Pin(19, Pin.IN, Pin.PULL_UP),
+                "b0": Pin(20, Pin.IN, Pin.PULL_UP), "b1": Pin(21, Pin.IN, Pin.PULL_UP)}
+          paro = Pin(15, Pin.IN, Pin.PULL_UP)
+
+          def orden(p):
+              c, s = pasos[p]
+              cil[c].avanzar() if s == "+" else cil[c].retroceder()
+
+          def sensor_de(c, s):
+              return c.lower() + ("1" if s == "+" else "0")
+
+          try:
+              paso = 0; orden(paso)
+              while True:
+                  sensores = {k: p.value() == 0 for k, p in fc.items()}
+                  c, s = pasos[paso]
+                  if sensores[sensor_de(c, s)]:
+                      paso = (paso + 1) % len(pasos)
+                      if paso == 0 and paro.value() == 0:
+                          print("Fin de ciclo: parado"); break
+                      orden(paso)
+                  time.sleep_ms(5)
+          finally:
+              for c in cil.values():
+                  c.retroceder()
+        esp32_s3: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          pasos = [(m[0], m[1]) for m in "A+ B+ B- A-".split()]
+          cil = {"A": CilindroDE(Pin(4, Pin.OUT), Pin(5, Pin.OUT)),
+                 "B": CilindroDE(Pin(6, Pin.OUT), Pin(7, Pin.OUT))}
+          fc = {"a0": Pin(17, Pin.IN, Pin.PULL_UP), "a1": Pin(18, Pin.IN, Pin.PULL_UP),
+                "b0": Pin(8, Pin.IN, Pin.PULL_UP), "b1": Pin(9, Pin.IN, Pin.PULL_UP)}
+          paro = Pin(15, Pin.IN, Pin.PULL_UP)
+
+          def orden(p):
+              c, s = pasos[p]
+              cil[c].avanzar() if s == "+" else cil[c].retroceder()
+
+          def sensor_de(c, s):
+              return c.lower() + ("1" if s == "+" else "0")
+
+          try:
+              paso = 0; orden(paso)
+              while True:
+                  sensores = {k: p.value() == 0 for k, p in fc.items()}
+                  c, s = pasos[paso]
+                  if sensores[sensor_de(c, s)]:
+                      paso = (paso + 1) % len(pasos)
+                      if paso == 0 and paro.value() == 0:
+                          print("Fin de ciclo: parado"); break
+                      orden(paso)
+                  time.sleep_ms(5)
+          finally:
+              for c in cil.values():
+                  c.retroceder()
+    practice: |
+      ### Práctica en el taller
+
+      1. Monta los 4 finales de carrera y comprueba cada uno con el monitor de la misión 7.
+      2. Ejecuta la estampadora por sensores. Baja la presión a 2 bar: ¿sigue funcionando bien? (Con tiempos fijos, fallaría.)
+      3. Añade un timeout por paso usando lo aprendido en la misión 7.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué sensor confirma el movimiento B-?"
+          options:
+            - {id: a, text: "b0"}
+            - {id: b, text: "b1", feedback: "b1 confirma que B está fuera (B+)."}
+            - {id: c, text: "a0", feedback: "a0 es del cilindro A."}
+          answer: a
+        - id: c1
+          type: code
+          points: 2
+          prompt: |
+            Escribe `sensor_de(cil, sentido)` que devuelva el nombre del sensor que confirma el movimiento.
+
+            Ejemplos: `sensor_de("A", "+")` → `"a1"` · `sensor_de("B", "-")` → `"b0"`
+          starter: |
+            def sensor_de(cil, sentido):
+                pass
+          solution: |
+            def sensor_de(cil, sentido):
+                if sentido == "+":
+                    return cil.lower() + "1"
+                return cil.lower() + "0"
+          tests:
+            - {desc: "A+ → a1", call: "sensor_de('A', '+')", expected: "a1"}
+            - {desc: "B- → b0", call: "sensor_de('B', '-')", expected: "b0"}
+            - {desc: "C+ → c1", call: "sensor_de('C', '+')", expected: "c1"}
+        - id: c2
+          type: code
+          points: 5
+          prompt: |
+            Escribe `siguiente_paso(paso, pasos, sensores)` que devuelva el paso siguiente (volviendo a 0 tras
+            el último) si el sensor del paso actual está pisado (`True` en el diccionario), o el mismo paso si no.
+            Incluye tu función `sensor_de`.
+          starter: |
+            def sensor_de(cil, sentido):
+                pass
+
+            def siguiente_paso(paso, pasos, sensores):
+                pass
+          solution: |
+            def sensor_de(cil, sentido):
+                if sentido == "+":
+                    return cil.lower() + "1"
+                return cil.lower() + "0"
+
+            def siguiente_paso(paso, pasos, sensores):
+                cil, sentido = pasos[paso]
+                if sensores.get(sensor_de(cil, sentido)):
+                    return (paso + 1) % len(pasos)
+                return paso
+          tests:
+            - before: ["_P = [('A', '+'), ('B', '+'), ('B', '-'), ('A', '-')]"]
+              desc: "Paso 0 (A+) con a1 pisado → 1"
+              call: "siguiente_paso(0, _P, {'a0': False, 'a1': True, 'b0': True, 'b1': False})"
+              expected: 1
+            - {desc: "Paso 1 (B+) sin b1 → se queda en 1", call: "siguiente_paso(1, _P, {'a1': True, 'b0': True, 'b1': False})", expected: 1}
+            - {desc: "Último paso (A-) con a0 → vuelve a 0", call: "siguiente_paso(3, _P, {'a0': True, 'b0': True})", expected: 0}
+            - {desc: "Sensor que falta en el diccionario → no avanza", call: "siguiente_paso(2, _P, {})", expected: 2}
+          hints:
+            wrong_result: "Desempaqueta el paso actual, calcula su sensor con sensor_de y usa sensores.get(nombre). Para volver a 0 usa el resto: (paso + 1) % len(pasos)."
+
+  - id: m8s4
+    title: "Proyecto corto: estampadora A+ B+ B- A-"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      Montar y programar la estampadora por sensores (A sujeta, B marca la pieza) y calcular su
+      **producción**.
+
+      ## Tiempo de ciclo y producción
+
+      Medimos el tiempo de cada movimiento (con la placa) y los guardamos en un diccionario:
+
+      ```python
+      tiempos = {"A+": 0.6, "B+": 0.4, "B-": 0.4, "A-": 0.6}     # segundos
+      ```
+
+      - **Tiempo de ciclo** = suma de los tiempos de los movimientos de la secuencia.
+      - Con una **pausa** entre ciclos (cargar y descargar la pieza), las **piezas por hora** son:
+
+      ```
+      piezas/hora = 3600 // (tiempo de ciclo + pausa)
+      ```
+
+      (`//` es la división entera: las piezas se cuentan enteras.)
+    examples:
+      - title: "Medidor de tiempos de cada movimiento"
+        explanation: "Ejecuta un ciclo por sensores y mide cuánto tarda cada paso; imprime el diccionario de tiempos."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          pasos = "A+ B+ B- A-".split()
+          cil = {"A": CilindroDE(Pin(10, Pin.OUT), Pin(11, Pin.OUT)),
+                 "B": CilindroDE(Pin(12, Pin.OUT), Pin(13, Pin.OUT))}
+          fc = {"a0": Pin(18, Pin.IN, Pin.PULL_UP), "a1": Pin(19, Pin.IN, Pin.PULL_UP),
+                "b0": Pin(20, Pin.IN, Pin.PULL_UP), "b1": Pin(21, Pin.IN, Pin.PULL_UP)}
+          tiempos = {}
+          try:
+              for m in pasos:
+                  c, s = m[0], m[1]
+                  sensor = fc[c.lower() + ("1" if s == "+" else "0")]
+                  t0 = time.ticks_ms()
+                  cil[c].avanzar() if s == "+" else cil[c].retroceder()
+                  while sensor.value() == 1 and time.ticks_diff(time.ticks_ms(), t0) < 3000:
+                      time.sleep_ms(2)
+                  tiempos[m] = time.ticks_diff(time.ticks_ms(), t0) / 1000
+              print(tiempos)
+          finally:
+              for c in cil.values():
+                  c.retroceder()
+        esp32_s3: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          pasos = "A+ B+ B- A-".split()
+          cil = {"A": CilindroDE(Pin(4, Pin.OUT), Pin(5, Pin.OUT)),
+                 "B": CilindroDE(Pin(6, Pin.OUT), Pin(7, Pin.OUT))}
+          fc = {"a0": Pin(17, Pin.IN, Pin.PULL_UP), "a1": Pin(18, Pin.IN, Pin.PULL_UP),
+                "b0": Pin(8, Pin.IN, Pin.PULL_UP), "b1": Pin(9, Pin.IN, Pin.PULL_UP)}
+          tiempos = {}
+          try:
+              for m in pasos:
+                  c, s = m[0], m[1]
+                  sensor = fc[c.lower() + ("1" if s == "+" else "0")]
+                  t0 = time.ticks_ms()
+                  cil[c].avanzar() if s == "+" else cil[c].retroceder()
+                  while sensor.value() == 1 and time.ticks_diff(time.ticks_ms(), t0) < 3000:
+                      time.sleep_ms(2)
+                  tiempos[m] = time.ticks_diff(time.ticks_ms(), t0) / 1000
+              print(tiempos)
+          finally:
+              for c in cil.values():
+                  c.retroceder()
+    practice: |
+      ### Proyecto por equipos (3 sesiones)
+
+      1. **Montaje**: dos cilindros con sus sensores sobre una base de madera; útil de marcado en B.
+      2. **Programa** por sensores con ciclo único (MARCHA) y continuo (MARCHA mantenido); PARO al final del ciclo.
+      3. **Producción**: medid los tiempos a 3 y 4 bar, calculad las piezas/hora y presentad los resultados.
+    evaluation:
+      intro: "Proyecto corto de la misión 8. Necesitas un 80 %."
+      items:
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `tiempo_ciclo(texto, tiempos)` (suma de los tiempos de los movimientos del texto, redondeada a 2
+            decimales) y `piezas_hora(t_ciclo, pausa)` (`3600 // (t_ciclo + pausa)`, como entero).
+          starter: |
+            def tiempo_ciclo(texto, tiempos):
+                pass
+
+            def piezas_hora(t_ciclo, pausa):
+                pass
+          solution: |
+            def tiempo_ciclo(texto, tiempos):
+                total = 0
+                for mov in texto.split():
+                    total += tiempos[mov]
+                return round(total, 2)
+
+            def piezas_hora(t_ciclo, pausa):
+                return int(3600 // (t_ciclo + pausa))
+          tests:
+            - before: ["_T = {'A+': 0.6, 'B+': 0.4, 'B-': 0.4, 'A-': 0.6}"]
+              desc: "Ciclo de la estampadora: 2,0 s"
+              call: "tiempo_ciclo('A+ B+ B- A-', _T)"
+              expected: 2.0
+            - {desc: "Producción con 4 s de pausa → 600 piezas/h", call: "piezas_hora(2.0, 4)", expected: 600}
+            - {desc: "Ciclo de un solo cilindro", call: "tiempo_ciclo('A+ A-', _T)", expected: 1.2}
+            - {desc: "Producción con ciclo 1,2 s y pausa 3 s", call: "piezas_hora(1.2, 3)", expected: 857}
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Cómo aumentarías la producción de la estampadora sin cambiar los cilindros?"
+          options:
+            - {id: a, text: "Reduciendo la pausa de carga/descarga (por ejemplo, con un alimentador automático) o subiendo un poco la presión."}
+            - {id: b, text: "Quitando los finales de carrera.", feedback: "Se perdería seguridad y fiabilidad, y no ganaría tiempo."}
+            - {id: c, text: "Cambiando el orden a A+ A- B+ B-.", feedback: "Esa secuencia ya no sujetaría la pieza mientras se marca."}
+          answer: a

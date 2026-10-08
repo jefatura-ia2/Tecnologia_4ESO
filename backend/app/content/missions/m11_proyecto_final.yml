@@ -1,0 +1,512 @@
+id: m11
+number: 11
+trimestre: 3
+icon: "🏭"
+title: "Proyecto final: automatiza una máquina"
+subtitle: "GRAFCET, asignación de pines, pruebas, documentación y construcción por equipos"
+weeks: [31, 32, 33]
+hours: 9
+objectives:
+  - Describir el funcionamiento de una máquina con un GRAFCET y programarlo como máquina de estados.
+  - Planificar el cableado comprobando que la asignación de pines es correcta.
+  - Probar el automatismo de forma sistemática y documentarlo.
+  - Diseñar, montar, programar y presentar un automatismo electroneumático completo.
+materials:
+  - Kit completo del taller (compresor, unidad de mantenimiento, electrovalvulas 2/2 y 3/2, cilindros, finales de carrera)
+  - Placa, módulo MOSFET, fuente de 12 V, pulsadores y seta
+  - Cuaderno de proyecto (plantilla del docente)
+criteria:
+  - Diseña y construye sistemas automáticos electroneumáticos programados que resuelven un problema real.
+  - Documenta y comunica el proceso de diseño, las pruebas y los resultados.
+  - Trabaja en equipo aplicando las normas de seguridad del taller.
+schedule:
+  - {week: 31, session: 1, title: "GRAFCET: etapas, transiciones y acciones", section: m11s1}
+  - {week: 31, session: 2, title: "Del GRAFCET al código", section: m11s1}
+  - {week: 31, session: 3, title: "Elegir proyecto y dibujar su GRAFCET", section: m11s1}
+  - {week: 32, session: 1, title: "Tabla de conexiones y asignación de pines", section: m11s2}
+  - {week: 32, session: 2, title: "Montaje neumático y eléctrico", section: m11s2}
+  - {week: 32, session: 3, title: "Plan de pruebas y documentación", section: m11s3}
+  - {week: 33, session: 1, title: "Proyecto final: programación y ajuste", section: m11s4}
+  - {week: 33, session: 2, title: "Proyecto final: pruebas y mejoras", section: m11s4}
+  - {week: 33, session: 3, title: "Proyecto final: presentación y evaluación", section: m11s4}
+sections:
+  - id: m11s1
+    title: "GRAFCET y máquinas de estados"
+    hours: 3
+    kind: lesson
+    theory: |
+      ## ¿Qué es un GRAFCET?
+
+      Es el diagrama normalizado para describir automatismos secuenciales:
+
+      - **Etapas** (cuadrados numerados): situaciones estables de la máquina. La **etapa inicial** tiene doble cuadrado.
+      - **Acciones** (rectángulo a la derecha de la etapa): lo que se activa en esa etapa (`EV1`, `EV2`…).
+      - **Transiciones** (rayita horizontal entre etapas): la **condición** para pasar a la siguiente
+        (`MARCHA`, `a1`, `b0`…).
+
+      ```
+      ╔═══╗
+      ║ 0 ║  (reposo)
+      ╚═══╝
+        ┼  MARCHA · a0 · b0
+      ┌───┐
+      │ 1 │──[ A+ ]
+      └───┘
+        ┼  a1
+      ┌───┐
+      │ 2 │──[ B+ ]
+      └───┘
+        ┼  b1
+      …
+      ```
+
+      ## Del GRAFCET al código
+
+      Es exactamente la **máquina de estados** de la misión 2: la etapa es el estado y las transiciones
+      son una tabla.
+
+      ```python
+      TRANSICIONES = {0: ("marcha", 1), 1: ("a1", 2), 2: ("b1", 3), 3: ("b0", 4), 4: ("a0", 0)}
+      ACCIONES = {0: [], 1: ["A+"], 2: ["B+"], 3: ["B-"], 4: ["A-"]}
+      ```
+
+      En cada vuelta del bucle: se leen las entradas, se comprueba la transición de la etapa actual y,
+      si se cumple, se cambia de etapa y se aplican sus acciones.
+    examples:
+      - title: "Estampadora A+ B+ B- A- programada desde su GRAFCET"
+        explanation: "Necesita CilindroDE y finales de carrera. La seta (si la tienes) debe ir en la condición de cada transición o fuera del bucle."
+        pico_w: |
+          from machine import Pin
+          import time
+          # ... pega CilindroDE (misión 6) ...
+          A = CilindroDE(10, 11); B = CilindroDE(12, 13)
+          ent = {
+              "marcha": Pin(14, Pin.IN, Pin.PULL_UP),
+              "a0": Pin(18, Pin.IN, Pin.PULL_UP), "a1": Pin(19, Pin.IN, Pin.PULL_UP),
+              "b0": Pin(20, Pin.IN, Pin.PULL_UP), "b1": Pin(21, Pin.IN, Pin.PULL_UP),
+          }
+          TRANSICIONES = {0: ("marcha", 1), 1: ("a1", 2), 2: ("b1", 3), 3: ("b0", 4), 4: ("a0", 0)}
+          ACCIONES = {1: (A, "avanzar"), 2: (B, "avanzar"), 3: (B, "retroceder"), 4: (A, "retroceder")}
+
+          etapa = 0
+          while True:
+              entradas = {k: p.value() == 0 for k, p in ent.items()}   # activo a nivel bajo
+              cond, sig = TRANSICIONES[etapa]
+              if entradas[cond]:
+                  etapa = sig
+                  print("Etapa", etapa)
+                  if etapa in ACCIONES:
+                      cil, orden = ACCIONES[etapa]
+                      getattr(cil, orden)()
+              time.sleep_ms(10)
+        esp32_s3: |
+          from machine import Pin
+          import time
+          # ... pega CilindroDE (misión 6) ...
+          A = CilindroDE(4, 5); B = CilindroDE(6, 7)
+          ent = {
+              "marcha": Pin(14, Pin.IN, Pin.PULL_UP),
+              "a0": Pin(17, Pin.IN, Pin.PULL_UP), "a1": Pin(18, Pin.IN, Pin.PULL_UP),
+              "b0": Pin(8, Pin.IN, Pin.PULL_UP), "b1": Pin(9, Pin.IN, Pin.PULL_UP),
+          }
+          TRANSICIONES = {0: ("marcha", 1), 1: ("a1", 2), 2: ("b1", 3), 3: ("b0", 4), 4: ("a0", 0)}
+          ACCIONES = {1: (A, "avanzar"), 2: (B, "avanzar"), 3: (B, "retroceder"), 4: (A, "retroceder")}
+
+          etapa = 0
+          while True:
+              entradas = {k: p.value() == 0 for k, p in ent.items()}   # activo a nivel bajo
+              cond, sig = TRANSICIONES[etapa]
+              if entradas[cond]:
+                  etapa = sig
+                  print("Etapa", etapa)
+                  if etapa in ACCIONES:
+                      cil, orden = ACCIONES[etapa]
+                      getattr(cil, orden)()
+              time.sleep_ms(10)
+    practice: |
+      ### Práctica en clase
+
+      1. Dibuja el GRAFCET de la estampadora y el de la prensa con bimanual.
+      2. Ejecuta el ejemplo y comprueba en la consola que la etapa cambia con cada final de carrera.
+      3. Por equipos, elige el proyecto final (ver la última sección) y dibuja su GRAFCET.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "En un GRAFCET, ¿qué representa la rayita horizontal entre dos etapas?"
+          options:
+            - {id: a, text: "Una transición: la condición para pasar a la siguiente etapa."}
+            - {id: b, text: "Una acción que se ejecuta.", feedback: "Las acciones van en rectángulos a la derecha de las etapas."}
+            - {id: c, text: "Un cable.", feedback: "Es la condición de paso entre etapas."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Qué tiene de especial la etapa inicial?"
+          options:
+            - {id: a, text: "Se dibuja con doble cuadrado y es la que está activa al arrancar."}
+            - {id: b, text: "Siempre activa todas las electroválvulas.", feedback: "Normalmente es el reposo: nada activado."}
+          answer: a
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `grafcet_paso(etapa, transiciones, entradas)`:
+            - `transiciones` es un diccionario `{etapa: (condicion, siguiente)}`.
+            - `entradas` es un diccionario `{nombre: True/False}`.
+            - Devuelve la etapa siguiente si la condición de la etapa actual es `True`; si no, la misma etapa.
+            - Si la etapa no tiene transición o la condición no aparece en `entradas`, se queda en la misma etapa.
+          starter: |
+            def grafcet_paso(etapa, transiciones, entradas):
+                pass
+          solution: |
+            def grafcet_paso(etapa, transiciones, entradas):
+                if etapa not in transiciones:
+                    return etapa
+                cond, siguiente = transiciones[etapa]
+                if entradas.get(cond, False):
+                    return siguiente
+                return etapa
+          tests:
+            - before: ["_TR = {0: ('marcha', 1), 1: ('a1', 2), 2: ('b1', 3), 3: ('b0', 4), 4: ('a0', 0)}"]
+              desc: "Con MARCHA pasa de 0 a 1"
+              call: "grafcet_paso(0, _TR, {'marcha': True, 'a1': False})"
+              expected: 1
+            - before: ["_TR = {0: ('marcha', 1), 1: ('a1', 2), 2: ('b1', 3), 3: ('b0', 4), 4: ('a0', 0)}"]
+              desc: "Sin a1 se queda en 1"
+              call: "grafcet_paso(1, _TR, {'marcha': True, 'a1': False})"
+              expected: 1
+            - before: ["_TR = {0: ('marcha', 1), 1: ('a1', 2), 2: ('b1', 3), 3: ('b0', 4), 4: ('a0', 0)}"]
+              desc: "Etapa 4 vuelve a 0 con a0"
+              call: "grafcet_paso(4, _TR, {'a0': True})"
+              expected: 0
+            - before: ["_TR = {0: ('marcha', 1)}"]
+              desc: "Condición que no está en las entradas → se queda"
+              call: "grafcet_paso(0, _TR, {})"
+              expected: 0
+            - before: ["_TR = {0: ('marcha', 1)}"]
+              desc: "Etapa sin transición → se queda"
+              call: "grafcet_paso(7, _TR, {'marcha': True})"
+              expected: 7
+          hints:
+            wrong_result: "Usa entradas.get(cond, False) para que una condición que falta cuente como no cumplida."
+
+  - id: m11s2
+    title: "Asignación de pines y montaje"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Tabla de conexiones
+
+      Antes de cablear se rellena una tabla. Ejemplo (Pico W):
+
+      | Señal | Pin | Tipo |
+      |---|---|---|
+      | EV1 (A+) | GP10 | Salida → MOSFET |
+      | EV2 (A−) | GP11 | Salida → MOSFET |
+      | MARCHA | GP14 | Entrada pull-up |
+      | SETA (NC) | GP16 | Entrada pull-up |
+      | a0 / a1 | GP18 / GP19 | Entrada pull-up |
+
+      ## Errores típicos que hay que comprobar
+
+      - **Pin repetido**: dos señales en el mismo pin.
+      - **Pin no disponible**: pines reservados (en el ESP32-S3, GPIO 19/20 son USB y 26–37 la memoria;
+        en la Pico W, GP23–25 y GP29 los usa la WiFi).
+      - **12 V** nunca llega a la placa: solo a la carga del MOSFET.
+
+      ## Orden de montaje
+
+      1. Neumática **sin presión**: tubos cortados a escuadra hasta el fondo de los racores.
+      2. Electrónica **sin la fuente de 12 V**: prueba los LED del módulo MOSFET.
+      3. Conecta 12 V; después, el aire a baja presión (2 bar) para las primeras pruebas.
+    examples:
+      - title: "Prueba de E/S: comprobar todo el cableado"
+        explanation: "Muestra el estado de cada entrada y activa cada salida 0,5 s, una a una, para verificar el cableado antes de programar la secuencia."
+        pico_w: |
+          from machine import Pin
+          import time
+          SALIDAS = {"EV1": 10, "EV2": 11, "EV3": 12, "EV4": 13}
+          ENTRADAS = {"MARCHA": 14, "PARO": 15, "SETA": 16, "a0": 18, "a1": 19, "b0": 20, "b1": 21}
+          ent = {n: Pin(p, Pin.IN, Pin.PULL_UP) for n, p in ENTRADAS.items()}
+          print({n: p.value() for n, p in ent.items()})
+          for nombre, num in SALIDAS.items():
+              ev = Pin(num, Pin.OUT, value=0)
+              print("Probando", nombre); ev.on(); time.sleep(0.5); ev.off(); time.sleep(0.5)
+        esp32_s3: |
+          from machine import Pin
+          import time
+          SALIDAS = {"EV1": 4, "EV2": 5, "EV3": 6, "EV4": 7}
+          ENTRADAS = {"MARCHA": 14, "PARO": 15, "SETA": 16, "a0": 17, "a1": 18, "b0": 8, "b1": 9}
+          ent = {n: Pin(p, Pin.IN, Pin.PULL_UP) for n, p in ENTRADAS.items()}
+          print({n: p.value() for n, p in ent.items()})
+          for nombre, num in SALIDAS.items():
+              ev = Pin(num, Pin.OUT, value=0)
+              print("Probando", nombre); ev.on(); time.sleep(0.5); ev.off(); time.sleep(0.5)
+    practice: |
+      ### Práctica en el taller
+
+      1. Rellena la tabla de conexiones de tu proyecto y pásala por `validar_pines()`.
+      2. Monta el circuito siguiendo el orden de montaje y ejecuta la prueba de E/S.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿En qué orden se ponen en marcha las energías para la primera prueba?"
+          options:
+            - {id: a, text: "Primero la electrónica (sin 12 V), luego los 12 V y por último el aire a baja presión."}
+            - {id: b, text: "Primero el aire a 6 bar y luego se conecta lo demás.", feedback: "Un cilindro podría moverse de forma inesperada."}
+          answer: a
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `validar_pines(asignacion, permitidos)`:
+            - `asignacion` es un diccionario `{señal: pin}` y `permitidos` una lista de pines válidos.
+            - Devuelve la lista **ordenada alfabéticamente** de señales con problemas: su pin no está en `permitidos`
+              **o** está repetido (en ese caso, todas las señales que lo comparten).
+            - Si todo está bien, devuelve `[]`.
+          starter: |
+            def validar_pines(asignacion, permitidos):
+                pass
+          solution: |
+            def validar_pines(asignacion, permitidos):
+                usos = {}
+                for senal, pin in asignacion.items():
+                    usos[pin] = usos.get(pin, 0) + 1
+                malas = []
+                for senal, pin in asignacion.items():
+                    if pin not in permitidos or usos[pin] > 1:
+                        malas.append(senal)
+                return sorted(malas)
+          tests:
+            - before: ["_OK = list(range(0, 23))"]
+              desc: "Asignación correcta"
+              call: "validar_pines({'EV1': 10, 'EV2': 11, 'MARCHA': 14, 'a0': 18}, _OK)"
+              expected: []
+            - before: ["_OK = list(range(0, 23))"]
+              desc: "Pin repetido"
+              call: "validar_pines({'EV1': 10, 'EV2': 10, 'MARCHA': 14}, _OK)"
+              expected: ["EV1", "EV2"]
+            - before: ["_OK = list(range(0, 23))"]
+              desc: "Pin no permitido (GP25 es de la WiFi)"
+              call: "validar_pines({'EV1': 10, 'LED': 25}, _OK)"
+              expected: ["LED"]
+          hints:
+            wrong_result: "Primero cuenta cuántas veces aparece cada pin; después recorre las señales y marca las que tengan un pin no permitido o usado más de una vez."
+
+  - id: m11s3
+    title: "Plan de pruebas y documentación"
+    hours: 1
+    kind: lesson
+    theory: |
+      ## Probar con método
+
+      Una máquina no está terminada hasta que se ha **probado cada caso**. El plan de pruebas es una tabla:
+
+      | # | Prueba | Resultado esperado | ¿OK? |
+      |---|---|---|---|
+      | 1 | Pulsar MARCHA en reposo | Hace un ciclo completo y vuelve a reposo | |
+      | 2 | Pulsar MARCHA a mitad de ciclo | Se ignora | |
+      | 3 | Pulsar la seta en cualquier etapa | Todo se desactiva; no rearranca solo | |
+      | 4 | Quitar el aire a mitad de ciclo | Salta la alarma por tiempo | |
+      | 5 | Desconectar un final de carrera | Salta la alarma | |
+
+      ## Documentación del proyecto
+
+      1. Descripción del problema y solución.
+      2. Esquema neumático (FluidSIM o a mano) y esquema eléctrico.
+      3. Tabla de conexiones y GRAFCET.
+      4. Código comentado.
+      5. Plan de pruebas con resultados, problemas encontrados y mejoras.
+    examples:
+      - title: "Pruebas automáticas de la lógica (en el ordenador o en la placa)"
+        explanation: "Antes de conectar el aire, prueba la lógica con assert. Si una línea falla, verás el error."
+        pico_w: |
+          # ... pega grafcet_paso() ...
+          TR = {0: ("marcha", 1), 1: ("a1", 2), 2: ("b1", 3), 3: ("b0", 4), 4: ("a0", 0)}
+          assert grafcet_paso(0, TR, {"marcha": True}) == 1
+          assert grafcet_paso(1, TR, {"marcha": True}) == 1      # MARCHA a mitad de ciclo no hace nada
+          assert grafcet_paso(4, TR, {"a0": True}) == 0
+          print("Todas las pruebas superadas")
+        esp32_s3: |
+          # ... pega grafcet_paso() ...
+          TR = {0: ("marcha", 1), 1: ("a1", 2), 2: ("b1", 3), 3: ("b0", 4), 4: ("a0", 0)}
+          assert grafcet_paso(0, TR, {"marcha": True}) == 1
+          assert grafcet_paso(1, TR, {"marcha": True}) == 1      # MARCHA a mitad de ciclo no hace nada
+          assert grafcet_paso(4, TR, {"a0": True}) == 0
+          print("Todas las pruebas superadas")
+    practice: |
+      ### Práctica
+
+      Escribe el plan de pruebas de tu proyecto (al menos 6 pruebas, incluidas las de seguridad) y empieza
+      la documentación con la plantilla.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué prueba es imprescindible en cualquier máquina del taller?"
+          options:
+            - {id: a, text: "Pulsar la seta en cada etapa y comprobar que todo se desactiva y no rearranca solo."}
+            - {id: b, text: "Medir el color de los cilindros.", feedback: "Lo imprescindible es la seguridad."}
+            - {id: c, text: "Ninguna, si el código compila.", feedback: "Que el código se ejecute no significa que la máquina funcione bien."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "Si quitas el aire a mitad de ciclo, ¿qué debería detectar tu programa?"
+          options:
+            - {id: a, text: "Que el final de carrera esperado no llega a tiempo, y dar una alarma."}
+            - {id: b, text: "Nada, la máquina sigue igual.", feedback: "Sin aire el cilindro no se mueve; el tiempo máximo lo detecta."}
+          answer: a
+        - id: q3
+          type: quiz
+          points: 1
+          question: "¿Para qué sirve probar la lógica con assert antes de conectar el aire?"
+          options:
+            - {id: a, text: "Para encontrar errores del programa sin riesgo de golpes ni movimientos inesperados."}
+            - {id: b, text: "Para que el programa vaya más rápido.", feedback: "Los assert son comprobaciones, no aceleran nada."}
+          answer: a
+
+  - id: m11s4
+    title: "Proyecto final por equipos"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## Elige un proyecto
+
+      | Proyecto | Secuencia orientativa | Elementos |
+      |---|---|---|
+      | **Estampadora automática** | A+ B+ B− A− | 2 cilindros DE, 4 EV 3/2, 4 FC |
+      | **Clasificadora de piezas** | A+ A− (si pieza grande: B+ B−) | 1 DE + 1 SE, sensor de tamaño |
+      | **Puerta neumática** | A+ (espera) A− con detección de obstáculo | 1 DE, pulsadores, temporizador |
+      | **Alimentador + taladro** | A+ B+ B− A− con contador de piezas | 2 DE, contador, panel web |
+      | **Prensa segura** | A+ A− con bimanual y seta | 1 DE, 2 pulsadores, seta |
+
+      ## Requisitos mínimos
+
+      - GRAFCET, tabla de conexiones validada y esquemas.
+      - Programa por máquina de estados con **seta**, **tiempos máximos** y enclavamiento de válvulas.
+      - Plan de pruebas superado y presentación de 5 minutos.
+
+      ## Rúbrica
+
+      | Criterio | Peso |
+      |---|---|
+      | Funcionamiento y fiabilidad | 30 % |
+      | Seguridad (seta, enclavamientos, alarmas) | 20 % |
+      | Calidad del código (funciones, clases, comentarios) | 20 % |
+      | Documentación y pruebas | 20 % |
+      | Presentación y trabajo en equipo | 10 % |
+
+      ## Planificador de secuencias
+
+      Antes de montar, cada equipo comprueba su secuencia con un planificador que dice si es válida,
+      cuántos pasos tiene y cuánto dura un ciclo.
+    examples:
+      - title: "Plantilla del programa final"
+        explanation: "Estructura recomendada: configuración, clases, máquina de estados y bucle principal con seta y alarmas."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          # 1. Configuración (tabla de conexiones)
+          # 2. Clases: Electrovalvula / CilindroDE (taller.py)
+          # 3. Entradas: seta, marcha, finales de carrera
+          # 4. GRAFCET: TRANSICIONES y ACCIONES
+          # 5. Bucle principal:
+          #    - si seta → estado seguro y esperar rearme
+          #    - comprobar transición de la etapa actual
+          #    - comprobar tiempo máximo de la etapa → alarma
+          #    - registrar ciclo al volver a reposo
+          etapa = 0
+          while True:
+              time.sleep_ms(10)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          # 1. Configuración (tabla de conexiones)
+          # 2. Clases: Electrovalvula / CilindroDE (taller.py)
+          # 3. Entradas: seta, marcha, finales de carrera
+          # 4. GRAFCET: TRANSICIONES y ACCIONES
+          # 5. Bucle principal:
+          #    - si seta → estado seguro y esperar rearme
+          #    - comprobar transición de la etapa actual
+          #    - comprobar tiempo máximo de la etapa → alarma
+          #    - registrar ciclo al volver a reposo
+          etapa = 0
+          while True:
+              time.sleep_ms(10)
+    practice: |
+      ### Proyecto por equipos (3 sesiones)
+
+      1. **Programación y ajuste**: completa la plantilla y ajusta reguladores y tiempos.
+      2. **Pruebas y mejoras**: ejecuta el plan de pruebas y corrige los fallos.
+      3. **Presentación**: demostración en vivo, explicación del GRAFCET y del código, y entrega de la documentación.
+    evaluation:
+      intro: "Proyecto final del curso. Necesitas un 80 %."
+      items:
+        - id: c1
+          type: code
+          points: 6
+          prompt: |
+            Escribe `planificar(texto, tiempos)` que reciba una secuencia como `"A+ B+ B- A-"` y un diccionario
+            de tiempos por movimiento y devuelva:
+
+            ```python
+            {"valida": True/False, "pasos": número de movimientos, "tiempo": suma de tiempos redondeada a 2 decimales}
+            ```
+
+            Una secuencia es **válida** si ningún cilindro repite movimiento seguido (todos empiezan dentro, `-`)
+            y al final todos vuelven a estar dentro. Si no es válida, `"tiempo"` vale `0`.
+          starter: |
+            def planificar(texto, tiempos):
+                pass
+          solution: |
+            def planificar(texto, tiempos):
+                movs = texto.split()
+                estado = {}
+                valida = True
+                for mov in movs:
+                    cil, sentido = mov[:-1], mov[-1]
+                    if estado.get(cil, "-") == sentido:
+                        valida = False
+                    estado[cil] = sentido
+                if any(s != "-" for s in estado.values()):
+                    valida = False
+                tiempo = round(sum(tiempos[m] for m in movs), 2) if valida else 0
+                return {"valida": valida, "pasos": len(movs), "tiempo": tiempo}
+          tests:
+            - before: ["_T = {'A+': 0.6, 'A-': 0.6, 'B+': 0.4, 'B-': 0.4}"]
+              desc: "Estampadora válida"
+              call: "planificar('A+ B+ B- A-', _T)"
+              expected: {"valida": true, "pasos": 4, "tiempo": 2.0}
+            - before: ["_T = {'A+': 0.6, 'A-': 0.6, 'B+': 0.4, 'B-': 0.4}"]
+              desc: "Termina con B fuera → no válida"
+              call: "planificar('A+ B+ A-', _T)"
+              expected: {"valida": false, "pasos": 3, "tiempo": 0}
+            - before: ["_T = {'A+': 0.6, 'A-': 0.6, 'B+': 0.4, 'B-': 0.4}"]
+              desc: "Movimiento repetido → no válida"
+              call: "planificar('A+ A+ A-', _T)['valida']"
+              expected: false
+            - before: ["_T = {'A+': 0.6, 'A-': 0.6, 'B+': 0.4, 'B-': 0.4}"]
+              desc: "Doble ciclo de A"
+              call: "planificar('A+ A- A+ A-', _T)"
+              expected: {"valida": true, "pasos": 4, "tiempo": 2.4}
+          hints:
+            wrong_result: "Separa cada movimiento en cilindro (mov[:-1]) y sentido (mov[-1]). Lleva la posición de cada cilindro en un diccionario."
+        - id: q1
+          type: quiz
+          points: 1
+          question: "Según la rúbrica, ¿qué aspecto pesa más?"
+          options:
+            - {id: a, text: "El funcionamiento y la fiabilidad (30 %)."}
+            - {id: b, text: "La presentación (10 %).", feedback: "Cuenta, pero menos que el funcionamiento."}
+          answer: a

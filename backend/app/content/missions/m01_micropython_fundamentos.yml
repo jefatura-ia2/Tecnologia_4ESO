@@ -1,0 +1,680 @@
+id: m1
+number: 1
+trimestre: 1
+icon: "🐍"
+title: "MicroPython I: fundamentos y entradas/salidas"
+subtitle: "Python esencial, salidas digitales, pulsadores, flancos y antirrebote"
+weeks: [1, 2, 3]
+hours: 9
+objectives:
+  - Instalar MicroPython y trabajar con Thonny (REPL y main.py) en la Pico W o la ESP32-S3.
+  - Usar variables, condicionales, bucles, funciones, listas y diccionarios.
+  - Controlar salidas digitales (LEDs que más adelante serán electroválvulas) y leer pulsadores con pull-up.
+  - Detectar flancos y filtrar rebotes de contactos mecánicos.
+materials:
+  - Raspberry Pi Pico W o ESP32-S3-DevKit + cable USB de datos
+  - Protoboard, 4 LEDs + 4 resistencias de 220 Ω, 2 pulsadores, cables
+  - Ordenador con Thonny
+criteria:
+  - Programa sistemas de control que leen entradas y gobiernan salidas utilizando estructuras de control y funciones.
+  - Descompone problemas en partes y depura programas de forma sistemática.
+schedule:
+  - {week: 1, session: 1, title: "Presentación del curso. Normas del taller. Instalar MicroPython", section: m1s1}
+  - {week: 1, session: 2, title: "Python esencial: variables, condiciones y bucles", section: m1s1}
+  - {week: 1, session: 3, title: "Funciones, listas y diccionarios", section: m1s1}
+  - {week: 2, session: 1, title: "Salidas digitales: los LEDs que serán electroválvulas", section: m1s2}
+  - {week: 2, session: 2, title: "Listas de salidas y funciones con parámetros", section: m1s2}
+  - {week: 2, session: 3, title: "Entradas: pulsadores y resistencia pull-up", section: m1s3}
+  - {week: 3, session: 1, title: "Flancos y antirrebote", section: m1s3}
+  - {week: 3, session: 2, title: "Proyecto corto: contador de piezas (montaje y programa)", section: m1s4}
+  - {week: 3, session: 3, title: "Proyecto corto: pruebas, mejora y presentación", section: m1s4}
+sections:
+  - id: m1s1
+    title: "Thonny, REPL y Python esencial"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## El microcontrolador: el cerebro de nuestras máquinas
+
+      Durante el curso programaremos una **Raspberry Pi Pico W** o una **ESP32-S3** para gobernar
+      máquinas neumáticas: abrirá electroválvulas, leerá pulsadores y finales de carrera y decidirá
+      qué hacer en cada momento. Es exactamente lo que hace un **autómata programable (PLC)** en una fábrica.
+
+      Escribimos el programa en **Thonny** con **MicroPython**:
+
+      - **REPL** (`>>>`): pruebas rápidas, orden a orden.
+      - **main.py**: el programa que la placa ejecuta sola al recibir corriente.
+
+      Instalación: **Pico W** → mantén BOOTSEL al conectar y arrastra el `.uf2`. **ESP32-S3** → en Thonny,
+      *Configurar intérprete → MicroPython (ESP32) → Instalar o actualizar MicroPython*, familia ESP32-S3.
+
+      ## Python esencial
+
+      ```python
+      presion = 4.5            # float
+      ciclos = 0               # int
+      cilindro = "A"           # str
+      en_marcha = True         # bool
+
+      if presion > 6:
+          print("¡Demasiada presión!")
+      elif presion < 3:
+          print("Presión baja")
+      else:
+          print("Presión correcta")
+
+      for i in range(3):       # 0, 1, 2
+          ciclos += 1
+      ```
+
+      ### Funciones
+
+      ```python
+      def area_circulo(d):
+          return 3.1416 * d * d / 4
+      ```
+
+      ### Listas y diccionarios
+
+      ```python
+      registro = ["A+", "A-", "A+", "A-"]        # lista: elementos en orden
+      registro.append("A+")
+      print(len(registro), registro[0], registro[-1])
+
+      valvulas = {"EV1": 0, "EV2": 1}             # diccionario: clave → valor
+      valvulas["EV1"] = 1
+      for nombre, estado in valvulas.items():
+          print(nombre, estado)
+      ```
+
+      `lista.count(x)` cuenta cuántas veces aparece `x`; `dic.get(clave, defecto)` lee sin error si no existe.
+    examples:
+      - title: "Primer programa: informe de la placa"
+        explanation: "Ejecútalo en el REPL o guárdalo como main.py."
+        pico_w: |
+          import machine, gc
+          print("Hola desde la Pico W")
+          print("Frecuencia:", machine.freq() // 1_000_000, "MHz")
+          print("RAM libre:", gc.mem_free(), "bytes")
+          for i in range(3):
+              print("Cuenta", i)
+        esp32_s3: |
+          import machine, gc
+          print("Hola desde la ESP32-S3")
+          print("Frecuencia:", machine.freq() // 1_000_000, "MHz")
+          print("RAM libre:", gc.mem_free(), "bytes")
+          for i in range(3):
+              print("Cuenta", i)
+    practice: |
+      ### Práctica en clase
+
+      1. Instala MicroPython en tu placa y ejecuta el ejemplo.
+      2. En el REPL, crea una lista con 6 movimientos de un cilindro (`"A+"`, `"A-"`…) y cuenta los avances con `count`.
+      3. Crea un diccionario con el estado de 4 electroválvulas y escribe un `for` que muestre las que están activadas.
+    evaluation:
+      intro: "Necesitas un 70 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué archivo ejecuta la placa automáticamente al recibir corriente?"
+          options:
+            - {id: a, text: "main.py"}
+            - {id: b, text: "inicio.txt", feedback: "Debe ser un archivo de Python con un nombre concreto."}
+            - {id: c, text: "Cualquier .py que haya en la placa", feedback: "Solo ejecuta boot.py y main.py."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "registro = ['A+', 'A-', 'A+']. ¿Qué vale registro[-1]?"
+          options:
+            - {id: a, text: "'A+'"}
+            - {id: b, text: "'A-'", feedback: "El índice -1 es el ÚLTIMO elemento."}
+            - {id: c, text: "Error", feedback: "Python admite índices negativos: cuentan desde el final."}
+          answer: a
+        - id: q3
+          type: quiz
+          points: 1
+          question: "¿Qué hace dic.get('EV3', 0) si el diccionario no tiene la clave 'EV3'?"
+          options:
+            - {id: a, text: "Devuelve 0 sin dar error."}
+            - {id: b, text: "Da un error KeyError.", feedback: "Eso pasaría con dic['EV3']; get permite un valor por defecto."}
+            - {id: c, text: "Crea la clave EV3.", feedback: "get solo lee; no modifica el diccionario."}
+          answer: a
+        - id: f1
+          type: fill_blank
+          points: 2
+          question: "Completa la función que devuelve True si la presión está entre 3 y 6 bar (ambos incluidos)."
+          text: |
+            def presion_ok(p):
+                ___ 3 <= p ___ 6
+          blanks:
+            - {accept: ["return"], hint: "La palabra que devuelve un valor."}
+            - {accept: ["<="], hint: "Menor o igual."}
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Un registro guarda los movimientos de un cilindro como una lista de textos (`"A+"` = avance,
+            `"A-"` = retroceso). Escribe `contar_ciclos(registro)` que devuelva cuántos **avances** hay.
+
+            Ejemplo: `contar_ciclos(["A+", "A-", "A+", "A-", "A+"])` → `3`
+          starter: |
+            def contar_ciclos(registro):
+                pass
+          solution: |
+            def contar_ciclos(registro):
+                total = 0
+                for mov in registro:
+                    if mov == "A+":
+                        total += 1
+                return total
+          tests:
+            - {desc: "Ejemplo del enunciado", call: "contar_ciclos(['A+', 'A-', 'A+', 'A-', 'A+'])", expected: 3}
+            - {desc: "Registro vacío", call: "contar_ciclos([])", expected: 0}
+            - {desc: "Solo retrocesos", call: "contar_ciclos(['A-', 'A-'])", expected: 0}
+          hints:
+            wrong_result: "Recorre la lista con un for y suma 1 cuando el elemento sea exactamente \"A+\" (o usa registro.count(\"A+\"))."
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `estado_final(acciones)` que reciba una lista de tuplas `(valvula, estado)` en orden
+            cronológico y devuelva un **diccionario** con el último estado de cada válvula.
+
+            Ejemplo: `estado_final([("EV1", 1), ("EV2", 1), ("EV1", 0)])` → `{"EV1": 0, "EV2": 1}`
+          starter: |
+            def estado_final(acciones):
+                pass
+          solution: |
+            def estado_final(acciones):
+                estados = {}
+                for valvula, estado in acciones:
+                    estados[valvula] = estado
+                return estados
+          tests:
+            - {desc: "Ejemplo del enunciado", call: "estado_final([('EV1', 1), ('EV2', 1), ('EV1', 0)])", expected: {"EV1": 0, "EV2": 1}}
+            - {desc: "Sin acciones → diccionario vacío", call: "estado_final([])", expected: {}}
+            - {desc: "Cuatro válvulas", call: "estado_final([('EV1', 1), ('EV2', 1), ('EV3', 1), ('EV4', 0), ('EV2', 0)])", expected: {"EV1": 1, "EV2": 0, "EV3": 1, "EV4": 0}}
+          hints:
+            wrong_result: "Crea un diccionario vacío y, recorriendo las tuplas en orden, guarda estados[valvula] = estado (el último sobrescribe a los anteriores)."
+
+  - id: m1s2
+    title: "Salidas digitales: los LEDs que serán electroválvulas"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Una salida digital = una orden de encendido
+
+      Un pin en modo salida (`Pin.OUT`) da **3,3 V (1)** o **0 V (0)**. Con un LED + resistencia de
+      220 Ω vemos la orden. En el 2.º trimestre, ese mismo pin activará un **módulo MOSFET** que
+      alimentará una **electroválvula de 12 V**: el programa será prácticamente el mismo.
+
+      ```python
+      from machine import Pin
+      ev1 = Pin(10, Pin.OUT)   # Pico W: GP10   (ESP32-S3: Pin(4, Pin.OUT))
+      ev1.value(1)             # activar   (también ev1.on())
+      ev1.value(0)             # desactivar (también ev1.off())
+      ```
+
+      ### Pines del curso
+
+      | Salida | Pico W | ESP32-S3 |
+      |---|---|---|
+      | EV1 · EV2 · EV3 · EV4 | GP10 · GP11 · GP12 · GP13 | GPIO 4 · 5 · 6 · 7 |
+
+      ### Varias salidas en una lista
+
+      ```python
+      salidas = [Pin(n, Pin.OUT) for n in (10, 11, 12, 13)]
+      for s in salidas:
+          s.value(0)             # todas desactivadas: ESTADO SEGURO
+      ```
+
+      ### Funciones que reciben pines
+
+      Si la función recibe la lista de salidas como **parámetro**, sirve para cualquier montaje:
+
+      ```python
+      def apagar_todas(salidas):
+          for s in salidas:
+              s.value(0)
+      ```
+
+      > 🛡️ **Estado seguro**: al arrancar un programa que manda una máquina, lo primero es poner todas
+      > las salidas a 0. Así ninguna electroválvula se activa por sorpresa.
+    examples:
+      - title: "Barrido de las 4 salidas"
+        explanation: "Enciende las salidas una a una. Monta 4 LEDs con su resistencia en los pines del curso."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          salidas = [Pin(n, Pin.OUT, value=0) for n in (10, 11, 12, 13)]
+          for i in range(len(salidas)):
+              salidas[i].value(1)
+              time.sleep(0.5)
+              salidas[i].value(0)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          salidas = [Pin(n, Pin.OUT, value=0) for n in (4, 5, 6, 7)]
+          for i in range(len(salidas)):
+              salidas[i].value(1)
+              time.sleep(0.5)
+              salidas[i].value(0)
+    practice: |
+      ### Práctica en clase
+
+      1. Monta los 4 LEDs en los pines EV1-EV4 de tu placa.
+      2. Ejecuta el barrido. Cámbialo para que vaya y vuelva (1-2-3-4-3-2-1).
+      3. Programa un "coche fantástico" y un parpadeo alterno (EV1+EV3 / EV2+EV4).
+    evaluation:
+      intro: "Necesitas un 70 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué lo primero de un programa de control debe ser poner todas las salidas a 0?"
+          options:
+            - {id: a, text: "Para que ninguna electroválvula se active por sorpresa al arrancar (estado seguro)."}
+            - {id: b, text: "Para que el programa vaya más rápido.", feedback: "No tiene que ver con la velocidad sino con la seguridad."}
+            - {id: c, text: "Porque MicroPython lo exige.", feedback: "No es obligatorio, pero sí una buena práctica de seguridad."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Qué tensión da un pin de la placa cuando está a 1?"
+          options:
+            - {id: a, text: "3,3 V"}
+            - {id: b, text: "12 V", feedback: "Los 12 V son de las electroválvulas; la placa trabaja a 3,3 V."}
+            - {id: c, text: "5 V", feedback: "La Pico W y la ESP32-S3 trabajan a 3,3 V."}
+          answer: a
+        - id: f1
+          type: fill_blank
+          points: 2
+          question: "Completa para crear la salida EV1 en la Pico W (GP10) y activarla."
+          text: |
+            ev1 = Pin(___, Pin.OUT)
+            ev1.___(1)
+          blanks:
+            - {accept: ["10"], hint: "Mira la tabla de pines del curso."}
+            - {accept: ["value"], hint: "El método que fija el valor del pin."}
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `apagar_todas(salidas)` que ponga a 0 todas las salidas de la lista.
+          starter: |
+            def apagar_todas(salidas):
+                pass
+          solution: |
+            def apagar_todas(salidas):
+                for s in salidas:
+                    s.value(0)
+          tests:
+            - desc: "Las 4 salidas quedan a 0"
+              before: ["from machine import Pin as _P", "_S = [_P(n, _P.OUT) for n in (10, 11, 12, 13)]", "[s.value(1) for s in _S]", "apagar_todas(_S)"]
+              check: "[s.value() for s in _S] == [0, 0, 0, 0]"
+            - {desc: "Funciona con una lista vacía", check: "apagar_todas([]) is None"}
+          hints:
+            wrong_result: "Recorre la lista con for s in salidas: y haz s.value(0)."
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `activar_solo(salidas, i)` que active **solo** la salida de la posición `i` y deje
+            todas las demás a 0.
+          starter: |
+            def activar_solo(salidas, i):
+                pass
+          solution: |
+            def activar_solo(salidas, i):
+                for n in range(len(salidas)):
+                    if n == i:
+                        salidas[n].value(1)
+                    else:
+                        salidas[n].value(0)
+          tests:
+            - desc: "Activa solo la posición 2"
+              before: ["from machine import Pin as _P", "_S = [_P(n, _P.OUT) for n in (10, 11, 12, 13)]", "_S[0].value(1)", "activar_solo(_S, 2)"]
+              check: "[s.value() for s in _S] == [0, 0, 1, 0]"
+            - desc: "Cambiar a la posición 0"
+              before: ["activar_solo(_S, 0)"]
+              check: "[s.value() for s in _S] == [1, 0, 0, 0]"
+          hints:
+            wrong_result: "Recorre las posiciones con for n in range(len(salidas)): activa la que coincide con i y apaga las demás."
+
+  - id: m1s3
+    title: "Entradas: pulsadores, flancos y antirrebote"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Leer un pulsador
+
+      Conectamos el pulsador entre el pin y **GND** y activamos la resistencia interna **pull-up**:
+
+      | Pulsador | `value()` |
+      |---|---|
+      | Suelto | **1** |
+      | Pulsado | **0** |
+
+      ```python
+      marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+      if marcha.value() == 0:
+          print("MARCHA pulsado")
+      ```
+
+      Igual se conectarán más adelante los **finales de carrera**: contacto a GND, pisado = 0.
+
+      ## Flanco: el instante en que se pulsa
+
+      Para que **una** pulsación dispare **un** ciclo de la máquina (y no cien mientras mantenemos el dedo),
+      detectamos el **flanco de bajada**: el paso de 1 a 0.
+
+      ```python
+      anterior = 1
+      while True:
+          actual = marcha.value()
+          if anterior == 1 and actual == 0:
+              print("¡Orden de marcha!")
+          anterior = actual
+      ```
+
+      ## Rebotes
+
+      Un contacto mecánico no cierra limpio: durante unos milisegundos **rebota** (0-1-0-1-0…). El programa
+      cree que se ha pulsado varias veces. Solución software (**antirrebote**): solo aceptamos un cambio
+      cuando la lectura se mantiene igual **n lecturas seguidas**.
+
+      Ejemplo con n = 3, empezando en 1:
+
+      | Lecturas | 1 | 0 | 1 | 0 | 0 | 0 | 1 | 1 | 1 |
+      |---|---|---|---|---|---|---|---|---|---|
+      | Filtrada | 1 | 1 | 1 | 1 | 1 | **0** | 0 | 0 | **1** |
+    examples:
+      - title: "Pulsador con flanco y antirrebote"
+        explanation: "Cuenta pulsaciones limpias: el estado solo cambia si se repite 3 lecturas seguidas (lectura cada 5 ms)."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          estable, candidato, repeticiones = 1, 1, 0
+          contador = 0
+          while True:
+              v = marcha.value()
+              if v == candidato:
+                  repeticiones += 1
+              else:
+                  candidato, repeticiones = v, 1
+              if repeticiones >= 3 and candidato != estable:
+                  estable = candidato
+                  if estable == 0:
+                      contador += 1
+                      print("Pulsaciones:", contador)
+              time.sleep_ms(5)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          estable, candidato, repeticiones = 1, 1, 0
+          contador = 0
+          while True:
+              v = marcha.value()
+              if v == candidato:
+                  repeticiones += 1
+              else:
+                  candidato, repeticiones = v, 1
+              if repeticiones >= 3 and candidato != estable:
+                  estable = candidato
+                  if estable == 0:
+                      contador += 1
+                      print("Pulsaciones:", contador)
+              time.sleep_ms(5)
+    practice: |
+      ### Práctica en clase
+
+      1. Monta MARCHA (GP14 / GPIO 14) y PARO (GP15 / GPIO 15) a GND.
+      2. Cuenta pulsaciones **sin** antirrebote y sin pausa. ¿Cuenta de más? Añade el filtro.
+      3. MARCHA enciende EV1 y PARO la apaga (función **telerruptor/memoria**). ¿Qué debe pasar si se pulsan los dos a la vez? (Pista: el paro siempre manda.)
+    evaluation:
+      intro: "Necesitas un 70 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "Con pull-up y el pulsador a GND, ¿qué lees al pulsar?"
+          options:
+            - {id: a, text: "0"}
+            - {id: b, text: "1", feedback: "1 es el reposo con pull-up; al pulsar el pin se une a GND."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "MARCHA y PARO se pulsan a la vez. ¿Qué debe prevalecer en una máquina?"
+          options:
+            - {id: a, text: "El PARO."}
+            - {id: b, text: "La MARCHA.", feedback: "Por seguridad, la orden de parada siempre tiene prioridad."}
+            - {id: c, text: "El que se pulsó primero.", feedback: "En seguridad no se arriesga: el paro siempre manda."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `flancos_bajada(lecturas)` que cuente los pasos de 1 a 0 en la lista (estado inicial 1).
+
+            Ejemplo: `flancos_bajada([1, 0, 0, 1, 0])` → `2`
+          starter: |
+            def flancos_bajada(lecturas):
+                pass
+          solution: |
+            def flancos_bajada(lecturas):
+                cuenta = 0
+                anterior = 1
+                for v in lecturas:
+                    if anterior == 1 and v == 0:
+                        cuenta += 1
+                    anterior = v
+                return cuenta
+          tests:
+            - {desc: "Ejemplo del enunciado", call: "flancos_bajada([1, 0, 0, 1, 0])", expected: 2}
+            - {desc: "Empieza pulsado → cuenta", call: "flancos_bajada([0, 0, 1])", expected: 1}
+            - {desc: "Sin pulsar", call: "flancos_bajada([1, 1, 1])", expected: 0}
+            - {desc: "Lista vacía", call: "flancos_bajada([])", expected: 0}
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Escribe `antirrebote(lecturas, n)` que devuelva la **lista filtrada** según la teoría: el valor
+            filtrado empieza en el primer valor de la lista y solo cambia cuando una lectura distinta se ha
+            repetido `n` veces seguidas (contando la actual).
+
+            Ejemplo (tabla de la teoría): `antirrebote([1,0,1,0,0,0,1,1,1], 3)` → `[1,1,1,1,1,0,0,0,1]`
+          starter: |
+            def antirrebote(lecturas, n):
+                pass
+          solution: |
+            def antirrebote(lecturas, n):
+                if not lecturas:
+                    return []
+                estable = lecturas[0]
+                candidato = lecturas[0]
+                repeticiones = 0
+                salida = []
+                for v in lecturas:
+                    if v == candidato:
+                        repeticiones += 1
+                    else:
+                        candidato = v
+                        repeticiones = 1
+                    if candidato != estable and repeticiones >= n:
+                        estable = candidato
+                    salida.append(estable)
+                return salida
+          tests:
+            - {desc: "Tabla de la teoría", call: "antirrebote([1, 0, 1, 0, 0, 0, 1, 1, 1], 3)", expected: [1, 1, 1, 1, 1, 0, 0, 0, 1]}
+            - {desc: "n = 1 no filtra", call: "antirrebote([1, 0, 1], 1)", expected: [1, 0, 1]}
+            - {desc: "Rebotes cortos se ignoran", call: "antirrebote([0, 1, 0, 1, 0, 0], 2)", expected: [0, 0, 0, 0, 0, 0]}
+            - {desc: "Lista vacía", call: "antirrebote([], 3)", expected: []}
+          hints:
+            wrong_result: "Guarda tres variables: estable (lo que devuelves), candidato (último valor visto) y repeticiones. Cambia estable solo cuando candidato != estable y repeticiones >= n."
+
+  - id: m1s4
+    title: "Proyecto corto: contador de piezas"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      En una cinta transportadora, un **final de carrera** se pisa cada vez que pasa una pieza (de momento lo
+      simulamos con un pulsador). Hay que **contar piezas** y avisar cada vez que se completa una **caja de 5**
+      encendiendo EV1 (en el futuro, un cilindro empujará la caja).
+
+      Requisitos:
+
+      1. Contar cada pieza **una sola vez** (flanco) y **sin rebotes**.
+      2. Cada 5 piezas → activar EV1 durante 1 s.
+      3. PARO pone el contador a 0.
+      4. Informe: cajas completas y piezas sueltas.
+
+      Reutiliza tus funciones de la sección anterior: así se programa de verdad, por **piezas reutilizables**.
+
+      Para el informe: `//` es la división entera y `%` el resto: `13 // 5 = 2` cajas, `13 % 5 = 3` sueltas.
+    examples:
+      - title: "Contador de piezas con aviso de caja completa"
+        explanation: "Lectura cada 5 ms con antirrebote de 3 lecturas. EV1 (LED) se enciende 1 s al completar cada caja."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          pieza = Pin(14, Pin.IN, Pin.PULL_UP)
+          reset = Pin(15, Pin.IN, Pin.PULL_UP)
+          ev1 = Pin(10, Pin.OUT, value=0)
+          TAM_CAJA = 5
+          estable, candidato, rep, piezas = 1, 1, 0, 0
+          while True:
+              v = pieza.value()
+              rep = rep + 1 if v == candidato else 1
+              candidato = v
+              if rep >= 3 and candidato != estable:
+                  estable = candidato
+                  if estable == 0:
+                      piezas += 1
+                      print("Piezas:", piezas)
+                      if piezas % TAM_CAJA == 0:
+                          ev1.on(); time.sleep(1); ev1.off()
+              if reset.value() == 0:
+                  piezas = 0
+              time.sleep_ms(5)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          pieza = Pin(14, Pin.IN, Pin.PULL_UP)
+          reset = Pin(15, Pin.IN, Pin.PULL_UP)
+          ev1 = Pin(4, Pin.OUT, value=0)
+          TAM_CAJA = 5
+          estable, candidato, rep, piezas = 1, 1, 0, 0
+          while True:
+              v = pieza.value()
+              rep = rep + 1 if v == candidato else 1
+              candidato = v
+              if rep >= 3 and candidato != estable:
+                  estable = candidato
+                  if estable == 0:
+                      piezas += 1
+                      print("Piezas:", piezas)
+                      if piezas % TAM_CAJA == 0:
+                          ev1.on(); time.sleep(1); ev1.off()
+              if reset.value() == 0:
+                  piezas = 0
+              time.sleep_ms(5)
+    practice: |
+      ### Proyecto por parejas (3 sesiones)
+
+      1. **Sesión 1**: montaje y programa básico.
+      2. **Sesión 2**: añade el informe (cajas y sueltas) cada vez que se pulsa PARO, y un parpadeo distinto en EV2 cuando se llega a 3 cajas.
+      3. **Sesión 3**: prueba cruzada con otra pareja y breve presentación (¿qué fallos encontrasteis y cómo los resolvisteis?).
+    evaluation:
+      intro: "Proyecto corto de la misión 1. Necesitas un 70 %."
+      items:
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `contar_piezas(lecturas, n)` que devuelva cuántas piezas hay en una lista de lecturas
+            del sensor: primero filtra con antirrebote de `n` lecturas y después cuenta los flancos de bajada
+            (estado inicial 1). Incluye en tu código las funciones que necesites.
+          starter: |
+            def antirrebote(lecturas, n):
+                pass
+
+            def flancos_bajada(lecturas):
+                pass
+
+            def contar_piezas(lecturas, n):
+                pass
+          solution: |
+            def antirrebote(lecturas, n):
+                if not lecturas:
+                    return []
+                estable = candidato = lecturas[0]
+                repeticiones = 0
+                salida = []
+                for v in lecturas:
+                    if v == candidato:
+                        repeticiones += 1
+                    else:
+                        candidato = v
+                        repeticiones = 1
+                    if candidato != estable and repeticiones >= n:
+                        estable = candidato
+                    salida.append(estable)
+                return salida
+
+            def flancos_bajada(lecturas):
+                cuenta = 0
+                anterior = 1
+                for v in lecturas:
+                    if anterior == 1 and v == 0:
+                        cuenta += 1
+                    anterior = v
+                return cuenta
+
+            def contar_piezas(lecturas, n):
+                return flancos_bajada(antirrebote(lecturas, n))
+          tests:
+            - {desc: "Dos piezas limpias", call: "contar_piezas([1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1], 2)", expected: 2}
+            - {desc: "Los rebotes no cuentan como piezas", call: "contar_piezas([1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1], 3)", expected: 1}
+            - {desc: "Sin piezas", call: "contar_piezas([1, 1, 1, 1], 3)", expected: 0}
+          hints:
+            wrong_result: "contar_piezas es una sola línea: return flancos_bajada(antirrebote(lecturas, n)). Comprueba antes cada función por separado."
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `informe(piezas, tam_caja)` que devuelva una tupla `(cajas_completas, piezas_sueltas)`.
+
+            Ejemplo: `informe(13, 5)` → `(2, 3)`
+          starter: |
+            def informe(piezas, tam_caja):
+                pass
+          solution: |
+            def informe(piezas, tam_caja):
+                return piezas // tam_caja, piezas % tam_caja
+          tests:
+            - {desc: "13 piezas en cajas de 5", call: "informe(13, 5)", expected: [2, 3]}
+            - {desc: "Justo 2 cajas", call: "informe(10, 5)", expected: [2, 0]}
+            - {desc: "Menos de una caja", call: "informe(4, 6)", expected: [0, 4]}
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué ventaja tiene dividir el programa en funciones como antirrebote y flancos_bajada?"
+          options:
+            - {id: a, text: "Se prueban por separado y se reutilizan en otros proyectos (finales de carrera, sensores…)."}
+            - {id: b, text: "El programa ocupa menos memoria siempre.", feedback: "No necesariamente; la ventaja es de organización y reutilización."}
+            - {id: c, text: "MicroPython no admite programas largos.", feedback: "Sí los admite."}
+          answer: a

@@ -1,0 +1,586 @@
+id: m5
+number: 5
+trimestre: 2
+icon: "⚡"
+title: "Electroválvulas con MicroPython"
+subtitle: "Etapa de potencia con MOSFET, la clase Electrovalvula y el cilindro de simple efecto automático"
+weeks: [13, 14, 15]
+hours: 9
+objectives:
+  - Explicar por qué un pin no puede mover una electroválvula de 12 V y montar la etapa de potencia con MOSFET.
+  - Proteger el circuito con diodo de libre circulación y masa común.
+  - Programar la clase Electrovalvula y usarla para automatizar un cilindro de simple efecto.
+  - Garantizar el estado seguro de las salidas incluso si el programa falla (try/finally).
+materials:
+  - Placa, módulos MOSFET de nivel lógico (AOD4184/D4184 o IRLZ44N), diodos 1N4007 o 1N5819
+  - Fuente de 12 V (≥ 2 A), electroválvulas 3/2 NC y 2/2 NC de 12 V
+  - Cilindro de simple efecto, banco neumático, polímetro
+criteria:
+  - Diseña y monta la interfaz de potencia entre un microcontrolador y actuadores de mayor tensión.
+  - Programa el control automático de actuadores neumáticos aplicando criterios de seguridad.
+schedule:
+  - {week: 13, session: 1, title: "¿Por qué no basta un pin? Corriente de la bobina", section: m5s1}
+  - {week: 13, session: 2, title: "El MOSFET como interruptor. Diodo y masa común", section: m5s1}
+  - {week: 13, session: 3, title: "Montaje y comprobación con polímetro", section: m5s1}
+  - {week: 14, session: 1, title: "La clase Electrovalvula", section: m5s2}
+  - {week: 14, session: 2, title: "Cilindro de simple efecto automático", section: m5s3}
+  - {week: 14, session: 3, title: "Estado seguro con try/finally", section: m5s3}
+  - {week: 15, session: 1, title: "Proyecto corto: expulsor de piezas (montaje)", section: m5s4}
+  - {week: 15, session: 2, title: "Proyecto corto: programa y soplado con 2/2", section: m5s4}
+  - {week: 15, session: 3, title: "Proyecto corto: pruebas y presentación", section: m5s4}
+sections:
+  - id: m5s1
+    title: "La etapa de potencia: MOSFET, diodo y 12 V"
+    hours: 3
+    kind: lesson
+    theory: |
+      ## ¿Por qué no conectamos la electroválvula al pin?
+
+      Una electroválvula de 12 V y 4,8 W consume `I = P / V = 4,8 / 12 = 0,4 A = 400 mA`.
+      Un pin de la placa da **3,3 V** y como mucho unos **12-20 mA**. Hace falta un **interruptor
+      electrónico** que, mandado por el pin, conecte los 12 V a la bobina: el **MOSFET**.
+
+      ## El MOSFET como interruptor (lado bajo)
+
+      ```
+      +12 V ──────────┬───────────────┐
+                      │  bobina EV    │ diodo 1N4007 (banda hacia +12 V)
+                      ├───────────────┘
+                   DRAIN
+      GPIO ── GATE  [MOSFET]
+                   SOURCE
+                      │
+      GND fuente ─────┴──── GND placa   ← ¡masa común!
+      ```
+
+      - Pin a **1** (3,3 V en la puerta, *gate*) → el MOSFET conduce → la bobina recibe 12 V → la válvula se activa.
+      - Pin a **0** → el MOSFET no conduce → válvula en reposo.
+
+      Usa módulos con **MOSFET de nivel lógico** (AOD4184/D4184, IRLZ44N…), que conducen bien con 3,3 V.
+      ⚠️ Los populares módulos con **IRF520** necesitan unos 10 V en la puerta: con 3,3 V conducen mal y se calientan.
+
+      ## El diodo de libre circulación
+
+      Una bobina almacena energía. Al cortar la corriente de golpe, genera un **pico de tensión** de
+      cientos de voltios que puede destruir el MOSFET. El **diodo** en paralelo con la bobina (banda
+      hacia +12 V) da un camino a esa corriente y elimina el pico. Muchos módulos ya lo llevan.
+
+      ## La fuente de 12 V
+
+      Suma las corrientes de las válvulas que puedan estar activas a la vez y deja un **margen del 25 %**:
+      4 válvulas de 4,8 W → 1,6 A · 1,25 = **2 A**.
+    examples:
+      - title: "Primera electroválvula desde la placa"
+        explanation: "EV1 (salida GP10 / GPIO 4 → módulo MOSFET) se activa 1 s cada 3 s. Escucha el clic de la válvula. Primero prueba sin aire."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          ev1 = Pin(10, Pin.OUT, value=0)     # módulo MOSFET → electroválvula 3/2 NC
+          for i in range(5):
+              ev1.value(1)
+              print("EV1 activada")
+              time.sleep(1)
+              ev1.value(0)
+              print("EV1 en reposo")
+              time.sleep(2)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          ev1 = Pin(4, Pin.OUT, value=0)      # módulo MOSFET → electroválvula 3/2 NC
+          for i in range(5):
+              ev1.value(1)
+              print("EV1 activada")
+              time.sleep(1)
+              ev1.value(0)
+              print("EV1 en reposo")
+              time.sleep(2)
+    practice: |
+      ### Práctica en el taller (con el profesor)
+
+      1. Lee en la etiqueta de las electroválvulas su potencia y calcula la corriente.
+      2. Monta un módulo MOSFET: señal al GPIO de EV1, GND común, +12 V y la bobina en la salida. Comprueba el diodo.
+      3. **Sin aire**, ejecuta el ejemplo y mide con el polímetro la tensión en la bobina (≈12 V activada, 0 V en reposo).
+      4. Conecta el aire (3 bar) y un cilindro de simple efecto a la 3/2.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué no se conecta la electroválvula directamente a un pin de la placa?"
+          options:
+            - {id: a, text: "Porque necesita 12 V y cientos de mA; el pin da 3,3 V y unos pocos mA."}
+            - {id: b, text: "Porque la placa no sabe activar salidas.", feedback: "Sí sabe; el problema es la tensión y la corriente."}
+            - {id: c, text: "Porque las electroválvulas funcionan con aire, no con electricidad.", feedback: "Las electroválvulas tienen una bobina eléctrica."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Para qué sirve el diodo en paralelo con la bobina?"
+          options:
+            - {id: a, text: "Para eliminar el pico de tensión al desconectar la bobina y proteger el MOSFET."}
+            - {id: b, text: "Para que la válvula consuma menos.", feedback: "No reduce el consumo; protege contra la sobretensión."}
+            - {id: c, text: "Para encender un indicador.", feedback: "Es un diodo de protección, no un LED."}
+          answer: a
+        - id: q3
+          type: quiz
+          points: 1
+          question: "Montas todo, pero la válvula no se activa nunca. ¿Qué es lo primero que comprobarías?"
+          options:
+            - {id: a, text: "Que la GND de la fuente de 12 V y la de la placa estén unidas (masa común)."}
+            - {id: b, text: "La presión del compresor.", feedback: "La válvula haría clic aunque no hubiera aire; el fallo es eléctrico."}
+            - {id: c, text: "El color de los tubos.", feedback: "No influye."}
+          answer: a
+        - id: c1
+          type: code
+          points: 2
+          prompt: |
+            Escribe `corriente_ma(potencia_w, tension_v)` que devuelva la corriente en mA redondeada a entero.
+
+            Ejemplo: `corriente_ma(4.8, 12)` → `400`
+          starter: |
+            def corriente_ma(potencia_w, tension_v):
+                pass
+          solution: |
+            def corriente_ma(potencia_w, tension_v):
+                return round(potencia_w / tension_v * 1000)
+          tests:
+            - {desc: "4,8 W a 12 V", call: "corriente_ma(4.8, 12)", expected: 400}
+            - {desc: "2,5 W a 12 V", call: "corriente_ma(2.5, 12)", expected: 208}
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `fuente_suficiente(potencias, tension, amperios_fuente)` que devuelva `True` si la fuente
+            puede alimentar a la vez todas las válvulas de la lista con un margen del 25 %
+            (`suma de corrientes · 1,25 ≤ amperios_fuente`).
+          starter: |
+            def fuente_suficiente(potencias, tension, amperios_fuente):
+                pass
+          solution: |
+            def fuente_suficiente(potencias, tension, amperios_fuente):
+                corriente = sum(potencias) / tension
+                return corriente * 1.25 <= amperios_fuente + 1e-9
+          tests:
+            - {desc: "4 × 4,8 W con fuente de 2 A → justo", call: "fuente_suficiente([4.8, 4.8, 4.8, 4.8], 12, 2)", expected: true}
+            - {desc: "4 × 6 W con fuente de 2 A → no", call: "fuente_suficiente([6, 6, 6, 6], 12, 2)", expected: false}
+            - {desc: "Una válvula", call: "fuente_suficiente([4.8], 12, 1)", expected: true}
+
+  - id: m5s2
+    title: "La clase Electrovalvula"
+    hours: 1
+    kind: lesson
+    theory: |
+      ## Del pin a la electroválvula
+
+      Encapsulamos el pin en una clase con métodos que hablan el idioma de la máquina:
+
+      ```python
+      class Electrovalvula:
+          def __init__(self, pin):
+              self.pin = pin
+              self.activaciones = 0       # para el mantenimiento
+              self.pin.value(0)           # ¡estado seguro al crearla!
+
+          def activar(self):
+              if self.pin.value() == 0:   # solo cuenta si estaba en reposo
+                  self.activaciones += 1
+              self.pin.value(1)
+
+          def desactivar(self):
+              self.pin.value(0)
+
+          def activa(self):
+              return self.pin.value() == 1
+      ```
+
+      Ventajas:
+
+      - El programa de la máquina se lee solo: `ev_avance.activar()`.
+      - **Contar activaciones** permite planificar el mantenimiento (una electroválvula aguanta millones
+        de maniobras, pero no infinitas).
+      - Si un día cambias el módulo MOSFET por un relé que se activa con 0 (**activo en bajo**), solo
+        hay que tocar la clase, no todo el programa.
+    examples:
+      - title: "Archivo taller.py con la clase"
+        explanation: "Guárdalo en la placa como taller.py; desde main.py: from taller import Electrovalvula."
+        pico_w: |
+          # taller.py
+          from machine import Pin
+
+          class Electrovalvula:
+              def __init__(self, n):
+                  self.pin = Pin(n, Pin.OUT, value=0)
+                  self.activaciones = 0
+
+              def activar(self):
+                  if self.pin.value() == 0:
+                      self.activaciones += 1
+                  self.pin.value(1)
+
+              def desactivar(self):
+                  self.pin.value(0)
+
+              def activa(self):
+                  return self.pin.value() == 1
+
+          EV1, EV2, EV3, EV4 = (Electrovalvula(n) for n in (10, 11, 12, 13))
+        esp32_s3: |
+          # taller.py
+          from machine import Pin
+
+          class Electrovalvula:
+              def __init__(self, n):
+                  self.pin = Pin(n, Pin.OUT, value=0)
+                  self.activaciones = 0
+
+              def activar(self):
+                  if self.pin.value() == 0:
+                      self.activaciones += 1
+                  self.pin.value(1)
+
+              def desactivar(self):
+                  self.pin.value(0)
+
+              def activa(self):
+                  return self.pin.value() == 1
+
+          EV1, EV2, EV3, EV4 = (Electrovalvula(n) for n in (4, 5, 6, 7))
+    practice: |
+      ### Práctica en clase
+
+      1. Crea `taller.py` con la clase y súbelo a la placa.
+      2. Desde el REPL: `from taller import EV1`, `EV1.activar()`, `EV1.activaciones`…
+      3. Añade el método `conmutar()` (si está activa la desactiva y al revés).
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué el constructor de Electrovalvula pone el pin a 0?"
+          options:
+            - {id: a, text: "Para que la válvula empiece en estado seguro (reposo)."}
+            - {id: b, text: "Para ahorrar memoria.", feedback: "Es una medida de seguridad."}
+            - {id: c, text: "Porque si no, no se puede activar.", feedback: "Se podría, pero no se garantiza el estado seguro al arrancar."}
+          answer: a
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Programa la clase `Electrovalvula(pin)` de la teoría: el constructor pone el pin a 0;
+            `activar()` (cuenta en `activaciones` solo si estaba en reposo), `desactivar()` y `activa()`.
+          starter: |
+            class Electrovalvula:
+                def __init__(self, pin):
+                    pass
+          solution: |
+            class Electrovalvula:
+                def __init__(self, pin):
+                    self.pin = pin
+                    self.activaciones = 0
+                    self.pin.value(0)
+
+                def activar(self):
+                    if self.pin.value() == 0:
+                        self.activaciones += 1
+                    self.pin.value(1)
+
+                def desactivar(self):
+                    self.pin.value(0)
+
+                def activa(self):
+                    return self.pin.value() == 1
+          tests:
+            - desc: "Al crearla, el pin queda a 0"
+              before: ["from machine import Pin as _P", "_log.clear()", "_ev = Electrovalvula(_P(10, _P.OUT))"]
+              check: "('pin', 10, 'value', 0) in _log and _ev.activa() == False"
+            - desc: "activar() pone el pin a 1"
+              before: ["_ev.activar()"]
+              check: "_ev.activa() and _ev.pin.value() == 1"
+            - desc: "Activar dos veces seguidas cuenta 1"
+              before: ["_ev.activar()"]
+              call: "_ev.activaciones"
+              expected: 1
+            - desc: "desactivar y volver a activar cuenta 2"
+              before: ["_ev.desactivar()", "_ev.activar()"]
+              call: "(_ev.activaciones, _ev.activa())"
+              expected: [2, true]
+          hints:
+            wrong_result: "En activar(), comprueba ANTES de poner el pin a 1 si estaba a 0; solo entonces suma 1 a self.activaciones."
+
+  - id: m5s3
+    title: "Cilindro de simple efecto automático"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Un golpe de cilindro
+
+      Con una 3/2 NC y un cilindro de simple efecto, un "golpe" es: activar, esperar a que avance,
+      desactivar. El muelle lo hará volver.
+
+      ```python
+      def golpe(ev, t_avance):
+          ev.activar()
+          time.sleep(t_avance)
+          ev.desactivar()
+      ```
+
+      ## Estado seguro aunque algo falle: try / finally
+
+      Si el programa da un error (o pulsas Ctrl+C en Thonny) justo con la válvula activada, ¡se queda
+      activada! `finally` se ejecuta **siempre**, haya error o no:
+
+      ```python
+      try:
+          for i in range(10):
+              golpe(ev1, 0.5)
+              time.sleep(1)
+      finally:
+          ev1.desactivar()        # pase lo que pase, la válvula termina en reposo
+      ```
+
+      Esto es una **buena práctica industrial**: diseñar pensando en qué pasa cuando las cosas fallan.
+
+      > De momento temporizamos con `sleep` porque el ciclo es corto y sencillo. En la misión 7 usaremos
+      > finales de carrera para saber cuándo ha llegado el cilindro de verdad.
+    examples:
+      - title: "Ciclos automáticos con estado seguro"
+        explanation: "10 golpes del cilindro (0,5 s fuera, 1 s de pausa). Pulsa Ctrl+C a mitad: la válvula queda en reposo gracias a finally."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import Electrovalvula
+
+          ev1 = Electrovalvula(10)
+
+          def golpe(ev, t_avance):
+              ev.activar()
+              time.sleep(t_avance)
+              ev.desactivar()
+
+          try:
+              for i in range(10):
+                  golpe(ev1, 0.5)
+                  print("Ciclo", i + 1)
+                  time.sleep(1)
+          finally:
+              ev1.desactivar()
+              print("Activaciones totales:", ev1.activaciones)
+        esp32_s3: |
+          from machine import Pin
+          import time
+          from taller import Electrovalvula
+
+          ev1 = Electrovalvula(4)
+
+          def golpe(ev, t_avance):
+              ev.activar()
+              time.sleep(t_avance)
+              ev.desactivar()
+
+          try:
+              for i in range(10):
+                  golpe(ev1, 0.5)
+                  print("Ciclo", i + 1)
+                  time.sleep(1)
+          finally:
+              ev1.desactivar()
+              print("Activaciones totales:", ev1.activaciones)
+    practice: |
+      ### Práctica en el taller
+
+      1. Ejecuta el ejemplo con el cilindro de simple efecto a 3 bar.
+      2. Busca el **tiempo mínimo de avance** para que el cilindro llegue al final de su carrera. ¿Cambia a 4 bar?
+      3. Interrumpe el programa con Ctrl+C con la válvula activada y comprueba que queda en reposo. Quita el `finally` y repite (¡con cuidado!).
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Cuándo se ejecuta el bloque finally?"
+          options:
+            - {id: a, text: "Siempre: tanto si el bloque try termina bien como si hay un error o se interrumpe."}
+            - {id: b, text: "Solo si hay un error.", feedback: "Eso sería except; finally se ejecuta siempre."}
+            - {id: c, text: "Solo si no hay errores.", feedback: "finally se ejecuta en ambos casos."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `golpe(ev, t_avance)` que active la electroválvula, espere `t_avance` segundos con
+            `time.sleep` y la desactive. `ev` tiene los métodos `activar()` y `desactivar()`.
+          starter: |
+            import time
+
+            def golpe(ev, t_avance):
+                pass
+          solution: |
+            import time
+
+            def golpe(ev, t_avance):
+                ev.activar()
+                time.sleep(t_avance)
+                ev.desactivar()
+          tests:
+            - desc: "Activa, espera y desactiva"
+              before:
+                - "class _EV:\n    def __init__(self):\n        self.historia = []\n    def activar(self):\n        self.historia.append(('on', _clock.us))\n    def desactivar(self):\n        self.historia.append(('off', _clock.us))"
+                - "_e = _EV()"
+                - "_clock.sleeps.clear()"
+                - "golpe(_e, 0.5)"
+              check: "[h[0] for h in _e.historia] == ['on', 'off'] and _e.historia[1][1] - _e.historia[0][1] == 500000"
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Escribe `ciclos(ev, n, t_on, t_off)` que haga `n` golpes de `t_on` segundos con pausas de `t_off`
+            segundos después de cada golpe. Usa `try/finally` para que la válvula termine **siempre** desactivada.
+          starter: |
+            import time
+
+            def ciclos(ev, n, t_on, t_off):
+                pass
+          solution: |
+            import time
+
+            def ciclos(ev, n, t_on, t_off):
+                try:
+                    for i in range(n):
+                        ev.activar()
+                        time.sleep(t_on)
+                        ev.desactivar()
+                        time.sleep(t_off)
+                finally:
+                    ev.desactivar()
+          tests:
+            - desc: "3 ciclos: 3 activaciones y 3 segundos en total"
+              before:
+                - "class _EV:\n    def __init__(self):\n        self.n = 0\n        self.on = False\n    def activar(self):\n        self.n += 1\n        self.on = True\n    def desactivar(self):\n        self.on = False"
+                - "_e = _EV()"
+                - "_clock.sleeps.clear()"
+                - "ciclos(_e, 3, 0.4, 0.6)"
+              check: "_e.n == 3 and abs(sum(_clock.sleeps) - 3.0) < 0.01 and _e.on == False"
+            - desc: "Termina desactivada aunque falle a mitad"
+              before:
+                - "class _EVmal:\n    def __init__(self):\n        self.on = False\n        self.veces = 0\n    def activar(self):\n        self.veces += 1\n        self.on = True\n        if self.veces == 2:\n            raise ValueError('fallo simulado')\n    def desactivar(self):\n        self.on = False"
+                - "_m = _EVmal()"
+                - "_err = None\ntry:\n    ciclos(_m, 5, 0.1, 0.1)\nexcept ValueError as _x:\n    _err = _x"
+              check: "_err is not None and _m.on == False"
+          required:
+            - {pattern: "finally", message: "Usa try/finally para garantizar el estado seguro."}
+          hints:
+            wrong_result: "Pon el bucle dentro de try: y en finally: llama a ev.desactivar()."
+
+  - id: m5s4
+    title: "Proyecto corto: expulsor de piezas"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      Al final de una cinta, un cilindro de **simple efecto** (EV1, 3/2) empuja las piezas defectuosas
+      fuera de la línea, y un **chorro de aire** (EV4, 2/2) limpia la zona después.
+
+      - Cada pulsación de MARCHA (el operario detecta una pieza mala) dispara **un ciclo**:
+        EV1 activada 0,6 s → EV1 en reposo → EV4 soplando 0,3 s.
+      - Un ciclo dura en total **1 s**. Las pulsaciones que llegan **mientras hay un ciclo en marcha se
+        ignoran** (no se puede empujar dos veces la misma pieza).
+
+      ## Planificar sin esperar
+
+      Para probar la lógica, trabajamos con la lista de **instantes** (en ms) en que se pulsó MARCHA y
+      calculamos en qué instantes **empieza** cada ciclo aceptado.
+
+      Ejemplo con ciclos de 1000 ms: pulsaciones `[0, 500, 1200, 1300, 3000]` → ciclos en `[0, 1200, 3000]`
+      (500 cae dentro del ciclo que empezó en 0; 1300, dentro del que empezó en 1200).
+    examples:
+      - title: "Expulsor con soplado"
+        explanation: "Detecta el flanco de MARCHA y ejecuta el ciclo. Con sleep el ciclo es bloqueante: por eso las pulsaciones durante el ciclo se ignoran solas."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import Electrovalvula
+
+          empujador, soplado = Electrovalvula(10), Electrovalvula(13)
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          anterior, piezas = 1, 0
+          try:
+              while True:
+                  v = marcha.value()
+                  if anterior == 1 and v == 0:
+                      empujador.activar(); time.sleep(0.6); empujador.desactivar()
+                      soplado.activar(); time.sleep(0.3); soplado.desactivar()
+                      piezas += 1
+                      print("Piezas expulsadas:", piezas)
+                  anterior = v
+                  time.sleep_ms(20)
+          finally:
+              empujador.desactivar(); soplado.desactivar()
+        esp32_s3: |
+          from machine import Pin
+          import time
+          from taller import Electrovalvula
+
+          empujador, soplado = Electrovalvula(4), Electrovalvula(7)
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          anterior, piezas = 1, 0
+          try:
+              while True:
+                  v = marcha.value()
+                  if anterior == 1 and v == 0:
+                      empujador.activar(); time.sleep(0.6); empujador.desactivar()
+                      soplado.activar(); time.sleep(0.3); soplado.desactivar()
+                      piezas += 1
+                      print("Piezas expulsadas:", piezas)
+                  anterior = v
+                  time.sleep_ms(20)
+          finally:
+              empujador.desactivar(); soplado.desactivar()
+    practice: |
+      ### Proyecto por equipos (3 sesiones)
+
+      1. **Montaje**: EV1 (3/2) + cilindro de simple efecto; EV4 (2/2) + boquilla de soplado. Etapa de potencia para las dos.
+      2. **Programa**: ciclo completo, contador de piezas y estado seguro.
+      3. **Pruebas y presentación**: ajustad los tiempos mínimos. ¿Qué pasa si pulsáis muy rápido varias veces?
+    evaluation:
+      intro: "Proyecto corto de la misión 5. Necesitas un 80 %."
+      items:
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `planificar(pulsaciones, duracion)` que reciba los instantes de pulsación (ms, en orden) y
+            la duración del ciclo, y devuelva la lista de instantes en que **empieza** cada ciclo aceptado.
+            Una pulsación se acepta si llega cuando el ciclo anterior ya ha terminado (instante ≥ fin del ciclo).
+          starter: |
+            def planificar(pulsaciones, duracion):
+                pass
+          solution: |
+            def planificar(pulsaciones, duracion):
+                inicios = []
+                fin = None
+                for t in pulsaciones:
+                    if fin is None or t >= fin:
+                        inicios.append(t)
+                        fin = t + duracion
+                return inicios
+          tests:
+            - {desc: "Ejemplo de la teoría", call: "planificar([0, 500, 1200, 1300, 3000], 1000)", expected: [0, 1200, 3000]}
+            - {desc: "Justo al terminar el ciclo se acepta", call: "planificar([100, 1100], 1000)", expected: [100, 1100]}
+            - {desc: "Sin pulsaciones", call: "planificar([], 1000)", expected: []}
+            - {desc: "Ráfaga de pulsaciones", call: "planificar([0, 10, 20, 30, 999], 1000)", expected: [0]}
+          hints:
+            wrong_result: "Guarda el instante de fin del ciclo en marcha (None al principio). Acepta la pulsación si fin es None o t >= fin, y actualiza fin = t + duracion."
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué el soplado usa una 2/2 y el empujador una 3/2?"
+          options:
+            - {id: a, text: "El soplado solo necesita abrir/cerrar el paso; el cilindro necesita además escape para volver."}
+            - {id: b, text: "Porque la 2/2 es más rápida.", feedback: "La razón es funcional: el cilindro necesita escape."}
+            - {id: c, text: "Da igual, son intercambiables.", feedback: "Con una 2/2 el cilindro no retrocedería."}
+          answer: a

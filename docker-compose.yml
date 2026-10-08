@@ -1,0 +1,28 @@
+services:
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: sqlite:////app/data/neumalab.db
+    volumes:
+      - datos:/app/data
+    restart: unless-stopped
+    # límites de recursos: protegen el servidor si un ejercicio se descontrola
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1g
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "${PORT:-8080}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  datos:

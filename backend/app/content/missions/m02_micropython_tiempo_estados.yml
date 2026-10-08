@@ -1,0 +1,634 @@
+id: m2
+number: 2
+trimestre: 1
+icon: "⏱️"
+title: "MicroPython II: tiempo, estados y clases"
+subtitle: "Temporización sin bloquear, máquinas de estados y programación orientada a objetos"
+weeks: [4, 5, 6]
+hours: 9
+objectives:
+  - Medir tiempos con ticks_ms y ticks_diff y temporizar sin bloquear el programa.
+  - Modelar el comportamiento de una máquina con una máquina de estados.
+  - Crear clases con atributos y métodos para representar componentes (pulsadores, temporizadores…).
+materials:
+  - Placa + protoboard, 3 LEDs (rojo, ámbar, verde) + resistencias, 2 pulsadores
+criteria:
+  - Diseña algoritmos que responden a eventos y al paso del tiempo sin bloquear el sistema.
+  - Utiliza estructuras de datos y programación orientada a objetos para organizar el código.
+schedule:
+  - {week: 4, session: 1, title: "Por qué sleep() bloquea la máquina", section: m2s1}
+  - {week: 4, session: 2, title: "ticks_ms y ticks_diff: temporizar sin bloquear", section: m2s1}
+  - {week: 4, session: 3, title: "Máquinas de estados: estados, eventos y transiciones", section: m2s2}
+  - {week: 5, session: 1, title: "Tablas de transiciones con diccionarios", section: m2s2}
+  - {week: 5, session: 2, title: "Clases y objetos: atributos y métodos", section: m2s3}
+  - {week: 5, session: 3, title: "Clases para el taller: Pulsador y Temporizador", section: m2s3}
+  - {week: 6, session: 1, title: "Proyecto corto: semáforo con pulsador peatonal (diseño)", section: m2s4}
+  - {week: 6, session: 2, title: "Proyecto corto: programación y pruebas", section: m2s4}
+  - {week: 6, session: 3, title: "Proyecto corto: mejoras y presentación", section: m2s4}
+sections:
+  - id: m2s1
+    title: "El tiempo sin bloquear"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## El problema de sleep()
+
+      `time.sleep(5)` **detiene** el programa 5 segundos. Durante ese tiempo la placa no lee pulsadores
+      ni finales de carrera. Si alguien pulsa la **seta de emergencia**… ¡la máquina no se entera!
+
+      ## El reloj interno: ticks_ms
+
+      `time.ticks_ms()` devuelve los milisegundos desde que arrancó la placa. Guardamos el instante de
+      inicio y, en cada vuelta del bucle, comprobamos si **ha pasado** el tiempo:
+
+      ```python
+      inicio = time.ticks_ms()
+      while True:
+          ahora = time.ticks_ms()
+          if time.ticks_diff(ahora, inicio) >= 2000:     # han pasado 2 s
+              led.toggle()
+              inicio = ahora
+          # ... aquí podemos leer pulsadores, sensores, etc. ¡sin esperar!
+      ```
+
+      > Usa siempre `ticks_diff(ahora, antes)` en lugar de `ahora - antes`: el contador da la vuelta
+      > al llegar a su máximo y `ticks_diff` lo tiene en cuenta.
+
+      En los ejercicios evaluados pasaremos `ahora` como **parámetro** para poder probar la lógica sin
+      esperar de verdad.
+
+      ## Un temporizador reutilizable
+
+      Necesitamos tres cosas: **arrancarlo**, saber si **ha vencido** y cuánto **falta**. Es justo lo que
+      tiene un temporizador de un autómata (bloque TON).
+    examples:
+      - title: "Dos parpadeos a distinto ritmo sin bloquear"
+        explanation: "EV1 cambia cada 500 ms y EV2 cada 1300 ms, y a la vez se lee el pulsador. Con sleep() sería imposible."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          ev1, ev2 = Pin(10, Pin.OUT), Pin(11, Pin.OUT)
+          paro = Pin(15, Pin.IN, Pin.PULL_UP)
+          t1 = t2 = time.ticks_ms()
+          while paro.value() == 1:
+              ahora = time.ticks_ms()
+              if time.ticks_diff(ahora, t1) >= 500:
+                  ev1.toggle(); t1 = ahora
+              if time.ticks_diff(ahora, t2) >= 1300:
+                  ev2.toggle(); t2 = ahora
+          ev1.off(); ev2.off()
+          print("Parado")
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          ev1, ev2 = Pin(4, Pin.OUT), Pin(5, Pin.OUT)
+          paro = Pin(15, Pin.IN, Pin.PULL_UP)
+          t1 = t2 = time.ticks_ms()
+          while paro.value() == 1:
+              ahora = time.ticks_ms()
+              if time.ticks_diff(ahora, t1) >= 500:
+                  ev1.value(not ev1.value()); t1 = ahora
+              if time.ticks_diff(ahora, t2) >= 1300:
+                  ev2.value(not ev2.value()); t2 = ahora
+          ev1.off(); ev2.off()
+          print("Parado")
+    practice: |
+      ### Práctica en clase
+
+      1. Programa el parpadeo de EV1 con `sleep` y comprueba que PARO tarda en responder.
+      2. Rehazlo con `ticks_ms`: PARO debe responder al instante.
+      3. Añade un tercer LED con otro ritmo. ¿Cuántas tareas "a la vez" podrías tener?
+    evaluation:
+      intro: "Necesitas un 70 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué es peligroso usar time.sleep(10) en el programa de una máquina?"
+          options:
+            - {id: a, text: "Porque durante 10 s no se leen pulsadores ni sensores, tampoco la emergencia."}
+            - {id: b, text: "Porque gasta mucha batería.", feedback: "El problema es que el programa queda ciego mientras espera."}
+            - {id: c, text: "Porque sleep no existe en MicroPython.", feedback: "Existe, pero bloquea."}
+          answer: a
+        - id: f1
+          type: fill_blank
+          points: 2
+          question: "Completa la condición «han pasado 500 ms desde inicio»."
+          text: "if time.___(ahora, inicio) >= ___:"
+          blanks:
+            - {accept: ["ticks_diff"], hint: "La función que resta tiempos de forma segura."}
+            - {accept: ["500"], hint: "En milisegundos."}
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `ha_pasado(ahora, inicio, duracion)` que devuelva `True` si desde `inicio` hasta
+            `ahora` han pasado **al menos** `duracion` milisegundos. Usa `time.ticks_diff`.
+          starter: |
+            import time
+
+            def ha_pasado(ahora, inicio, duracion):
+                pass
+          solution: |
+            import time
+
+            def ha_pasado(ahora, inicio, duracion):
+                return time.ticks_diff(ahora, inicio) >= duracion
+          tests:
+            - {desc: "1500 ms de 1000 → True", call: "ha_pasado(2500, 1000, 1000)", expected: true}
+            - {desc: "Justo en el límite → True", call: "ha_pasado(2000, 1000, 1000)", expected: true}
+            - {desc: "Aún no → False", call: "ha_pasado(1999, 1000, 1000)", expected: false}
+          required:
+            - {pattern: "ticks_diff", message: "Usa time.ticks_diff para restar tiempos."}
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Crea la clase `Temporizador` con:
+            - `__init__(self, duracion)`: guarda la duración (ms); el temporizador empieza **parado**.
+            - `iniciar(self, ahora)`: lo pone en marcha desde `ahora`.
+            - `vencido(self, ahora)`: `True` si está en marcha y ya ha pasado la duración.
+            - `restante(self, ahora)`: ms que faltan (0 si ha vencido; la duración completa si está parado).
+          starter: |
+            import time
+
+            class Temporizador:
+                def __init__(self, duracion):
+                    self.duracion = duracion
+                    self.inicio = None
+
+                def iniciar(self, ahora):
+                    pass
+
+                def vencido(self, ahora):
+                    pass
+
+                def restante(self, ahora):
+                    pass
+          solution: |
+            import time
+
+            class Temporizador:
+                def __init__(self, duracion):
+                    self.duracion = duracion
+                    self.inicio = None
+
+                def iniciar(self, ahora):
+                    self.inicio = ahora
+
+                def vencido(self, ahora):
+                    if self.inicio is None:
+                        return False
+                    return time.ticks_diff(ahora, self.inicio) >= self.duracion
+
+                def restante(self, ahora):
+                    if self.inicio is None:
+                        return self.duracion
+                    pasado = time.ticks_diff(ahora, self.inicio)
+                    return max(0, self.duracion - pasado)
+          tests:
+            - {desc: "Parado: no vence", before: ["_t = Temporizador(1000)"], call: "_t.vencido(5000)", expected: false}
+            - {desc: "Parado: restante = duración", call: "_t.restante(5000)", expected: 1000}
+            - {desc: "En marcha: aún no vence", before: ["_t.iniciar(2000)"], call: "(_t.vencido(2500), _t.restante(2500))", expected: [false, 500]}
+            - {desc: "Vence a los 1000 ms", call: "(_t.vencido(3000), _t.restante(3200))", expected: [true, 0]}
+          hints:
+            wrong_result: "Guarda el instante de inicio en self.inicio (None = parado) y compara con time.ticks_diff(ahora, self.inicio)."
+
+  - id: m2s2
+    title: "Máquinas de estados"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Pensar como un autómata
+
+      Una máquina siempre está en un **estado** (reposo, avanzando, esperando…). Cambia de estado
+      cuando ocurre un **evento** (se pulsa marcha, se pisa un final de carrera, vence un tiempo).
+      A ese cambio lo llamamos **transición**.
+
+      Ejemplo: una puerta neumática.
+
+      ```
+      CERRADA --(pulsar)--> ABRIENDO --(fin_apertura)--> ABIERTA
+         ^                                                  |
+         +------------(fin_cierre)--- CERRANDO <--(tiempo)--+
+      ```
+
+      ## Tabla de transiciones con un diccionario
+
+      La clave es la pareja `(estado, evento)` y el valor, el estado siguiente:
+
+      ```python
+      TABLA = {
+          ("CERRADA", "pulsar"): "ABRIENDO",
+          ("ABRIENDO", "fin_apertura"): "ABIERTA",
+          ("ABIERTA", "tiempo"): "CERRANDO",
+          ("CERRANDO", "fin_cierre"): "CERRADA",
+      }
+      estado = "CERRADA"
+      estado = TABLA.get((estado, "pulsar"), estado)   # si no hay transición, se queda igual
+      ```
+
+      Ventajas: el comportamiento se **lee en la tabla**, es fácil de comprobar y no hay `if` anidados
+      imposibles de seguir. Así se programan de verdad las máquinas (y así funciona el GRAFCET que
+      veremos más adelante).
+    examples:
+      - title: "Telerruptor con máquina de estados"
+        explanation: "Cada pulsación de MARCHA alterna EV1 entre ACTIVADA y DESACTIVADA; PARO lleva siempre a DESACTIVADA."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          TABLA = {
+              ("DESACTIVADA", "marcha"): "ACTIVADA",
+              ("ACTIVADA", "marcha"): "DESACTIVADA",
+              ("ACTIVADA", "paro"): "DESACTIVADA",
+          }
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          paro = Pin(15, Pin.IN, Pin.PULL_UP)
+          ev1 = Pin(10, Pin.OUT, value=0)
+          estado, ant_m = "DESACTIVADA", 1
+          while True:
+              m = marcha.value()
+              evento = "paro" if paro.value() == 0 else ("marcha" if ant_m == 1 and m == 0 else None)
+              ant_m = m
+              if evento:
+                  estado = TABLA.get((estado, evento), estado)
+                  print(evento, "→", estado)
+              ev1.value(1 if estado == "ACTIVADA" else 0)
+              time.sleep_ms(20)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          TABLA = {
+              ("DESACTIVADA", "marcha"): "ACTIVADA",
+              ("ACTIVADA", "marcha"): "DESACTIVADA",
+              ("ACTIVADA", "paro"): "DESACTIVADA",
+          }
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          paro = Pin(15, Pin.IN, Pin.PULL_UP)
+          ev1 = Pin(4, Pin.OUT, value=0)
+          estado, ant_m = "DESACTIVADA", 1
+          while True:
+              m = marcha.value()
+              evento = "paro" if paro.value() == 0 else ("marcha" if ant_m == 1 and m == 0 else None)
+              ant_m = m
+              if evento:
+                  estado = TABLA.get((estado, evento), estado)
+                  print(evento, "→", estado)
+              ev1.value(1 if estado == "ACTIVADA" else 0)
+              time.sleep_ms(20)
+    practice: |
+      ### Práctica en clase
+
+      1. **Desenchufada**: dibuja el diagrama de estados de una barrera de parking (bajada, subiendo, subida, bajando).
+      2. Escribe su tabla de transiciones como diccionario.
+      3. Prográmala con LEDs: EV1 = subir, EV2 = bajar, y simula los finales de carrera con pulsadores.
+    evaluation:
+      intro: "Necesitas un 70 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "En la tabla de transiciones, ¿qué ocurre si llega un evento que no tiene transición desde el estado actual?"
+          options:
+            - {id: a, text: "La máquina se queda en el mismo estado."}
+            - {id: b, text: "La máquina vuelve al estado inicial.", feedback: "Con TABLA.get((estado, evento), estado) se mantiene el estado actual."}
+            - {id: c, text: "El programa se bloquea.", feedback: "get con valor por defecto evita el error."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `siguiente(estado, evento, tabla)` que devuelva el estado siguiente según la tabla
+            `{(estado, evento): nuevo_estado}`, o el mismo estado si no hay transición.
+          starter: |
+            def siguiente(estado, evento, tabla):
+                pass
+          solution: |
+            def siguiente(estado, evento, tabla):
+                return tabla.get((estado, evento), estado)
+          tests:
+            - before: ["_T = {('CERRADA', 'pulsar'): 'ABRIENDO', ('ABRIENDO', 'fin_apertura'): 'ABIERTA'}"]
+              desc: "Transición existente"
+              call: "siguiente('CERRADA', 'pulsar', _T)"
+              expected: "ABRIENDO"
+            - {desc: "Sin transición: se queda", call: "siguiente('CERRADA', 'fin_apertura', _T)", expected: "CERRADA"}
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Escribe `simular(tabla, inicial, eventos)` que aplique los eventos en orden y devuelva la
+            **lista de estados** por los que pasa la máquina, **incluyendo** el inicial.
+
+            Ejemplo: con la tabla de la puerta, `simular(T, "CERRADA", ["pulsar", "fin_apertura"])`
+            → `["CERRADA", "ABRIENDO", "ABIERTA"]`
+          starter: |
+            def simular(tabla, inicial, eventos):
+                pass
+          solution: |
+            def simular(tabla, inicial, eventos):
+                estados = [inicial]
+                estado = inicial
+                for ev in eventos:
+                    estado = tabla.get((estado, ev), estado)
+                    estados.append(estado)
+                return estados
+          tests:
+            - before: ["_T = {('CERRADA', 'pulsar'): 'ABRIENDO', ('ABRIENDO', 'fin_apertura'): 'ABIERTA', ('ABIERTA', 'tiempo'): 'CERRANDO', ('CERRANDO', 'fin_cierre'): 'CERRADA'}"]
+              desc: "Ejemplo del enunciado"
+              call: "simular(_T, 'CERRADA', ['pulsar', 'fin_apertura'])"
+              expected: ["CERRADA", "ABRIENDO", "ABIERTA"]
+            - {desc: "Ciclo completo", call: "simular(_T, 'CERRADA', ['pulsar', 'fin_apertura', 'tiempo', 'fin_cierre'])[-1]", expected: "CERRADA"}
+            - {desc: "Eventos sin efecto mantienen el estado", call: "simular(_T, 'CERRADA', ['tiempo', 'pulsar'])", expected: ["CERRADA", "CERRADA", "ABRIENDO"]}
+            - {desc: "Sin eventos", call: "simular(_T, 'ABIERTA', [])", expected: ["ABIERTA"]}
+
+  - id: m2s3
+    title: "Clases y objetos"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Agrupar datos y acciones
+
+      En una máquina hay muchos elementos del mismo tipo: 4 electroválvulas, 2 cilindros, 4 finales de
+      carrera… Una **clase** es el molde y cada **objeto** es una pieza hecha con ese molde.
+
+      ```python
+      class Pulsador:
+          def __init__(self, pin):          # se ejecuta al crear el objeto
+              self.pin = pin                # atributo: dato propio del objeto
+              self.pulsaciones = 0
+
+          def pulsado(self):                # método: acción del objeto
+              return self.pin.value() == 0  # pull-up: pulsado = 0
+
+      marcha = Pulsador(Pin(14, Pin.IN, Pin.PULL_UP))
+      if marcha.pulsado():
+          print("¡Marcha!")
+      ```
+
+      - `self` es "el propio objeto": `self.pin` es el pin **de ese** pulsador.
+      - Cada objeto guarda sus propios datos: `marcha.pulsaciones` y `paro.pulsaciones` son distintos.
+
+      En el 2.º trimestre crearemos las clases `Electrovalvula` y `Cilindro`, y el programa de la máquina
+      quedará tan claro como: `cilindro_a.avanzar()`.
+    examples:
+      - title: "Clase Pulsador con detección de flanco"
+        explanation: "Cada objeto recuerda su lectura anterior: así detecta el flanco de forma independiente."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          class Pulsador:
+              def __init__(self, n):
+                  self.pin = Pin(n, Pin.IN, Pin.PULL_UP)
+                  self.anterior = 1
+
+              def flanco(self):
+                  v = self.pin.value()
+                  hubo = self.anterior == 1 and v == 0
+                  self.anterior = v
+                  return hubo
+
+          marcha, paro = Pulsador(14), Pulsador(15)
+          while True:
+              if marcha.flanco():
+                  print("MARCHA")
+              if paro.flanco():
+                  print("PARO")
+              time.sleep_ms(20)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          class Pulsador:
+              def __init__(self, n):
+                  self.pin = Pin(n, Pin.IN, Pin.PULL_UP)
+                  self.anterior = 1
+
+              def flanco(self):
+                  v = self.pin.value()
+                  hubo = self.anterior == 1 and v == 0
+                  self.anterior = v
+                  return hubo
+
+          marcha, paro = Pulsador(14), Pulsador(15)
+          while True:
+              if marcha.flanco():
+                  print("MARCHA")
+              if paro.flanco():
+                  print("PARO")
+              time.sleep_ms(20)
+    practice: |
+      ### Práctica en clase
+
+      1. Crea dos objetos `Pulsador` y comprueba que cada uno detecta sus flancos por separado.
+      2. Añade el atributo `pulsaciones` que cuente los flancos de cada pulsador.
+      3. Guarda tus clases en un archivo `taller.py` en la placa y úsalas desde `main.py` con `from taller import Pulsador`.
+    evaluation:
+      intro: "Necesitas un 70 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué es self dentro de un método?"
+          options:
+            - {id: a, text: "El propio objeto sobre el que se llama el método."}
+            - {id: b, text: "Una variable global de MicroPython.", feedback: "self se refiere al objeto concreto, no es global."}
+            - {id: c, text: "El nombre de la clase.", feedback: "La clase es el molde; self es el objeto concreto."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "Creas a = Contador() y b = Contador() y llamas a a.incrementar() tres veces. ¿Cuánto vale b.valor?"
+          options:
+            - {id: a, text: "0"}
+            - {id: b, text: "3", feedback: "Cada objeto tiene sus propios atributos: b no se ha tocado."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Crea la clase `Contador` con el atributo `valor` (empieza en 0) y los métodos
+            `incrementar()` (suma 1) y `reiniciar()` (vuelve a 0).
+          starter: |
+            class Contador:
+                pass
+          solution: |
+            class Contador:
+                def __init__(self):
+                    self.valor = 0
+
+                def incrementar(self):
+                    self.valor += 1
+
+                def reiniciar(self):
+                    self.valor = 0
+          tests:
+            - {desc: "Empieza en 0", before: ["_a = Contador()", "_b = Contador()"], call: "_a.valor", expected: 0}
+            - {desc: "Incrementa", before: ["_a.incrementar()", "_a.incrementar()", "_a.incrementar()"], call: "(_a.valor, _b.valor)", expected: [3, 0]}
+            - {desc: "Reinicia", before: ["_a.reiniciar()"], call: "_a.valor", expected: 0}
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Crea la clase `Pulsador` que reciba un **pin ya creado** (con pull-up) y tenga:
+            - `pulsado()`: `True` si el pin vale 0.
+            - `flanco()`: `True` solo la primera vez que se detecta pulsado tras estar suelto (estado anterior inicial 1).
+          starter: |
+            class Pulsador:
+                def __init__(self, pin):
+                    self.pin = pin
+                    self.anterior = 1
+
+                def pulsado(self):
+                    pass
+
+                def flanco(self):
+                    pass
+          solution: |
+            class Pulsador:
+                def __init__(self, pin):
+                    self.pin = pin
+                    self.anterior = 1
+
+                def pulsado(self):
+                    return self.pin.value() == 0
+
+                def flanco(self):
+                    v = self.pin.value()
+                    hubo = self.anterior == 1 and v == 0
+                    self.anterior = v
+                    return hubo
+          setup: ["PIN_INPUTS[14] = [1, 0, 0, 1, 0]"]
+          tests:
+            - desc: "Detecta flancos en la secuencia 1, 0, 0, 1, 0"
+              before: ["from machine import Pin as _P", "_p = Pulsador(_P(14, _P.IN, _P.PULL_UP))"]
+              call: "[_p.flanco() for _ in range(5)]"
+              expected: [false, true, false, false, true]
+            - desc: "pulsado() lee el estado actual"
+              before: ["_q = Pulsador(_P(15, _P.IN, _P.PULL_UP))"]
+              call: "_q.pulsado()"
+              expected: false
+          hints:
+            wrong_result: "En flanco(): lee v = self.pin.value(), calcula hubo = self.anterior == 1 and v == 0, guarda self.anterior = v y devuelve hubo."
+
+  - id: m2s4
+    title: "Proyecto corto: semáforo con pulsador peatonal"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      Un semáforo de coches con pulsador para peatones, programado como **máquina de estados sin bloquear**:
+
+      | Estado | Luz | Sale cuando… | Va a |
+      |---|---|---|---|
+      | `VERDE` | verde | han pasado **≥ 5 s** en verde **y** hay petición de peatón | `AMBAR` |
+      | `AMBAR` | ámbar | han pasado **≥ 2 s** | `ROJO` |
+      | `ROJO` | rojo | han pasado **≥ 5 s** | `VERDE` |
+
+      Si un peatón pulsa durante el verde antes de los 5 s, la petición **se recuerda** y el cambio ocurre
+      al cumplirse los 5 s. Mientras no haya peticiones, el semáforo se queda en verde.
+
+      La función clave recibe el estado, el tiempo que lleva en él y si hay petición, y devuelve el
+      **estado siguiente**. Así se puede probar sin esperar.
+    examples:
+      - title: "Semáforo sin bloquear"
+        explanation: "LEDs: verde EV1, ámbar EV2, rojo EV3. Pulsador peatonal en MARCHA. La lógica está en la función paso()."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          luces = {"VERDE": Pin(10, Pin.OUT), "AMBAR": Pin(11, Pin.OUT), "ROJO": Pin(12, Pin.OUT)}
+          boton = Pin(14, Pin.IN, Pin.PULL_UP)
+
+          def paso(estado, t, peticion):
+              # escribe aquí tu función del ejercicio
+              return estado
+
+          estado, desde, peticion = "VERDE", time.ticks_ms(), False
+          while True:
+              ahora = time.ticks_ms()
+              if boton.value() == 0:
+                  peticion = True
+              nuevo = paso(estado, time.ticks_diff(ahora, desde), peticion)
+              if nuevo != estado:
+                  estado, desde = nuevo, ahora
+                  if estado == "AMBAR":
+                      peticion = False
+              for nombre, pin in luces.items():
+                  pin.value(1 if nombre == estado else 0)
+              time.sleep_ms(20)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          luces = {"VERDE": Pin(4, Pin.OUT), "AMBAR": Pin(5, Pin.OUT), "ROJO": Pin(6, Pin.OUT)}
+          boton = Pin(14, Pin.IN, Pin.PULL_UP)
+
+          def paso(estado, t, peticion):
+              # escribe aquí tu función del ejercicio
+              return estado
+
+          estado, desde, peticion = "VERDE", time.ticks_ms(), False
+          while True:
+              ahora = time.ticks_ms()
+              if boton.value() == 0:
+                  peticion = True
+              nuevo = paso(estado, time.ticks_diff(ahora, desde), peticion)
+              if nuevo != estado:
+                  estado, desde = nuevo, ahora
+                  if estado == "AMBAR":
+                      peticion = False
+              for nombre, pin in luces.items():
+                  pin.value(1 if nombre == estado else 0)
+              time.sleep_ms(20)
+    practice: |
+      ### Proyecto por parejas (3 sesiones)
+
+      1. **Diseño**: diagrama de estados y tabla de pruebas (qué debe pasar en cada caso).
+      2. **Programa**: implementa `paso()` y pruébalo en el corrector y en la placa.
+      3. **Mejoras y presentación**: añade un semáforo de peatones (2 LEDs más) con parpadeo del verde peatonal los últimos 2 s.
+    evaluation:
+      intro: "Proyecto corto de la misión 2. Necesitas un 70 %."
+      items:
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `paso(estado, t, peticion)` según la tabla de la teoría. `t` son los milisegundos que
+            lleva en el estado actual y `peticion` indica si hay un peatón esperando. Devuelve el estado siguiente.
+          starter: |
+            def paso(estado, t, peticion):
+                pass
+          solution: |
+            def paso(estado, t, peticion):
+                if estado == "VERDE":
+                    if t >= 5000 and peticion:
+                        return "AMBAR"
+                    return "VERDE"
+                if estado == "AMBAR":
+                    return "ROJO" if t >= 2000 else "AMBAR"
+                if estado == "ROJO":
+                    return "VERDE" if t >= 5000 else "ROJO"
+                return estado
+          tests:
+            - {desc: "Verde con petición pero < 5 s → sigue verde", call: "paso('VERDE', 3000, True)", expected: "VERDE"}
+            - {desc: "Verde ≥ 5 s con petición → ámbar", call: "paso('VERDE', 5000, True)", expected: "AMBAR"}
+            - {desc: "Verde mucho tiempo sin petición → sigue verde", call: "paso('VERDE', 60000, False)", expected: "VERDE"}
+            - {desc: "Ámbar 2 s → rojo", call: "(paso('AMBAR', 1999, False), paso('AMBAR', 2000, False))", expected: ["AMBAR", "ROJO"]}
+            - {desc: "Rojo 5 s → verde", call: "(paso('ROJO', 4000, True), paso('ROJO', 5000, False))", expected: ["ROJO", "VERDE"]}
+          hints:
+            wrong_result: "Usa if/elif por estado. Fíjate en los límites (>=) y en que VERDE solo cambia si hay petición."
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué la función paso() recibe el tiempo como parámetro en lugar de llamar a ticks_ms() dentro?"
+          options:
+            - {id: a, text: "Para poder probarla con valores concretos sin esperar de verdad."}
+            - {id: b, text: "Porque ticks_ms() no funciona dentro de funciones.", feedback: "Sí funciona; el motivo es poder probar la lógica."}
+            - {id: c, text: "Para que el semáforo vaya más rápido.", feedback: "No cambia la velocidad."}
+          answer: a

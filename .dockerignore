@@ -1,0 +1,8 @@
+node_modules
+frontend/dist
+frontend/public/pyodide
+.datos-locales
+.netlify
+backend/data
+backend/static
+**/__pycache__

@@ -1,0 +1,530 @@
+id: m4
+number: 4
+trimestre: 1
+icon: "🔀"
+title: "Neumática II: válvulas y circuitos básicos"
+subtitle: "Vías y posiciones, simbología, antirretorno, selectora y primeros circuitos"
+weeks: [10, 11, 12]
+hours: 9
+objectives:
+  - Interpretar la designación (vías/posiciones) y la simbología normalizada de las válvulas.
+  - Conocer la numeración de las vías y el estado de reposo (NC/NA) de una válvula.
+  - Utilizar válvulas antirretorno y selectoras (función O) en circuitos.
+  - Montar circuitos básicos de mando de cilindros de simple y doble efecto.
+materials:
+  - Banco neumático (compresor, unidad de acondicionamiento, tubo de 4/6 mm)
+  - Electroválvulas 2/2 y 3/2 NC de 12 V, válvula selectora, válvula antirretorno
+  - Cilindros de simple y doble efecto, pulsadores, fuente de 12 V, diodos 1N4007
+criteria:
+  - Interpreta y realiza esquemas neumáticos sencillos utilizando simbología normalizada.
+  - Monta y comprueba circuitos neumáticos de mando de cilindros.
+schedule:
+  - {week: 10, session: 1, title: "Válvulas distribuidoras: vías, posiciones y reposo", section: m4s1}
+  - {week: 10, session: 2, title: "Simbología y numeración de vías", section: m4s1}
+  - {week: 10, session: 3, title: "Antirretorno y selectora (función O)", section: m4s2}
+  - {week: 11, session: 1, title: "Circuito 1: simple efecto con 3/2 (mando directo)", section: m4s3}
+  - {week: 11, session: 2, title: "Circuito 2: doble efecto con dos 3/2", section: m4s3}
+  - {week: 11, session: 3, title: "Circuito 3: ¿por qué no sirve una 2/2? Errores típicos", section: m4s3}
+  - {week: 12, session: 1, title: "Proyecto corto: puerta neumática desde dos puntos (diseño)", section: m4s4}
+  - {week: 12, session: 2, title: "Proyecto corto: montaje y pruebas", section: m4s4}
+  - {week: 12, session: 3, title: "Proyecto corto: presentación. Repaso del trimestre", section: m4s4}
+sections:
+  - id: m4s1
+    title: "Válvulas distribuidoras y simbología"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Vías y posiciones
+
+      Una válvula distribuidora dirige el aire. Se nombra con dos números: **vías / posiciones**.
+
+      - **Vías**: número de conexiones (orificios) para el aire.
+      - **Posiciones**: número de estados en que puede estar (cada uno es un **cuadrado** en el símbolo).
+
+      | Válvula | Uso típico |
+      |---|---|
+      | **2/2** | Abrir o cerrar el paso (soplado, corte, llenado) |
+      | **3/2** | Dar presión o comunicar con el escape: cilindro de **simple efecto**, o una cámara de un doble efecto |
+      | **5/2** | Cilindro de **doble efecto** con una sola válvula |
+
+      ## Reposo: NC y NA
+
+      La posición de **reposo** es la que tiene la válvula sin accionar (mantenida por un **muelle**).
+
+      - **NC** (normalmente cerrada): en reposo **no pasa** aire de la alimentación a la utilización.
+      - **NA** (normalmente abierta): en reposo **sí pasa**.
+
+      Nuestras electroválvulas son **2/2 NC** y **3/2 NC**: si se corta la corriente, se cierran.
+
+      ## Numeración de las vías (ISO 5599)
+
+      | Número | Función |
+      |---|---|
+      | **1** | Alimentación (presión) |
+      | **2, 4** | Utilización (hacia el cilindro) |
+      | **3, 5** | Escape |
+      | **12, 14** | Pilotaje (mando neumático) |
+
+      ## Leer un símbolo
+
+      Cada cuadrado es una posición; las flechas indican el paso del aire y la **T** invertida, una vía
+      bloqueada. A los lados se dibujan los **accionamientos**: un rectángulo con una diagonal es una
+      **bobina (solenoide)**, y un zigzag es el **muelle** de retorno.
+    examples:
+      - title: "Fichero de válvulas del taller"
+        explanation: "Guarda en un diccionario las válvulas del banco e imprime para qué sirve cada una."
+        pico_w: |
+          VALVULAS = {
+              "EV1": {"tipo": "3/2", "reposo": "NC", "uso": "cilindro simple efecto"},
+              "EV2": {"tipo": "3/2", "reposo": "NC", "uso": "doble efecto · cámara de avance"},
+              "EV3": {"tipo": "3/2", "reposo": "NC", "uso": "doble efecto · cámara de retroceso"},
+              "EV4": {"tipo": "2/2", "reposo": "NC", "uso": "soplado de piezas"},
+          }
+          for nombre, v in VALVULAS.items():
+              print(nombre, v["tipo"], v["reposo"], "→", v["uso"])
+        esp32_s3: |
+          VALVULAS = {
+              "EV1": {"tipo": "3/2", "reposo": "NC", "uso": "cilindro simple efecto"},
+              "EV2": {"tipo": "3/2", "reposo": "NC", "uso": "doble efecto · cámara de avance"},
+              "EV3": {"tipo": "3/2", "reposo": "NC", "uso": "doble efecto · cámara de retroceso"},
+              "EV4": {"tipo": "2/2", "reposo": "NC", "uso": "soplado de piezas"},
+          }
+          for nombre, v in VALVULAS.items():
+              print(nombre, v["tipo"], v["reposo"], "→", v["uso"])
+    practice: |
+      ### Práctica en clase
+
+      1. Identifica las electroválvulas del taller: lee su etiqueta (tipo, tensión, presión máxima) y localiza las vías 1, 2 y 3.
+      2. Dibuja el símbolo de una 2/2 NC y una 3/2 NC con accionamiento por solenoide y retorno por muelle.
+      3. Con una fuente de 12 V (y diodo), activa una electroválvula 3/2 sin cilindro: ¿por dónde sale el aire al activarla y al desactivarla?
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué significa «3/2»?"
+          options:
+            - {id: a, text: "3 vías (conexiones) y 2 posiciones."}
+            - {id: b, text: "3 posiciones y 2 vías.", feedback: "Primero se indican las vías y después las posiciones."}
+            - {id: c, text: "3 bar y 2 litros.", feedback: "Es la designación de vías y posiciones."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "En una válvula NC sin accionar…"
+          options:
+            - {id: a, text: "no pasa aire de la alimentación (1) a la utilización (2)."}
+            - {id: b, text: "pasa aire de 1 a 2.", feedback: "Eso sería NA (normalmente abierta)."}
+            - {id: c, text: "salen todas las vías al escape.", feedback: "En la 3/2 NC, la 2 comunica con el escape 3, pero la 1 está bloqueada."}
+          answer: a
+        - id: f1
+          type: fill_blank
+          points: 2
+          question: "Completa la numeración de vías."
+          text: "Alimentación = ___ · Escape en una 3/2 = ___"
+          blanks:
+            - {accept: ["1"], hint: "La presión siempre es la vía…"}
+            - {accept: ["3"], hint: "En las 3/2 el escape es la vía…"}
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `parse_valvula(texto)` que interprete designaciones como `"3/2 NC"`, `"2/2 NA"` o `"5/2"`
+            y devuelva `{"vias": 3, "posiciones": 2, "reposo": "NC"}` (`"reposo": None` si no se indica).
+
+            Pista: `texto.split()` separa por espacios y `"3/2".split("/")` da `["3", "2"]`.
+          starter: |
+            def parse_valvula(texto):
+                pass
+          solution: |
+            def parse_valvula(texto):
+                partes = texto.split()
+                vias, posiciones = partes[0].split("/")
+                reposo = partes[1] if len(partes) > 1 else None
+                return {"vias": int(vias), "posiciones": int(posiciones), "reposo": reposo}
+          tests:
+            - {desc: "3/2 NC", call: "parse_valvula('3/2 NC')", expected: {"vias": 3, "posiciones": 2, "reposo": "NC"}}
+            - {desc: "2/2 NA", call: "parse_valvula('2/2 NA')", expected: {"vias": 2, "posiciones": 2, "reposo": "NA"}}
+            - {desc: "5/2 sin reposo", call: "parse_valvula('5/2')", expected: {"vias": 5, "posiciones": 2, "reposo": null}}
+          hints:
+            wrong_result: "Convierte vías y posiciones a número con int(). Si la lista de partes solo tiene un elemento, el reposo es None."
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `funcion_via(n)` que devuelva `"alimentación"` (1), `"utilización"` (2 y 4),
+            `"escape"` (3 y 5), `"pilotaje"` (12 y 14) o `"desconocida"`.
+          starter: |
+            def funcion_via(n):
+                pass
+          solution: |
+            def funcion_via(n):
+                if n == 1:
+                    return "alimentación"
+                if n in (2, 4):
+                    return "utilización"
+                if n in (3, 5):
+                    return "escape"
+                if n in (12, 14):
+                    return "pilotaje"
+                return "desconocida"
+          tests:
+            - {desc: "Vías 1, 2, 3", call: "[funcion_via(1), funcion_via(2), funcion_via(3)]", expected: ["alimentación", "utilización", "escape"]}
+            - {desc: "Vías 4, 5, 14", call: "[funcion_via(4), funcion_via(5), funcion_via(14)]", expected: ["utilización", "escape", "pilotaje"]}
+            - {desc: "Vía 7 → desconocida", call: "funcion_via(7)", expected: "desconocida"}
+
+  - id: m4s2
+    title: "Antirretorno y selectora (función O)"
+    hours: 1
+    kind: lesson
+    theory: |
+      ## Válvula antirretorno
+
+      Deja pasar el aire en **un solo sentido**: de la entrada a la salida si la presión de entrada es
+      **mayor** que la de salida. En sentido contrario, una bola o un cierre bloquea el paso.
+
+      Usos: evitar que el aire **vuelva** hacia atrás (por ejemplo, entre el compresor y el depósito),
+      mantener la presión en una parte del circuito y, combinada con una estrangulación, formar el
+      **regulador de caudal unidireccional** que controla la velocidad de un cilindro.
+
+      ⚠️ Si una antirretorno **atrapa** aire en un cilindro, este se queda presurizado aunque desconectes
+      las válvulas: hay que **purgarlo** antes de tocar nada.
+
+      ## Válvula selectora: la función O
+
+      Tiene **dos entradas** y **una salida**. Una bola interior se desplaza hacia el lado de **menor
+      presión** y lo tapa, de modo que a la salida llega la **presión mayor** de las dos.
+
+      Lógica: hay señal a la salida si hay señal en la entrada 1 **O** en la entrada 2.
+
+      | Entrada 1 | Entrada 2 | Salida |
+      |---|---|---|
+      | 0 | 0 | 0 |
+      | 1 | 0 | 1 |
+      | 0 | 1 | 1 |
+      | 1 | 1 | 1 |
+
+      ¿Por qué no unir las dos válvulas con una simple **T**? Porque el aire de la válvula activada
+      **se escaparía** por el escape de la otra (que está en reposo). La selectora tapa ese camino.
+    examples:
+      - title: "Tabla de verdad de la selectora en la placa"
+        explanation: "Simula la selectora con dos pulsadores y muestra el resultado en EV1 (LED)."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          p1 = Pin(14, Pin.IN, Pin.PULL_UP)
+          p2 = Pin(15, Pin.IN, Pin.PULL_UP)
+          salida = Pin(10, Pin.OUT)
+          while True:
+              e1 = 1 if p1.value() == 0 else 0
+              e2 = 1 if p2.value() == 0 else 0
+              salida.value(e1 or e2)          # función O
+              time.sleep_ms(20)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          p1 = Pin(14, Pin.IN, Pin.PULL_UP)
+          p2 = Pin(15, Pin.IN, Pin.PULL_UP)
+          salida = Pin(4, Pin.OUT)
+          while True:
+              e1 = 1 if p1.value() == 0 else 0
+              e2 = 1 if p2.value() == 0 else 0
+              salida.value(e1 or e2)          # función O
+              time.sleep_ms(20)
+    practice: |
+      ### Práctica en el taller
+
+      1. Sopla (con el aire a 1 bar) por cada lado de la antirretorno: ¿en qué sentido pasa? Localiza la flecha grabada.
+      2. Conecta aire a una entrada de la selectora y observa la salida. Repite por la otra entrada.
+      3. Ejecuta el ejemplo y comprueba la tabla de verdad con los LEDs.
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué función lógica realiza la válvula selectora?"
+          options:
+            - {id: a, text: "O (OR)"}
+            - {id: b, text: "Y (AND)", feedback: "Basta con señal en UNA entrada para que haya salida."}
+            - {id: c, text: "NO (NOT)", feedback: "No invierte la señal."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Por qué no se juntan dos válvulas 3/2 con una simple T para mandar un cilindro desde dos puntos?"
+          options:
+            - {id: a, text: "Porque el aire se escaparía por el escape de la válvula que está en reposo."}
+            - {id: b, text: "Porque las T no existen en neumática.", feedback: "Existen, pero aquí provocarían una fuga por el escape."}
+            - {id: c, text: "Porque la presión se duplicaría.", feedback: "No se duplica; se pierde por el escape."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `selectora(p1, p2)` que devuelva la presión que llega a la salida (la mayor de las dos).
+          starter: |
+            def selectora(p1, p2):
+                pass
+          solution: |
+            def selectora(p1, p2):
+                if p1 >= p2:
+                    return p1
+                return p2
+          tests:
+            - {desc: "Solo entrada 1", call: "selectora(4, 0)", expected: 4}
+            - {desc: "Solo entrada 2", call: "selectora(0, 3.5)", expected: 3.5}
+            - {desc: "Ninguna", call: "selectora(0, 0)", expected: 0}
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `antirretorno(p_entrada, p_salida)` que devuelva `True` si el aire **pasa** (la presión de
+            entrada es mayor que la de salida) y `False` si queda bloqueado.
+          starter: |
+            def antirretorno(p_entrada, p_salida):
+                pass
+          solution: |
+            def antirretorno(p_entrada, p_salida):
+                return p_entrada > p_salida
+          tests:
+            - {desc: "Entrada mayor → pasa", call: "antirretorno(4, 0)", expected: true}
+            - {desc: "Salida mayor → bloquea", call: "antirretorno(0, 4)", expected: false}
+            - {desc: "Iguales → no hay flujo", call: "antirretorno(3, 3)", expected: false}
+
+  - id: m4s3
+    title: "Circuitos básicos de mando de cilindros"
+    hours: 3
+    kind: lesson
+    theory: |
+      ## Circuito 1 · Simple efecto con una 3/2 NC
+
+      ```
+      1 (presión) ─► [EV 3/2 NC] ─► 2 ─► cilindro simple efecto
+                          3 ─► escape
+      ```
+
+      - EV activada: 1 → 2, el cilindro **avanza**.
+      - EV en reposo: 2 → 3, el aire sale y el muelle hace **retroceder** el cilindro.
+
+      ## Circuito 2 · Doble efecto con dos 3/2 NC
+
+      Cada cámara tiene su propia válvula: EV_A (cámara trasera, avance) y EV_B (cámara delantera, retroceso).
+
+      | EV_A | EV_B | Cilindro |
+      |---|---|---|
+      | 1 | 0 | **avanza** (A con presión, B al escape) |
+      | 0 | 1 | **retrocede** |
+      | 0 | 0 | **libre**: las dos cámaras al escape, se queda donde esté y se puede mover a mano |
+      | 1 | 1 | **PROHIBIDO**: presión en las dos cámaras, fuerzas enfrentadas; por la diferencia de áreas avanza de forma descontrolada |
+
+      ⚠️ El programa **nunca** debe activar EV_A y EV_B a la vez. Es un **enclavamiento** (interlock) que
+      programaremos en el 2.º trimestre.
+
+      ## Circuito 3 · ¿Y la 2/2?
+
+      Una 2/2 NC solo **abre o cierra** el paso: no tiene escape. Si la usas para un simple efecto, el
+      cilindro avanza… pero al cerrar, el aire queda **atrapado** y el cilindro **no retrocede**.
+      Las 2/2 se usan para **soplar** (expulsar piezas con un chorro de aire), cortar el aire de una zona o
+      llenar un depósito.
+    examples:
+      - title: "Probador de circuitos con pulsadores"
+        explanation: "Antes de tener la etapa de potencia, verifica la lógica con LEDs: MARCHA = EV_A, PARO = EV_B, y aviso si se piden las dos."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          ev_a, ev_b = Pin(11, Pin.OUT, value=0), Pin(12, Pin.OUT, value=0)
+          pa = Pin(14, Pin.IN, Pin.PULL_UP)
+          pb = Pin(15, Pin.IN, Pin.PULL_UP)
+          led = Pin("LED", Pin.OUT)
+          while True:
+              a, b = pa.value() == 0, pb.value() == 0
+              if a and b:
+                  ev_a.off(); ev_b.off(); led.on()     # prohibido: todo a reposo y aviso
+              else:
+                  ev_a.value(a); ev_b.value(b); led.off()
+              time.sleep_ms(20)
+        esp32_s3: |
+          from machine import Pin
+          import neopixel, time
+
+          ev_a, ev_b = Pin(5, Pin.OUT, value=0), Pin(6, Pin.OUT, value=0)
+          pa = Pin(14, Pin.IN, Pin.PULL_UP)
+          pb = Pin(15, Pin.IN, Pin.PULL_UP)
+          np = neopixel.NeoPixel(Pin(48), 1)
+          while True:
+              a, b = pa.value() == 0, pb.value() == 0
+              if a and b:
+                  ev_a.off(); ev_b.off(); np[0] = (40, 0, 0)
+              else:
+                  ev_a.value(a); ev_b.value(b); np[0] = (0, 0, 0)
+              np.write()
+              time.sleep_ms(20)
+    practice: |
+      ### Prácticas en el taller (con el profesor)
+
+      1. **Circuito 1**: simple efecto con 3/2 NC y mando directo con pulsador a 12 V.
+      2. **Circuito 2**: doble efecto con dos 3/2 NC y dos pulsadores. Prueba las 3 combinaciones permitidas.
+      3. **Circuito 3**: monta un simple efecto con una 2/2 y comprueba que no retrocede. Purga con cuidado.
+      4. Dibuja los tres esquemas con simbología normalizada.
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "Un cilindro de simple efecto mandado por una 2/2 NC avanza al activarla. ¿Qué pasa al desactivarla?"
+          options:
+            - {id: a, text: "Se queda avanzado: el aire queda atrapado porque la 2/2 no tiene escape."}
+            - {id: b, text: "Retrocede por el muelle.", feedback: "El muelle no puede vencer el aire atrapado: la 2/2 no tiene escape."}
+            - {id: c, text: "Retrocede y avanza continuamente.", feedback: "Sin escape, se queda presurizado."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "Doble efecto con dos 3/2 NC: ambas electroválvulas desactivadas. ¿Cómo está el cilindro?"
+          options:
+            - {id: a, text: "Libre: las dos cámaras al escape; se queda donde esté."}
+            - {id: b, text: "Retrocede automáticamente.", feedback: "No tiene muelle; sin presión en ninguna cámara no se mueve solo."}
+            - {id: c, text: "Bloqueado con presión.", feedback: "Eso pasaría con las dos activadas (situación prohibida)."}
+          answer: a
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `cilindro_de(ev_a, ev_b)` (valores 0/1) que devuelva `"avanza"`, `"retrocede"`,
+            `"libre"` o `"prohibido"` según la tabla de la teoría.
+          starter: |
+            def cilindro_de(ev_a, ev_b):
+                pass
+          solution: |
+            def cilindro_de(ev_a, ev_b):
+                if ev_a and ev_b:
+                    return "prohibido"
+                if ev_a:
+                    return "avanza"
+                if ev_b:
+                    return "retrocede"
+                return "libre"
+          tests:
+            - {desc: "1, 0 → avanza", call: "cilindro_de(1, 0)", expected: "avanza"}
+            - {desc: "0, 1 → retrocede", call: "cilindro_de(0, 1)", expected: "retrocede"}
+            - {desc: "0, 0 → libre", call: "cilindro_de(0, 0)", expected: "libre"}
+            - {desc: "1, 1 → prohibido", call: "cilindro_de(1, 1)", expected: "prohibido"}
+          hints:
+            wrong_result: "Comprueba primero el caso prohibido (las dos a 1)."
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `salida_32(activada, p_red)` que devuelva la presión en la vía 2 de una 3/2 NC:
+            `p_red` si está activada y `0` si está en reposo (comunicada con el escape).
+          starter: |
+            def salida_32(activada, p_red):
+                pass
+          solution: |
+            def salida_32(activada, p_red):
+                if activada:
+                    return p_red
+                return 0
+          tests:
+            - {desc: "Activada a 4 bar", call: "salida_32(True, 4)", expected: 4}
+            - {desc: "En reposo", call: "salida_32(False, 4)", expected: 0}
+
+  - id: m4s4
+    title: "Proyecto corto: puerta neumática desde dos puntos"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      La puerta de un autobús (maqueta) se abre con un cilindro de **simple efecto** y debe poder
+      abrirse **desde dos puntos**: el conductor y un pulsador junto a la puerta.
+
+      ```
+      aire ─► EV1 (3/2 NC) ─┐
+                            ├─► [SELECTORA] ─► cilindro simple efecto (abre la puerta)
+      aire ─► EV2 (3/2 NC) ─┘
+      ```
+
+      Cada pulsador activa su electroválvula. La selectora hace la función **O**: basta con una de las dos.
+
+      ## La misma lógica en el programa
+
+      Cuando lo automaticemos con la placa, podremos hacer la función O **en el programa** con una sola
+      electroválvula: `abrir = p1 or p2`. Comparar ambas soluciones (lógica **neumática** frente a lógica
+      **programada**) es el objetivo de este proyecto.
+    examples:
+      - title: "Función O programada"
+        explanation: "La misma puerta con una sola electroválvula (EV1) y la lógica en el programa."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          p1 = Pin(14, Pin.IN, Pin.PULL_UP)      # conductor
+          p2 = Pin(15, Pin.IN, Pin.PULL_UP)      # junto a la puerta
+          ev1 = Pin(10, Pin.OUT, value=0)
+          while True:
+              abrir = p1.value() == 0 or p2.value() == 0
+              ev1.value(1 if abrir else 0)
+              time.sleep_ms(20)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          p1 = Pin(14, Pin.IN, Pin.PULL_UP)
+          p2 = Pin(15, Pin.IN, Pin.PULL_UP)
+          ev1 = Pin(4, Pin.OUT, value=0)
+          while True:
+              abrir = p1.value() == 0 or p2.value() == 0
+              ev1.value(1 if abrir else 0)
+              time.sleep_ms(20)
+    practice: |
+      ### Proyecto por equipos (3 sesiones)
+
+      1. **Diseño**: esquema neumático (dos 3/2 + selectora) y eléctrico (dos pulsadores, 12 V, diodos).
+      2. **Montaje y pruebas** con la maqueta de la puerta. Comprueba qué pasa si sustituyes la selectora por una T.
+      3. **Presentación**: compara la lógica neumática (selectora) con la programada (`or`). Ventajas e inconvenientes de cada una.
+    evaluation:
+      intro: "Proyecto corto de la misión 4. Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `dos_puntos(lecturas1, lecturas2)` que reciba dos listas de lecturas de pulsadores **con
+            pull-up** (0 = pulsado) tomadas a la vez, y devuelva la lista de órdenes para la electroválvula
+            (1 = abrir) aplicando la función O.
+
+            Ejemplo: `dos_puntos([1, 0, 1], [1, 1, 0])` → `[0, 1, 1]`
+          starter: |
+            def dos_puntos(lecturas1, lecturas2):
+                pass
+          solution: |
+            def dos_puntos(lecturas1, lecturas2):
+                salida = []
+                for a, b in zip(lecturas1, lecturas2):
+                    if a == 0 or b == 0:
+                        salida.append(1)
+                    else:
+                        salida.append(0)
+                return salida
+          tests:
+            - {desc: "Ejemplo del enunciado", call: "dos_puntos([1, 0, 1], [1, 1, 0])", expected: [0, 1, 1]}
+            - {desc: "Los dos pulsados", call: "dos_puntos([0, 0], [0, 1])", expected: [1, 1]}
+            - {desc: "Ninguno", call: "dos_puntos([1, 1], [1, 1])", expected: [0, 0]}
+          hints:
+            wrong_result: "Recorre las dos listas a la vez con zip. Con pull-up, pulsado es 0: la salida es 1 si a == 0 or b == 0."
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué ventaja tiene hacer la función O en el programa en lugar de con una selectora?"
+          options:
+            - {id: a, text: "Se ahorra una electroválvula y una selectora, y se puede cambiar la lógica sin tocar los tubos."}
+            - {id: b, text: "Funciona aunque falle la corriente.", feedback: "Al revés: la lógica neumática no depende de la electrónica."}
+            - {id: c, text: "Es más rápida que el aire.", feedback: "La ventaja es la flexibilidad y el ahorro de componentes."}
+          answer: a

@@ -1,0 +1,13 @@
+.env
+node_modules/
+frontend/dist/
+frontend/public/pyodide/
+frontend/public/sandbox/harness.py
+netlify/functions/lib/content.generated.mjs
+.netlify/
+.datos-locales/
+backend/data/
+backend/static/
+__pycache__/
+*.pyc
+.pytest_cache/

@@ -1,0 +1,585 @@
+id: m6
+number: 6
+trimestre: 2
+icon: "↔️"
+title: "Cilindros de doble efecto y enclavamientos"
+subtitle: "Dos electroválvulas 3/2 por cilindro, enclavamiento por software, temporización y velocidad"
+weeks: [16, 17, 18]
+hours: 9
+objectives:
+  - Gobernar un cilindro de doble efecto con dos electroválvulas 3/2 NC.
+  - Programar un enclavamiento que impida activar a la vez las dos cámaras.
+  - Automatizar ciclos temporizados de avance, espera y retroceso.
+  - Medir y ajustar la velocidad de un cilindro.
+materials:
+  - Placa + 2 módulos MOSFET, 2 electroválvulas 3/2 NC de 12 V, cilindro de doble efecto
+  - Válvula antirretorno, banco neumático, cronómetro (o la propia placa)
+criteria:
+  - Programa sistemas automáticos con actuadores neumáticos aplicando condiciones de seguridad.
+  - Comprueba y ajusta el funcionamiento de un automatismo midiendo sus magnitudes.
+schedule:
+  - {week: 16, session: 1, title: "Doble efecto con dos 3/2: montaje", section: m6s1}
+  - {week: 16, session: 2, title: "Enclavamiento: nunca las dos a la vez", section: m6s1}
+  - {week: 16, session: 3, title: "La clase CilindroDE", section: m6s1}
+  - {week: 17, session: 1, title: "Ciclo temporizado avance-espera-retroceso", section: m6s2}
+  - {week: 17, session: 2, title: "Ciclos repetidos y contador", section: m6s2}
+  - {week: 17, session: 3, title: "Velocidad del cilindro y regulación", section: m6s3}
+  - {week: 18, session: 1, title: "Proyecto corto: barrera neumática (diseño)", section: m6s4}
+  - {week: 18, session: 2, title: "Proyecto corto: programación y montaje", section: m6s4}
+  - {week: 18, session: 3, title: "Proyecto corto: pruebas y presentación", section: m6s4}
+sections:
+  - id: m6s1
+    title: "Doble efecto con dos 3/2: el enclavamiento"
+    hours: 3
+    kind: lesson
+    theory: |
+      ## Montaje
+
+      ```
+      aire ─► EV_A (3/2 NC) ─► cámara trasera  (avance)
+      aire ─► EV_B (3/2 NC) ─► cámara delantera (retroceso)
+      ```
+
+      Recuerda la tabla de la misión 4: (1,0) avanza · (0,1) retrocede · (0,0) libre · **(1,1) prohibido**.
+
+      ## Enclavamiento por software
+
+      Para cambiar de sentido, el **orden** de las órdenes importa:
+
+      ```python
+      # MAL: durante un instante las dos están activadas
+      ev_a.value(1)
+      ev_b.value(0)
+
+      # BIEN: primero se desactiva la contraria, luego se activa la que toca
+      ev_b.value(0)
+      ev_a.value(1)
+      ```
+
+      Aunque el instante sea de microsegundos, un programa de seguridad **nunca** debe pasar por un
+      estado prohibido. Además, en máquinas reales se añade un pequeño **tiempo muerto** (unos ms) entre
+      desactivar una y activar la otra para que la cámara empiece a descargar.
+
+      ## La clase CilindroDE
+
+      ```python
+      class CilindroDE:
+          def __init__(self, pin_a, pin_b):
+              self.a, self.b = pin_a, pin_b
+              self.liberar()
+
+          def avanzar(self):
+              self.b.value(0)          # primero la contraria
+              self.a.value(1)
+
+          def retroceder(self):
+              self.a.value(0)
+              self.b.value(1)
+
+          def liberar(self):
+              self.a.value(0)
+              self.b.value(0)
+      ```
+    examples:
+      - title: "Mando manual del doble efecto con enclavamiento"
+        explanation: "MARCHA = avanzar, PARO = retroceder. Pines: EV_A = EV2, EV_B = EV3."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          class CilindroDE:
+              def __init__(self, pin_a, pin_b):
+                  self.a, self.b = pin_a, pin_b
+                  self.liberar()
+              def avanzar(self):
+                  self.b.value(0); self.a.value(1)
+              def retroceder(self):
+                  self.a.value(0); self.b.value(1)
+              def liberar(self):
+                  self.a.value(0); self.b.value(0)
+
+          cil = CilindroDE(Pin(11, Pin.OUT), Pin(12, Pin.OUT))
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          paro = Pin(15, Pin.IN, Pin.PULL_UP)
+          try:
+              while True:
+                  if paro.value() == 0:          # retroceder tiene prioridad
+                      cil.retroceder()
+                  elif marcha.value() == 0:
+                      cil.avanzar()
+                  time.sleep_ms(20)
+          finally:
+              cil.liberar()
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          class CilindroDE:
+              def __init__(self, pin_a, pin_b):
+                  self.a, self.b = pin_a, pin_b
+                  self.liberar()
+              def avanzar(self):
+                  self.b.value(0); self.a.value(1)
+              def retroceder(self):
+                  self.a.value(0); self.b.value(1)
+              def liberar(self):
+                  self.a.value(0); self.b.value(0)
+
+          cil = CilindroDE(Pin(5, Pin.OUT), Pin(6, Pin.OUT))
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          paro = Pin(15, Pin.IN, Pin.PULL_UP)
+          try:
+              while True:
+                  if paro.value() == 0:
+                      cil.retroceder()
+                  elif marcha.value() == 0:
+                      cil.avanzar()
+                  time.sleep_ms(20)
+          finally:
+              cil.liberar()
+    practice: |
+      ### Práctica en el taller
+
+      1. Monta el doble efecto con EV2 (avance) y EV3 (retroceso) y sus módulos MOSFET.
+      2. Ejecuta el ejemplo a 3 bar. Comprueba que el cilindro se queda donde está si no se pulsa nada... ¿o no? (Pista: la última orden se mantiene.)
+      3. Añade la clase `CilindroDE` a tu `taller.py`.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "Para pasar de avanzar a retroceder, ¿en qué orden se dan las órdenes?"
+          options:
+            - {id: a, text: "Primero desactivar EV_A y después activar EV_B."}
+            - {id: b, text: "Primero activar EV_B y después desactivar EV_A.", feedback: "Así habría un instante con las dos activadas: estado prohibido."}
+            - {id: c, text: "Da igual el orden.", feedback: "El orden evita pasar por el estado prohibido."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Qué es un enclavamiento?"
+          options:
+            - {id: a, text: "Una condición que impide que se den a la vez dos órdenes incompatibles."}
+            - {id: b, text: "Una pieza que fija el cilindro a la mesa.", feedback: "En automatización es una condición de seguridad entre órdenes."}
+            - {id: c, text: "El final de carrera del cilindro.", feedback: "No; es una condición lógica de seguridad."}
+          answer: a
+        - id: c1
+          type: code
+          points: 6
+          prompt: |
+            Programa la clase `CilindroDE(pin_a, pin_b)` con `avanzar()`, `retroceder()` y `liberar()`.
+            El constructor debe dejar el cilindro libre (las dos salidas a 0). **En ningún momento** pueden
+            estar las dos salidas a 1 a la vez (el corrector revisa cada orden que das a los pines).
+            Añade el atributo `estado` con `"libre"`, `"avance"` o `"retroceso"`.
+          starter: |
+            class CilindroDE:
+                def __init__(self, pin_a, pin_b):
+                    self.a = pin_a
+                    self.b = pin_b
+                    self.estado = "libre"
+
+                def avanzar(self):
+                    pass
+
+                def retroceder(self):
+                    pass
+
+                def liberar(self):
+                    pass
+          solution: |
+            class CilindroDE:
+                def __init__(self, pin_a, pin_b):
+                    self.a = pin_a
+                    self.b = pin_b
+                    self.liberar()
+
+                def avanzar(self):
+                    self.b.value(0)
+                    self.a.value(1)
+                    self.estado = "avance"
+
+                def retroceder(self):
+                    self.a.value(0)
+                    self.b.value(1)
+                    self.estado = "retroceso"
+
+                def liberar(self):
+                    self.a.value(0)
+                    self.b.value(0)
+                    self.estado = "libre"
+          tests:
+            - desc: "Al crearlo queda libre"
+              before:
+                - "def _nunca_ambas(log, a, b):\n    st = {a: 0, b: 0}\n    for e in log:\n        if e[0] == 'pin' and e[1] in st and e[2] in ('value', 'toggle'):\n            st[e[1]] = e[3]\n            if st[a] == 1 and st[b] == 1:\n                return False\n    return True"
+                - "from machine import Pin as _P"
+                - "_log.clear()"
+                - "_c = CilindroDE(_P(11, _P.OUT), _P(12, _P.OUT))"
+              check: "_c.a.value() == 0 and _c.b.value() == 0 and _c.estado == 'libre'"
+            - desc: "avanzar → (1, 0)"
+              before: ["_c.avanzar()"]
+              check: "(_c.a.value(), _c.b.value(), _c.estado) == (1, 0, 'avance')"
+            - desc: "retroceder → (0, 1)"
+              before: ["_c.retroceder()"]
+              check: "(_c.a.value(), _c.b.value(), _c.estado) == (0, 1, 'retroceso')"
+            - desc: "Avanzar y retroceder varias veces sin pasar NUNCA por (1, 1)"
+              before: ["_c.avanzar()", "_c.retroceder()", "_c.avanzar()", "_c.liberar()"]
+              check: "_nunca_ambas(_log, 11, 12) and (_c.a.value(), _c.b.value()) == (0, 0)"
+          hints:
+            wrong_result: "En avanzar(), PRIMERO self.b.value(0) y DESPUÉS self.a.value(1). En retroceder(), al revés."
+
+  - id: m6s2
+    title: "Ciclos temporizados"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## El ciclo básico de una máquina
+
+      ```
+      reposo ─► AVANCE (t_avance) ─► ESPERA (t_espera) ─► RETROCESO (t_avance) ─► reposo
+      ```
+
+      Con la clase CilindroDE el programa es casi el enunciado:
+
+      ```python
+      def ciclo(cil, t_avance, t_espera):
+          cil.avanzar()
+          time.sleep(t_avance + t_espera)   # llega y espera fuera (sigue empujando)
+          cil.retroceder()
+          time.sleep(t_avance)              # vuelve; se queda retenido dentro
+      ```
+
+      Observa que durante la espera **mantenemos** la presión de avance: el cilindro sigue empujando
+      (por ejemplo, para sujetar una pieza). Al terminar lo dejamos **retenido dentro** (EV_B activada)
+      para que no se mueva por vibraciones.
+
+      ## Ciclos repetidos y contador
+
+      Repetimos el ciclo `n` veces, contando y mostrando el número de ciclos, siempre con `try/finally`
+      para dejar el cilindro en un estado conocido.
+    examples:
+      - title: "Ciclos de estampado temporizados"
+        explanation: "5 ciclos: avance 0,8 s, espera 0,5 s, retroceso 0,8 s, pausa 1 s. Requiere taller.py con CilindroDE (pines 11 y 12 / 5 y 6)."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(11, Pin.OUT), Pin(12, Pin.OUT))
+
+          def ciclo(c, t_avance, t_espera):
+              c.avanzar()
+              time.sleep(t_avance + t_espera)
+              c.retroceder()
+              time.sleep(t_avance)
+
+          try:
+              for n in range(1, 6):
+                  ciclo(cil, 0.8, 0.5)
+                  print("Ciclo", n)
+                  time.sleep(1)
+          finally:
+              cil.retroceder()
+        esp32_s3: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(5, Pin.OUT), Pin(6, Pin.OUT))
+
+          def ciclo(c, t_avance, t_espera):
+              c.avanzar()
+              time.sleep(t_avance + t_espera)
+              c.retroceder()
+              time.sleep(t_avance)
+
+          try:
+              for n in range(1, 6):
+                  ciclo(cil, 0.8, 0.5)
+                  print("Ciclo", n)
+                  time.sleep(1)
+          finally:
+              cil.retroceder()
+    practice: |
+      ### Práctica en el taller
+
+      1. Ejecuta los ciclos a 3 bar y ajusta `t_avance` al mínimo que permita completar la carrera.
+      2. Haz que MARCHA lance un ciclo y que PARO interrumpa la serie al terminar el ciclo en curso.
+      3. ¿Qué pasa si `t_avance` es demasiado corto? Explica por qué la temporización "a ciegas" es frágil (lo arreglaremos con finales de carrera).
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué temporizar «a ciegas» (solo con tiempos) es frágil?"
+          options:
+            - {id: a, text: "Porque si baja la presión o hay más carga, el cilindro tarda más y el programa no se entera."}
+            - {id: b, text: "Porque time.sleep no es exacto.", feedback: "Es bastante exacto; el problema es que el cilindro no siempre tarda lo mismo."}
+            - {id: c, text: "No es frágil, es lo más seguro.", feedback: "Sin sensores, el programa no sabe dónde está el cilindro."}
+          answer: a
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `ciclo(cil, t_avance, t_espera)` como en la teoría: avanzar, esperar `t_avance + t_espera`,
+            retroceder y esperar `t_avance`. `cil` tiene los métodos `avanzar()` y `retroceder()`.
+          starter: |
+            import time
+
+            def ciclo(cil, t_avance, t_espera):
+                pass
+          solution: |
+            import time
+
+            def ciclo(cil, t_avance, t_espera):
+                cil.avanzar()
+                time.sleep(t_avance + t_espera)
+                cil.retroceder()
+                time.sleep(t_avance)
+          tests:
+            - desc: "Orden de las órdenes y tiempos"
+              before:
+                - "class _Cil:\n    def __init__(self):\n        self.h = []\n    def avanzar(self):\n        self.h.append(('avanzar', _clock.us // 1000))\n    def retroceder(self):\n        self.h.append(('retroceder', _clock.us // 1000))"
+                - "_c = _Cil()"
+                - "_t0 = _clock.us // 1000"
+                - "ciclo(_c, 0.8, 0.5)"
+              check: "[x[0] for x in _c.h] == ['avanzar', 'retroceder'] and _c.h[1][1] - _c.h[0][1] == 1300"
+            - {desc: "Duración total del ciclo: 2,1 s", check: "_clock.us // 1000 - _t0 == 2100"}
+          hints:
+            wrong_result: "Cuatro órdenes: cil.avanzar(), time.sleep(t_avance + t_espera), cil.retroceder(), time.sleep(t_avance)."
+
+  - id: m6s3
+    title: "Velocidad del cilindro y regulación"
+    hours: 1
+    kind: lesson
+    theory: |
+      ## ¿A qué velocidad va el cilindro?
+
+      `velocidad media = carrera / tiempo`. Un cilindro de 100 mm de carrera que tarda 0,5 s va a 200 mm/s.
+
+      La velocidad depende del **caudal** de aire que entra y, sobre todo, del que **sale** por el escape,
+      de la **presión** y de la **carga**.
+
+      ## Regular la velocidad
+
+      La forma habitual es el **regulador de caudal unidireccional**: una **antirretorno** en paralelo con
+      un **estrangulador** regulable. El aire pasa libre en un sentido (por la antirretorno) y frenado en
+      el otro (por el estrangulador).
+
+      - En los cilindros de **doble efecto** se regula **el aire que sale** (escape): el movimiento es más
+        suave y estable porque el émbolo queda "sujeto" entre dos colchones de aire.
+      - En los de **simple efecto** se regula el aire que entra (avance) y/o el que sale (retroceso).
+
+      Otras opciones: **silenciadores regulables** en los escapes de las electroválvulas o bajar la
+      presión del regulador (menos fuerza y menos velocidad).
+    examples:
+      - title: "Cronómetro de carrera con la placa"
+        explanation: "Mide el tiempo entre MARCHA (inicio del avance) y PARO (lo pulsas cuando ves llegar el cilindro). En la misión 7 lo medirá un final de carrera."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          paro = Pin(15, Pin.IN, Pin.PULL_UP)
+          CARRERA = 100        # mm
+          while marcha.value() == 1:
+              pass
+          t0 = time.ticks_ms()
+          while paro.value() == 1:
+              pass
+          t = time.ticks_diff(time.ticks_ms(), t0) / 1000
+          print("Tiempo:", t, "s · velocidad media:", round(CARRERA / t), "mm/s")
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          paro = Pin(15, Pin.IN, Pin.PULL_UP)
+          CARRERA = 100        # mm
+          while marcha.value() == 1:
+              pass
+          t0 = time.ticks_ms()
+          while paro.value() == 1:
+              pass
+          t = time.ticks_diff(time.ticks_ms(), t0) / 1000
+          print("Tiempo:", t, "s · velocidad media:", round(CARRERA / t), "mm/s")
+    practice: |
+      ### Práctica en el taller
+
+      1. Mide la velocidad media de avance y retroceso a 2, 3 y 4 bar. Haz una tabla.
+      2. Si disponéis de reguladores de caudal o silenciadores regulables, compara la velocidad con distintos ajustes.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿De qué dos elementos está formado un regulador de caudal unidireccional?"
+          options:
+            - {id: a, text: "Una válvula antirretorno y un estrangulador regulable en paralelo."}
+            - {id: b, text: "Una selectora y un manómetro.", feedback: "La selectora hace la función O; no regula caudal."}
+            - {id: c, text: "Dos electroválvulas 3/2.", feedback: "Las electroválvulas dirigen el aire; no regulan su caudal."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "En un cilindro de doble efecto, ¿qué aire se suele regular para controlar la velocidad?"
+          options:
+            - {id: a, text: "El que sale por el escape."}
+            - {id: b, text: "El que entra.", feedback: "Se suele regular el escape: el movimiento es más estable."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `velocidad(carrera_mm, tiempo_s)` (mm/s redondeada a entero) y
+            `tiempo_necesario(carrera_mm, v_mm_s)` (segundos redondeados a 2 decimales).
+          starter: |
+            def velocidad(carrera_mm, tiempo_s):
+                pass
+
+            def tiempo_necesario(carrera_mm, v_mm_s):
+                pass
+          solution: |
+            def velocidad(carrera_mm, tiempo_s):
+                return round(carrera_mm / tiempo_s)
+
+            def tiempo_necesario(carrera_mm, v_mm_s):
+                return round(carrera_mm / v_mm_s, 2)
+          tests:
+            - {desc: "100 mm en 0,5 s", call: "velocidad(100, 0.5)", expected: 200}
+            - {desc: "50 mm en 0,3 s", call: "velocidad(50, 0.3)", expected: 167}
+            - {desc: "Tiempo para 80 mm a 160 mm/s", call: "tiempo_necesario(80, 160)", expected: 0.5}
+
+  - id: m6s4
+    title: "Proyecto corto: barrera neumática"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      Una barrera de parking (maqueta) movida por un cilindro de **doble efecto**:
+
+      | Estado | Salidas (EV_A, EV_B) | Pasa a… |
+      |---|---|---|
+      | `BAJADA` | (0, 1) retenida abajo | `SUBIENDO` si se pulsa |
+      | `SUBIENDO` | (1, 0) | `SUBIDA` cuando lleva ≥ 2000 ms |
+      | `SUBIDA` | (1, 0) retenida arriba | `BAJANDO` cuando lleva ≥ 5000 ms |
+      | `BAJANDO` | (0, 1) | `SUBIENDO` si se pulsa (**¡seguridad!**) · `BAJADA` cuando lleva ≥ 2000 ms |
+
+      La regla de seguridad: si alguien pulsa mientras la barrera baja (por ejemplo, porque hay un coche
+      debajo), la barrera **vuelve a subir**.
+
+      Como en el semáforo, separamos la **lógica** (función `paso`) del **hardware** (pines) para probarla.
+    examples:
+      - title: "Barrera con máquina de estados"
+        explanation: "Completa paso() y salidas() con tus funciones del ejercicio."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(11, Pin.OUT), Pin(12, Pin.OUT))
+          boton = Pin(14, Pin.IN, Pin.PULL_UP)
+
+          def paso(estado, t, pulsado):
+              return estado          # ← tu función
+          def salidas(estado):
+              return (0, 1)          # ← tu función
+
+          estado, desde = "BAJADA", time.ticks_ms()
+          try:
+              while True:
+                  ahora = time.ticks_ms()
+                  nuevo = paso(estado, time.ticks_diff(ahora, desde), boton.value() == 0)
+                  if nuevo != estado:
+                      estado, desde = nuevo, ahora
+                      print(estado)
+                  a, b = salidas(estado)
+                  cil.avanzar() if a else cil.retroceder()
+                  time.sleep_ms(20)
+          finally:
+              cil.retroceder()
+        esp32_s3: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(5, Pin.OUT), Pin(6, Pin.OUT))
+          boton = Pin(14, Pin.IN, Pin.PULL_UP)
+
+          def paso(estado, t, pulsado):
+              return estado          # ← tu función
+          def salidas(estado):
+              return (0, 1)          # ← tu función
+
+          estado, desde = "BAJADA", time.ticks_ms()
+          try:
+              while True:
+                  ahora = time.ticks_ms()
+                  nuevo = paso(estado, time.ticks_diff(ahora, desde), boton.value() == 0)
+                  if nuevo != estado:
+                      estado, desde = nuevo, ahora
+                      print(estado)
+                  a, b = salidas(estado)
+                  cil.avanzar() if a else cil.retroceder()
+                  time.sleep_ms(20)
+          finally:
+              cil.retroceder()
+    practice: |
+      ### Proyecto por equipos (3 sesiones)
+
+      1. **Diseño**: diagrama de estados y maqueta de la barrera (palanca de cartón pluma movida por el vástago).
+      2. **Programación y montaje** con el doble efecto y dos 3/2.
+      3. **Pruebas**: comprueba especialmente la regla de seguridad durante la bajada. Presentación.
+    evaluation:
+      intro: "Proyecto corto de la misión 6. Necesitas un 80 %."
+      items:
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `paso(estado, t, pulsado)` y `salidas(estado)` según la tabla de la teoría.
+            `salidas` devuelve una tupla `(ev_a, ev_b)`.
+          starter: |
+            def paso(estado, t, pulsado):
+                pass
+
+            def salidas(estado):
+                pass
+          solution: |
+            def paso(estado, t, pulsado):
+                if estado == "BAJADA":
+                    return "SUBIENDO" if pulsado else "BAJADA"
+                if estado == "SUBIENDO":
+                    return "SUBIDA" if t >= 2000 else "SUBIENDO"
+                if estado == "SUBIDA":
+                    return "BAJANDO" if t >= 5000 else "SUBIDA"
+                if estado == "BAJANDO":
+                    if pulsado:
+                        return "SUBIENDO"
+                    return "BAJADA" if t >= 2000 else "BAJANDO"
+                return estado
+
+            def salidas(estado):
+                if estado in ("SUBIENDO", "SUBIDA"):
+                    return (1, 0)
+                return (0, 1)
+          tests:
+            - {desc: "Bajada + pulsar → subiendo", call: "(paso('BAJADA', 100, True), paso('BAJADA', 9999, False))", expected: ["SUBIENDO", "BAJADA"]}
+            - {desc: "Subiendo 2 s → subida", call: "(paso('SUBIENDO', 1999, False), paso('SUBIENDO', 2000, False))", expected: ["SUBIENDO", "SUBIDA"]}
+            - {desc: "Subida 5 s → bajando", call: "(paso('SUBIDA', 4000, False), paso('SUBIDA', 5000, False))", expected: ["SUBIDA", "BAJANDO"]}
+            - {desc: "Seguridad: pulsar mientras baja → sube", call: "paso('BAJANDO', 1000, True)", expected: "SUBIENDO"}
+            - {desc: "Bajando 2 s → bajada", call: "paso('BAJANDO', 2000, False)", expected: "BAJADA"}
+            - {desc: "Salidas de cada estado", call: "[salidas(e) for e in ('BAJADA', 'SUBIENDO', 'SUBIDA', 'BAJANDO')]", expected: [[0, 1], [1, 0], [1, 0], [0, 1]]}
+          hints:
+            wrong_result: "En BAJANDO comprueba PRIMERO si se ha pulsado (seguridad) y después el tiempo."
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué en BAJANDO se comprueba el pulsador antes que el tiempo?"
+          options:
+            - {id: a, text: "Porque la seguridad (subir si hay alguien debajo) tiene prioridad sobre terminar la bajada."}
+            - {id: b, text: "Por casualidad, el orden da igual.", feedback: "Si se comprobara antes el tiempo, en el último instante la barrera bajaría aunque se pulsara."}
+          answer: a

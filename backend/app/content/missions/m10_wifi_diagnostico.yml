@@ -1,0 +1,536 @@
+id: m10
+number: 10
+trimestre: 3
+icon: "📡"
+title: "Control WiFi, registro y mantenimiento"
+subtitle: "Servidor web en la placa, panel de control seguro, registro de ciclos y diagnóstico"
+weeks: [28, 29, 30]
+hours: 9
+objectives:
+  - Conectar la placa a la WiFi y servir una página web y datos JSON.
+  - Diseñar un panel de control remoto que respete siempre la seguridad local.
+  - Registrar los ciclos de la máquina en un archivo y planificar el mantenimiento.
+  - Detectar ciclos anómalos (lentos) como indicio de fugas o falta de presión.
+materials:
+  - Placa con WiFi, red de 2,4 GHz del aula (o punto de acceso)
+  - Máquina de los proyectos anteriores (estampadora o prensa)
+  - Móvil u ordenador para el panel
+criteria:
+  - Integra comunicaciones en sistemas automáticos para su supervisión y control remoto de forma segura.
+  - Analiza datos de funcionamiento para el mantenimiento de máquinas.
+schedule:
+  - {week: 28, session: 1, title: "La placa en la red: WiFi e IP", section: m10s1}
+  - {week: 28, session: 2, title: "HTTP: peticiones, rutas y respuestas", section: m10s1}
+  - {week: 28, session: 3, title: "Panel de control: rutas /estado, /ciclo y /paro", section: m10s2}
+  - {week: 29, session: 1, title: "La seguridad manda: lo remoto nunca anula lo local", section: m10s2}
+  - {week: 29, session: 2, title: "Registro de ciclos en un archivo CSV", section: m10s3}
+  - {week: 29, session: 3, title: "Mantenimiento: contadores y ciclos lentos", section: m10s3}
+  - {week: 30, session: 1, title: "Proyecto corto: panel de la estampadora (servidor)", section: m10s4}
+  - {week: 30, session: 2, title: "Proyecto corto: página de estadísticas", section: m10s4}
+  - {week: 30, session: 3, title: "Proyecto corto: pruebas y presentación", section: m10s4}
+sections:
+  - id: m10s1
+    title: "WiFi y servidor web en la placa"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Conectar a la WiFi
+
+      ```python
+      import network, time
+      wlan = network.WLAN(network.STA_IF)
+      wlan.active(True)
+      wlan.connect("RED", "CLAVE")          # mejor en un archivo secretos.py
+      while not wlan.isconnected():
+          time.sleep(0.5)
+      print(wlan.ifconfig()[0])             # IP de la placa
+      ```
+
+      Pico W: antes, `import rp2; rp2.country("ES")`. Solo redes de **2,4 GHz**.
+
+      ## HTTP en dos líneas
+
+      El navegador pide `GET /estado HTTP/1.1` y la placa responde:
+
+      ```
+      HTTP/1.1 200 OK\r\n
+      Content-Type: application/json\r\n
+      \r\n
+      {"fase": "REPOSO", "ciclos": 25}
+      ```
+
+      - La **ruta** (`/estado`) es el segundo elemento de la primera línea: `peticion.split()[1]`.
+      - Las cabeceras terminan con una **línea en blanco** (`\r\n\r\n`).
+      - **JSON** es el formato para que otro programa (o el JavaScript de la página) lea los datos.
+    examples:
+      - title: "Servidor web mínimo con el estado de la máquina"
+        explanation: "Crea secretos.py con SSID y CLAVE. Abre http://IP/estado desde el móvil (misma red)."
+        pico_w: |
+          import network, rp2, socket, time, json
+          from secretos import SSID, CLAVE
+
+          rp2.country("ES")
+          wlan = network.WLAN(network.STA_IF); wlan.active(True); wlan.connect(SSID, CLAVE)
+          while not wlan.isconnected():
+              time.sleep(0.5)
+          print("http://" + wlan.ifconfig()[0])
+
+          estado = {"fase": "REPOSO", "ciclos": 0}
+          s = socket.socket()
+          s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+          s.bind(("0.0.0.0", 80)); s.listen(2)
+          while True:
+              cli, _ = s.accept()
+              pet = cli.recv(1024).decode()
+              ruta = pet.split()[1] if len(pet.split()) > 1 else "/"
+              cuerpo = json.dumps(estado) if ruta == "/estado" else "NeumaLab"
+              tipo = "application/json" if ruta == "/estado" else "text/plain"
+              cli.send("HTTP/1.1 200 OK\r\nContent-Type: " + tipo + "\r\n\r\n" + cuerpo)
+              cli.close()
+        esp32_s3: |
+          import network, socket, time, json
+          from secretos import SSID, CLAVE
+
+          wlan = network.WLAN(network.STA_IF); wlan.active(True); wlan.connect(SSID, CLAVE)
+          while not wlan.isconnected():
+              time.sleep(0.5)
+          print("http://" + wlan.ifconfig()[0])
+
+          estado = {"fase": "REPOSO", "ciclos": 0}
+          s = socket.socket()
+          s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+          s.bind(("0.0.0.0", 80)); s.listen(2)
+          while True:
+              cli, _ = s.accept()
+              pet = cli.recv(1024).decode()
+              ruta = pet.split()[1] if len(pet.split()) > 1 else "/"
+              cuerpo = json.dumps(estado) if ruta == "/estado" else "NeumaLab"
+              tipo = "application/json" if ruta == "/estado" else "text/plain"
+              cli.send("HTTP/1.1 200 OK\r\nContent-Type: " + tipo + "\r\n\r\n" + cuerpo)
+              cli.close()
+    practice: |
+      ### Práctica en clase
+
+      1. Conecta la placa a la red del aula y anota su IP.
+      2. Abre `/estado` desde el ordenador y desde el móvil.
+      3. Añade una ruta `/hola` que devuelva tu nombre.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué separa las cabeceras del cuerpo en una respuesta HTTP?"
+          options:
+            - {id: a, text: "Una línea en blanco (\\r\\n\\r\\n)."}
+            - {id: b, text: "Un punto y coma.", feedback: "Es una línea vacía."}
+            - {id: c, text: "Nada, van juntos.", feedback: "Hace falta una línea en blanco."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `respuesta_http(cuerpo, tipo)` que devuelva exactamente
+            `"HTTP/1.1 200 OK\r\nContent-Type: " + tipo + "\r\n\r\n" + cuerpo`.
+          starter: |
+            def respuesta_http(cuerpo, tipo):
+                pass
+          solution: |
+            def respuesta_http(cuerpo, tipo):
+                return "HTTP/1.1 200 OK\r\nContent-Type: " + tipo + "\r\n\r\n" + cuerpo
+          tests:
+            - {desc: "Respuesta JSON", call: "respuesta_http('{}', 'application/json')", expected: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{}"}
+            - {desc: "Línea de estado correcta", check: "respuesta_http('x', 'text/plain').split('\\r\\n')[0] == 'HTTP/1.1 200 OK'"}
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `extraer_ruta(peticion)` que devuelva la ruta de la petición (`"/"` si está vacía o mal formada).
+          starter: |
+            def extraer_ruta(peticion):
+                pass
+          solution: |
+            def extraer_ruta(peticion):
+                partes = peticion.split()
+                if len(partes) < 2:
+                    return "/"
+                return partes[1]
+          tests:
+            - {desc: "GET /estado", call: "extraer_ruta('GET /estado HTTP/1.1\\r\\nHost: x\\r\\n\\r\\n')", expected: "/estado"}
+            - {desc: "Vacía → /", call: "extraer_ruta('')", expected: "/"}
+
+  - id: m10s2
+    title: "Panel de control seguro"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Rutas del panel
+
+      | Ruta | Acción |
+      |---|---|
+      | `/estado` | Devuelve el estado en JSON (no mueve nada) |
+      | `/ciclo` | Pide un ciclo |
+      | `/paro` | Para al final del ciclo |
+
+      ## La seguridad manda
+
+      Un mando a distancia **nunca** puede saltarse la seguridad local:
+
+      - Con la **emergencia** activada, `/ciclo` se **deniega** siempre.
+      - Solo se acepta `/ciclo` si la máquina está en **REPOSO** (no se encadenan órdenes a mitad de ciclo).
+      - `/paro` se acepta **siempre** (parar nunca es peligroso).
+      - Quien manda a distancia **no ve** si hay alguien junto a la máquina: en una máquina real, el mando
+        remoto solo se permite con resguardos cerrados o en zonas sin personas.
+
+      ## Seguridad informática básica
+
+      Cualquiera conectado a la misma red puede abrir esas rutas. En el aula basta con una red controlada;
+      en una fábrica se usan contraseñas, cifrado (HTTPS) y redes separadas.
+    examples:
+      - title: "Panel con botones (página HTML + rutas)"
+        explanation: "La página tiene botones que llaman a /ciclo y /paro y refresca /estado cada segundo. Pega tu función atender()."
+        pico_w: |
+          import socket, json
+          # ... conexión WiFi como en la sección anterior ...
+          HTML = """<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'></head>
+          <body style='font-family:sans-serif'><h1>Panel NeumaLab</h1><pre id='e'></pre>
+          <button onclick="fetch('/ciclo')">CICLO</button> <button onclick="fetch('/paro')">PARO</button>
+          <script>setInterval(async()=>{e.textContent=await (await fetch('/estado')).text()},1000)</script>
+          </body></html>"""
+          estado = {"fase": "REPOSO", "emergencia": False, "ciclos": 0}
+
+          def atender(ruta, estado):
+              return "NO_EXISTE"     # ← tu función
+
+          s = socket.socket(); s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+          s.bind(("0.0.0.0", 80)); s.listen(2)
+          while True:
+              cli, _ = s.accept()
+              pet = cli.recv(1024).decode()
+              ruta = pet.split()[1] if len(pet.split()) > 1 else "/"
+              if ruta == "/":
+                  cli.send("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + HTML)
+              else:
+                  accion = atender(ruta, estado)
+                  cli.send("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n" + json.dumps({"accion": accion, **estado}))
+              cli.close()
+        esp32_s3: |
+          import socket, json
+          # ... conexión WiFi como en la sección anterior ...
+          HTML = """<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'></head>
+          <body style='font-family:sans-serif'><h1>Panel NeumaLab</h1><pre id='e'></pre>
+          <button onclick="fetch('/ciclo')">CICLO</button> <button onclick="fetch('/paro')">PARO</button>
+          <script>setInterval(async()=>{e.textContent=await (await fetch('/estado')).text()},1000)</script>
+          </body></html>"""
+          estado = {"fase": "REPOSO", "emergencia": False, "ciclos": 0}
+
+          def atender(ruta, estado):
+              return "NO_EXISTE"     # ← tu función
+
+          s = socket.socket(); s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+          s.bind(("0.0.0.0", 80)); s.listen(2)
+          while True:
+              cli, _ = s.accept()
+              pet = cli.recv(1024).decode()
+              ruta = pet.split()[1] if len(pet.split()) > 1 else "/"
+              if ruta == "/":
+                  cli.send("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + HTML)
+              else:
+                  accion = atender(ruta, estado)
+                  cli.send("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n" + json.dumps({"accion": accion, **estado}))
+              cli.close()
+    practice: |
+      ### Práctica en clase
+
+      1. Ejecuta el panel y ábrelo en el móvil.
+      2. Completa `atender()` y comprueba que `/ciclo` se deniega con la emergencia activada.
+      3. Debate: ¿qué máquinas del instituto o de casa se controlan a distancia? ¿Qué riesgos tiene?
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "La emergencia está activada y alguien pulsa CICLO en el panel web. ¿Qué debe pasar?"
+          options:
+            - {id: a, text: "Se deniega: lo remoto nunca anula la seguridad local."}
+            - {id: b, text: "Se ejecuta, porque es una orden válida.", feedback: "La emergencia está por encima de cualquier orden."}
+            - {id: c, text: "Se rearma la máquina automáticamente.", feedback: "El rearme debe ser manual y local."}
+          answer: a
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `atender(ruta, estado)` que devuelva la acción a realizar:
+            - `"/paro"` → `"PARO"` (siempre).
+            - `"/estado"` → `"ESTADO"`.
+            - `"/ciclo"` → `"CICLO"` si `estado["emergencia"]` es `False` **y** `estado["fase"] == "REPOSO"`; si no, `"DENEGADO"`.
+            - Cualquier otra ruta → `"NO_EXISTE"`.
+          starter: |
+            def atender(ruta, estado):
+                pass
+          solution: |
+            def atender(ruta, estado):
+                if ruta == "/paro":
+                    return "PARO"
+                if ruta == "/estado":
+                    return "ESTADO"
+                if ruta == "/ciclo":
+                    if not estado["emergencia"] and estado["fase"] == "REPOSO":
+                        return "CICLO"
+                    return "DENEGADO"
+                return "NO_EXISTE"
+          tests:
+            - {desc: "Ciclo en reposo y sin emergencia", call: "atender('/ciclo', {'fase': 'REPOSO', 'emergencia': False})", expected: "CICLO"}
+            - {desc: "Ciclo con emergencia → denegado", call: "atender('/ciclo', {'fase': 'REPOSO', 'emergencia': True})", expected: "DENEGADO"}
+            - {desc: "Ciclo a mitad de ciclo → denegado", call: "atender('/ciclo', {'fase': 'BAJANDO', 'emergencia': False})", expected: "DENEGADO"}
+            - {desc: "Paro siempre", call: "atender('/paro', {'fase': 'BAJANDO', 'emergencia': True})", expected: "PARO"}
+            - {desc: "Estado y ruta desconocida", call: "(atender('/estado', {'fase': 'REPOSO', 'emergencia': False}), atender('/abrir', {'fase': 'REPOSO', 'emergencia': False}))", expected: ["ESTADO", "NO_EXISTE"]}
+
+  - id: m10s3
+    title: "Registro de ciclos y mantenimiento"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Guardar lo que pasa
+
+      La memoria flash de la placa permite guardar un archivo **CSV** con una línea por ciclo:
+
+      ```python
+      with open("ciclos.csv", "a") as f:          # "a" = añadir al final
+          f.write("{},{},{}\n".format(n, t_ms, resultado))
+      ```
+
+      ```
+      1,2050,OK
+      2,2010,OK
+      3,2890,OK
+      ```
+
+      ⚠️ La flash aguanta un número limitado de escrituras: no guardes cada pocos milisegundos; una línea
+      por ciclo es razonable.
+
+      ## Mantenimiento preventivo y predictivo
+
+      - **Preventivo**: revisar la máquina cada cierto número de ciclos (por ejemplo, cada 5000:
+        purgar, revisar fugas, comprobar tornillos y finales de carrera).
+      - **Predictivo**: vigilar los datos. Un ciclo mucho más lento que la media indica fuga, presión
+        baja o rozamiento. Marcamos como **lentos** los ciclos que superan la media en más de un margen
+        (por ejemplo, un 20 %: `t > media · 1,2`).
+    examples:
+      - title: "Registro y análisis de ciclos"
+        explanation: "Añade una línea por ciclo y después analiza el archivo: media, máximo y ciclos lentos."
+        pico_w: |
+          def registrar(n, t_ms, resultado):
+              with open("ciclos.csv", "a") as f:
+                  f.write("{},{},{}\n".format(n, t_ms, resultado))
+
+          def analizar():
+              tiempos = []
+              with open("ciclos.csv") as f:
+                  for linea in f:
+                      n, t, r = linea.strip().split(",")
+                      tiempos.append(int(t))
+              media = sum(tiempos) / len(tiempos)
+              lentos = [i + 1 for i, t in enumerate(tiempos) if t > media * 1.2]
+              print("Ciclos:", len(tiempos), "· media:", round(media), "ms · lentos:", lentos)
+
+          for i, t in enumerate([2050, 2010, 2890, 2030, 2040], 1):
+              registrar(i, t, "OK")
+          analizar()
+        esp32_s3: |
+          def registrar(n, t_ms, resultado):
+              with open("ciclos.csv", "a") as f:
+                  f.write("{},{},{}\n".format(n, t_ms, resultado))
+
+          def analizar():
+              tiempos = []
+              with open("ciclos.csv") as f:
+                  for linea in f:
+                      n, t, r = linea.strip().split(",")
+                      tiempos.append(int(t))
+              media = sum(tiempos) / len(tiempos)
+              lentos = [i + 1 for i, t in enumerate(tiempos) if t > media * 1.2]
+              print("Ciclos:", len(tiempos), "· media:", round(media), "ms · lentos:", lentos)
+
+          for i, t in enumerate([2050, 2010, 2890, 2030, 2040], 1):
+              registrar(i, t, "OK")
+          analizar()
+    practice: |
+      ### Práctica en el taller
+
+      1. Añade el registro a tu estampadora o prensa. Haz 20 ciclos y descarga `ciclos.csv` con Thonny.
+      2. Represéntalo en una hoja de cálculo. Baja la presión a mitad de la prueba: ¿se ve en la gráfica?
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué diferencia hay entre mantenimiento preventivo y predictivo?"
+          options:
+            - {id: a, text: "El preventivo se hace cada cierto tiempo/ciclos; el predictivo se basa en los datos que indican que algo empieza a fallar."}
+            - {id: b, text: "Son lo mismo.", feedback: "El predictivo usa los datos de funcionamiento."}
+            - {id: c, text: "El predictivo se hace cuando la máquina ya se ha roto.", feedback: "Eso es el mantenimiento correctivo."}
+          answer: a
+        - id: c1
+          type: code
+          points: 2
+          prompt: |
+            Escribe `linea_csv(n, t_ms, resultado)` que devuelva el texto `"n,t_ms,resultado\n"`.
+
+            Ejemplo: `linea_csv(3, 2890, "OK")` → `"3,2890,OK\n"`
+          starter: |
+            def linea_csv(n, t_ms, resultado):
+                pass
+          solution: |
+            def linea_csv(n, t_ms, resultado):
+                return "{},{},{}\n".format(n, t_ms, resultado)
+          tests:
+            - {desc: "Ejemplo", call: "linea_csv(3, 2890, 'OK')", expected: "3,2890,OK\n"}
+            - {desc: "Alarma", call: "linea_csv(10, 3000, 'ALARMA_AVANCE')", expected: "10,3000,ALARMA_AVANCE\n"}
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Escribe `detectar_lentos(tiempos, margen)` que devuelva la lista de **posiciones** (empezando en 0) de los
+            ciclos cuyo tiempo supera `media · (1 + margen)`. Lista vacía → `[]`.
+          starter: |
+            def detectar_lentos(tiempos, margen):
+                pass
+          solution: |
+            def detectar_lentos(tiempos, margen):
+                if not tiempos:
+                    return []
+                media = sum(tiempos) / len(tiempos)
+                lentos = []
+                for i, t in enumerate(tiempos):
+                    if t > media * (1 + margen):
+                        lentos.append(i)
+                return lentos
+          tests:
+            - {desc: "Un ciclo lento", call: "detectar_lentos([2050, 2010, 2890, 2030, 2040], 0.2)", expected: [2]}
+            - {desc: "Todos normales", call: "detectar_lentos([1000, 1010, 990], 0.2)", expected: []}
+            - {desc: "Vacía", call: "detectar_lentos([], 0.2)", expected: []}
+        - id: c3
+          type: code
+          points: 2
+          prompt: |
+            Escribe `faltan_para_revision(ciclos, intervalo)` que devuelva cuántos ciclos faltan para la próxima
+            revisión preventiva (las revisiones son cada `intervalo` ciclos).
+
+            Ejemplo: `faltan_para_revision(12300, 5000)` → `2700`
+          starter: |
+            def faltan_para_revision(ciclos, intervalo):
+                pass
+          solution: |
+            def faltan_para_revision(ciclos, intervalo):
+                return intervalo - ciclos % intervalo
+          tests:
+            - {desc: "12300 ciclos, revisión cada 5000", call: "faltan_para_revision(12300, 5000)", expected: 2700}
+            - {desc: "Justo tras una revisión", call: "faltan_para_revision(10000, 5000)", expected: 5000}
+
+  - id: m10s4
+    title: "Proyecto corto: panel de la estampadora"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      Añadir a la estampadora (misión 8) un **panel web** que muestre en el móvil:
+
+      - Estado (fase, emergencia) y botones CICLO / PARO (con las reglas de seguridad).
+      - **Estadísticas** de los tiempos de ciclo registrados: número de ciclos, media, máximo y número
+        de ciclos lentos.
+      - Ciclos que faltan para la próxima revisión.
+
+      La función de estadísticas devuelve un diccionario que el panel convierte en JSON:
+
+      ```python
+      {"ciclos": 5, "media": 2204.0, "maximo": 2890, "lentos": 1}
+      ```
+    examples:
+      - title: "Ruta /estadisticas"
+        explanation: "Lee ciclos.csv y devuelve las estadísticas en JSON. Pega tus funciones resumen() y detectar_lentos()."
+        pico_w: |
+          import json
+          # ... pega aquí detectar_lentos() y resumen() ...
+
+          def leer_tiempos():
+              tiempos = []
+              try:
+                  with open("ciclos.csv") as f:
+                      for linea in f:
+                          tiempos.append(int(linea.split(",")[1]))
+              except OSError:
+                  pass
+              return tiempos
+
+          def ruta_estadisticas():
+              return json.dumps(resumen(leer_tiempos(), 0.2))
+        esp32_s3: |
+          import json
+          # ... pega aquí detectar_lentos() y resumen() ...
+
+          def leer_tiempos():
+              tiempos = []
+              try:
+                  with open("ciclos.csv") as f:
+                      for linea in f:
+                          tiempos.append(int(linea.split(",")[1]))
+              except OSError:
+                  pass
+              return tiempos
+
+          def ruta_estadisticas():
+              return json.dumps(resumen(leer_tiempos(), 0.2))
+    practice: |
+      ### Proyecto por equipos (3 sesiones)
+
+      1. **Servidor**: une la estampadora por sensores, el registro y el panel. Cuidado: el servidor no debe bloquear la máquina (atiende las peticiones entre ciclos o usa `s.settimeout(0.05)`).
+      2. **Página**: botones, estado y estadísticas con refresco automático.
+      3. **Pruebas y presentación**: demostración desde el móvil, incluida la denegación con emergencia.
+    evaluation:
+      intro: "Proyecto corto de la misión 10. Necesitas un 80 %."
+      items:
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `resumen(tiempos, margen)` que devuelva `{"ciclos": n, "media": media redondeada a 1 decimal,
+            "maximo": máximo, "lentos": número de ciclos lentos}`. Con la lista vacía:
+            `{"ciclos": 0, "media": 0, "maximo": 0, "lentos": 0}`. Incluye tu `detectar_lentos`.
+          starter: |
+            def detectar_lentos(tiempos, margen):
+                pass
+
+            def resumen(tiempos, margen):
+                pass
+          solution: |
+            def detectar_lentos(tiempos, margen):
+                if not tiempos:
+                    return []
+                media = sum(tiempos) / len(tiempos)
+                return [i for i, t in enumerate(tiempos) if t > media * (1 + margen)]
+
+            def resumen(tiempos, margen):
+                if not tiempos:
+                    return {"ciclos": 0, "media": 0, "maximo": 0, "lentos": 0}
+                return {
+                    "ciclos": len(tiempos),
+                    "media": round(sum(tiempos) / len(tiempos), 1),
+                    "maximo": max(tiempos),
+                    "lentos": len(detectar_lentos(tiempos, margen)),
+                }
+          tests:
+            - {desc: "Ejemplo de la teoría", call: "resumen([2050, 2010, 2890, 2030, 2040], 0.2)", expected: {"ciclos": 5, "media": 2204.0, "maximo": 2890, "lentos": 1}}
+            - {desc: "Lista vacía", call: "resumen([], 0.2)", expected: {"ciclos": 0, "media": 0, "maximo": 0, "lentos": 0}}
+            - {desc: "Sin lentos", call: "resumen([1000, 1000, 1100], 0.2)['lentos']", expected: 0}
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué el servidor web no debe quedarse bloqueado esperando peticiones mientras la máquina trabaja?"
+          options:
+            - {id: a, text: "Porque dejaría de vigilar sensores y emergencia durante la espera."}
+            - {id: b, text: "Porque gasta datos móviles.", feedback: "El problema es que el programa dejaría de atender la máquina."}
+          answer: a

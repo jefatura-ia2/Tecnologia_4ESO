@@ -1,0 +1,538 @@
+id: m3
+number: 3
+trimestre: 1
+icon: "💨"
+title: "Neumática I: aire comprimido y cilindros"
+subtitle: "Compresor, unidad de acondicionamiento, presión, fuerza y consumo de aire"
+weeks: [7, 8, 9]
+hours: 9
+objectives:
+  - Explicar cómo se produce, almacena y acondiciona el aire comprimido.
+  - Manejar las unidades de presión y distinguir presión manométrica y absoluta.
+  - Calcular la fuerza de cilindros de simple y doble efecto y el consumo de aire.
+  - Trabajar en el banco neumático cumpliendo las normas de seguridad.
+materials:
+  - Compresor con depósito, unidad de acondicionamiento (filtro-regulador-lubricador) y tubo
+  - Cilindros de simple y doble efecto
+  - Gafas de seguridad
+  - Placa con Thonny (para los programas de cálculo)
+criteria:
+  - Analiza el funcionamiento de sistemas neumáticos, describiendo sus componentes y calculando magnitudes básicas.
+  - Trabaja en el taller de forma segura respetando las normas de uso de los equipos.
+schedule:
+  - {week: 7, session: 1, title: "¿Por qué neumática? Normas de seguridad del banco", section: m3s1}
+  - {week: 7, session: 2, title: "Compresor, depósito, presostato y purga", section: m3s1}
+  - {week: 7, session: 3, title: "Unidad de acondicionamiento y unidades de presión", section: m3s1}
+  - {week: 8, session: 1, title: "Presión y fuerza: F = p · A", section: m3s2}
+  - {week: 8, session: 2, title: "Cilindros de simple y doble efecto en el banco", section: m3s2}
+  - {week: 8, session: 3, title: "Consumo de aire y elección del cilindro", section: m3s3}
+  - {week: 9, session: 1, title: "Proyecto corto: elevador neumático (cálculo)", section: m3s4}
+  - {week: 9, session: 2, title: "Proyecto corto: montaje con mando eléctrico directo", section: m3s4}
+  - {week: 9, session: 3, title: "Proyecto corto: pruebas y ficha técnica", section: m3s4}
+sections:
+  - id: m3s1
+    title: "El aire comprimido: producción y acondicionamiento"
+    hours: 3
+    kind: lesson
+    theory: |
+      ## ¿Por qué neumática?
+
+      La **neumática** usa **aire comprimido** para producir movimiento. Está en fábricas, puertas de autobús,
+      frenos de camión, robots de empaquetado… Ventajas: es **limpia**, **rápida**, **segura** (no hay
+      chispas) y el aire es **gratis**. Inconvenientes: fuerzas moderadas, ruido de escapes y el aire es
+      compresible (movimientos poco precisos a velocidad lenta).
+
+      ## Producción: el compresor
+
+      ```
+      aire ─► COMPRESOR ─► DEPÓSITO ─► (llave) ─► UNIDAD DE ACONDICIONAMIENTO ─► circuito
+                    ▲           │
+                PRESOSTATO ─────┘   (arranca el motor por debajo de p.mín y lo para al llegar a p.máx)
+      ```
+
+      - **Compresor** (de pistón en el taller): aspira aire y lo comprime.
+      - **Depósito**: acumula aire, estabiliza la presión y deja enfriar el aire. Lleva **manómetro**,
+        **válvula de seguridad** y **purga**.
+      - **Presostato**: arranca y para el motor automáticamente.
+      - Al comprimir el aire, su humedad **condensa**: hay que **purgar** el agua del depósito con frecuencia.
+
+      ## La unidad de acondicionamiento (FRL)
+
+      Antes de llegar a las válvulas, el aire pasa por:
+
+      1. **Filtro**: retiene agua y partículas (tiene su propia purga).
+      2. **Regulador con manómetro**: fija la **presión de trabajo** (en el aula, **3-4 bar**), constante
+         aunque varíe la del depósito.
+      3. **Lubricador**: añade una niebla de aceite (muchos equipos modernos trabajan sin lubricar).
+
+      ## Unidades de presión
+
+      | Unidad | Equivalencia |
+      |---|---|
+      | 1 bar | 100 000 Pa = **100 kPa** = 0,1 MPa |
+      | 1 bar | ≈ **14,5 psi** (manómetros americanos) |
+      | 1 bar | **0,1 N/mm²** (¡muy útil para calcular fuerzas!) |
+
+      Los manómetros miden la presión **manométrica** (por encima de la atmosférica). La presión **absoluta**
+      es la manométrica + la atmosférica (≈ 1,013 bar).
+
+      ## Seguridad
+
+      Gafas siempre · presión máxima 4 bar en el aula · nunca desconectar con presión · no dirigir el aire
+      hacia nadie · cerrar la llave y purgar al terminar.
+    examples:
+      - title: "Calculadora de unidades en la placa"
+        explanation: "Un programa de consola para convertir presiones. Igual en las dos placas."
+        pico_w: |
+          def convertir(bar):
+              print(bar, "bar =", bar * 100, "kPa =", round(bar * 14.5038, 1), "psi")
+              print("   absoluta:", round(bar + 1.013, 3), "bar")
+
+          for p in (1, 3, 4, 6, 8):
+              convertir(p)
+        esp32_s3: |
+          def convertir(bar):
+              print(bar, "bar =", bar * 100, "kPa =", round(bar * 14.5038, 1), "psi")
+              print("   absoluta:", round(bar + 1.013, 3), "bar")
+
+          for p in (1, 3, 4, 6, 8):
+              convertir(p)
+    practice: |
+      ### Práctica en el taller (con el profesor)
+
+      1. Identifica en el compresor: depósito, manómetro, presostato, válvula de seguridad, purga y llave de salida.
+      2. Anota la presión a la que arranca y para el compresor. Purga el depósito: ¿sale agua?
+      3. Ajusta el regulador de la unidad de acondicionamiento a 3 bar y luego a 4 bar. Anota las lecturas en bar y psi.
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué elemento fija la presión de trabajo del circuito aunque cambie la del depósito?"
+          options:
+            - {id: a, text: "El regulador de la unidad de acondicionamiento."}
+            - {id: b, text: "El presostato.", feedback: "El presostato arranca y para el compresor; la presión de trabajo la fija el regulador."}
+            - {id: c, text: "El filtro.", feedback: "El filtro limpia el aire; no regula la presión."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Por qué hay que purgar el depósito del compresor?"
+          options:
+            - {id: a, text: "Porque la humedad del aire condensa en agua al comprimirlo."}
+            - {id: b, text: "Para bajar la presión de trabajo.", feedback: "La purga elimina el agua condensada."}
+            - {id: c, text: "Para lubricar el compresor.", feedback: "La purga saca agua, no aceite."}
+          answer: a
+        - id: q3
+          type: quiz
+          points: 1
+          question: "Un manómetro marca 4 bar. ¿Cuál es la presión absoluta aproximada?"
+          options:
+            - {id: a, text: "≈ 5 bar"}
+            - {id: b, text: "4 bar", feedback: "Esa es la manométrica; la absoluta suma la atmosférica (≈1 bar)."}
+            - {id: c, text: "≈ 3 bar", feedback: "La absoluta es mayor que la manométrica."}
+          answer: a
+        - id: f1
+          type: fill_blank
+          points: 2
+          question: "Completa las equivalencias."
+          text: "1 bar = ___ kPa · 1 bar = ___ N/mm²"
+          blanks:
+            - {accept: ["100"], hint: "1 bar = 100 000 Pa."}
+            - {accept: ["0.1", "0,1"], hint: "Es la que usaremos para calcular fuerzas."}
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `bar_a_kpa(bar)` (1 bar = 100 kPa) y `bar_a_psi(bar)` (1 bar = 14,5038 psi,
+            redondeado a 1 decimal).
+          starter: |
+            def bar_a_kpa(bar):
+                pass
+
+            def bar_a_psi(bar):
+                pass
+          solution: |
+            def bar_a_kpa(bar):
+                return bar * 100
+
+            def bar_a_psi(bar):
+                return round(bar * 14.5038, 1)
+          tests:
+            - {desc: "4 bar = 400 kPa", call: "bar_a_kpa(4)", expected: 400}
+            - {desc: "2.5 bar = 250 kPa", call: "bar_a_kpa(2.5)", expected: 250}
+            - {desc: "4 bar = 58.0 psi", call: "bar_a_psi(4)", expected: 58.0}
+            - {desc: "6 bar = 87.0 psi", call: "bar_a_psi(6)", expected: 87.0}
+        - id: c2
+          type: code
+          points: 2
+          prompt: |
+            Escribe `presion_absoluta(p_man)` que sume la presión atmosférica (1,013 bar) a la manométrica,
+            redondeando a 3 decimales.
+          starter: |
+            def presion_absoluta(p_man):
+                pass
+          solution: |
+            def presion_absoluta(p_man):
+                return round(p_man + 1.013, 3)
+          tests:
+            - {desc: "4 bar manométricos", call: "presion_absoluta(4)", expected: 5.013}
+            - {desc: "0 bar manométricos = atmosférica", call: "presion_absoluta(0)", expected: 1.013}
+
+  - id: m3s2
+    title: "Presión, fuerza y cilindros"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Los cilindros: el "músculo" neumático
+
+      - **Simple efecto**: una sola toma de aire. El aire lo hace **avanzar** y un **muelle** lo hace
+        **retroceder** al quitar la presión. Sencillo y gasta poco aire, pero la fuerza de retroceso es
+        pequeña y parte de la fuerza de avance se pierde en comprimir el muelle.
+      - **Doble efecto**: dos tomas. El aire lo hace **avanzar** (por la cámara trasera) y **retroceder**
+        (por la cámara delantera). Fuerza en los dos sentidos.
+
+      ## La fuerza: F = p · A
+
+      Con `p` en **N/mm²** (1 bar = 0,1 N/mm²) y el área `A` en **mm²**, la fuerza sale en **newtons**.
+
+      - **Avance**: el aire empuja toda la cara del émbolo de diámetro `D`:  `A = π · D² / 4`
+      - **Retroceso** (doble efecto): el **vástago** (diámetro `d`) ocupa parte del área:
+        `A = π · (D² − d²) / 4`  → el retroceso tiene **menos fuerza** que el avance.
+
+      Ejemplo: D = 20 mm, p = 4 bar → A = 314,16 mm² → F = 0,4 · 314,16 ≈ **125,7 N** (unos 12,8 kg).
+
+      > En la realidad hay rozamiento (y el muelle en el simple efecto): la fuerza útil es algo menor,
+      > un 85-90 % de la teórica.
+
+      En Python: `import math` y `math.pi`.
+    examples:
+      - title: "Tabla de fuerzas para varios diámetros"
+        explanation: "Imprime la fuerza de avance y retroceso de los cilindros más comunes a 4 bar."
+        pico_w: |
+          import math
+
+          def fuerza(p_bar, area_mm2):
+              return p_bar * 0.1 * area_mm2
+
+          P = 4
+          for D, d in ((10, 4), (16, 6), (20, 8), (25, 10), (32, 12)):
+              av = fuerza(P, math.pi * D * D / 4)
+              re = fuerza(P, math.pi * (D * D - d * d) / 4)
+              print("Ø", D, "mm  avance", round(av), "N  retroceso", round(re), "N")
+        esp32_s3: |
+          import math
+
+          def fuerza(p_bar, area_mm2):
+              return p_bar * 0.1 * area_mm2
+
+          P = 4
+          for D, d in ((10, 4), (16, 6), (20, 8), (25, 10), (32, 12)):
+              av = fuerza(P, math.pi * D * D / 4)
+              re = fuerza(P, math.pi * (D * D - d * d) / 4)
+              print("Ø", D, "mm  avance", round(av), "N  retroceso", round(re), "N")
+    practice: |
+      ### Práctica en el taller
+
+      1. Mide con el calibre el diámetro del émbolo (o léelo en la placa del cilindro) y del vástago de los cilindros del taller.
+      2. Calcula su fuerza de avance y retroceso a 3 y 4 bar.
+      3. Con el profesor: conecta directamente el aire (a 2 bar) a cada toma de un cilindro de doble efecto y observa avance y retroceso. ¿Qué pasa en el simple efecto al quitar el aire?
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "En un cilindro de doble efecto, ¿por qué el retroceso tiene menos fuerza que el avance?"
+          options:
+            - {id: a, text: "Porque el vástago ocupa parte del área del émbolo en la cámara delantera."}
+            - {id: b, text: "Porque el muelle frena el retroceso.", feedback: "El doble efecto no tiene muelle."}
+            - {id: c, text: "Porque el aire sale por el escape.", feedback: "La diferencia viene del área útil."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Cómo retrocede un cilindro de simple efecto?"
+          options:
+            - {id: a, text: "Por la fuerza de un muelle al quitarle la presión."}
+            - {id: b, text: "Con aire por la segunda toma.", feedback: "El simple efecto solo tiene una toma de aire."}
+            - {id: c, text: "No retrocede.", feedback: "Retrocede gracias al muelle."}
+          answer: a
+        - id: f1
+          type: fill_blank
+          points: 2
+          question: "Completa la fórmula del área de avance (D en mm)."
+          text: "A = math.___ * D ** 2 / ___"
+          blanks:
+            - {accept: ["pi"], hint: "El número π en el módulo math."}
+            - {accept: ["4"], hint: "π·D²/…"}
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `fuerza_avance(p_bar, D_mm)` que devuelva la fuerza teórica de avance en N redondeada a 1 decimal.
+
+            Ejemplo: `fuerza_avance(4, 20)` → `125.7`
+          starter: |
+            import math
+
+            def fuerza_avance(p_bar, D_mm):
+                pass
+          solution: |
+            import math
+
+            def fuerza_avance(p_bar, D_mm):
+                area = math.pi * D_mm ** 2 / 4
+                return round(p_bar * 0.1 * area, 1)
+          tests:
+            - {desc: "4 bar, Ø20", call: "fuerza_avance(4, 20)", expected: 125.7}
+            - {desc: "6 bar, Ø32", call: "fuerza_avance(6, 32)", expected: 482.5}
+            - {desc: "0 bar → 0 N", call: "fuerza_avance(0, 25)", expected: 0}
+          hints:
+            wrong_result: "Pasa los bar a N/mm² multiplicando por 0.1 y multiplica por el área π·D²/4. Redondea con round(..., 1)."
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `fuerza_retroceso(p_bar, D_mm, d_mm)` (d = diámetro del vástago), redondeada a 1 decimal.
+
+            Ejemplo: `fuerza_retroceso(4, 20, 8)` → `105.6`
+          starter: |
+            import math
+
+            def fuerza_retroceso(p_bar, D_mm, d_mm):
+                pass
+          solution: |
+            import math
+
+            def fuerza_retroceso(p_bar, D_mm, d_mm):
+                area = math.pi * (D_mm ** 2 - d_mm ** 2) / 4
+                return round(p_bar * 0.1 * area, 1)
+          tests:
+            - {desc: "4 bar, Ø20, vástago 8", call: "fuerza_retroceso(4, 20, 8)", expected: 105.6}
+            - {desc: "6 bar, Ø32, vástago 12", call: "fuerza_retroceso(6, 32, 12)", expected: 414.7}
+          hints:
+            wrong_result: "El área es π·(D² − d²)/4."
+
+  - id: m3s3
+    title: "Consumo de aire y elección del cilindro"
+    hours: 1
+    kind: lesson
+    theory: |
+      ## ¿Cuánto aire gasta un cilindro?
+
+      En cada carrera el cilindro se llena con un volumen `V = A · carrera`. Pero ese aire está **comprimido**:
+      a 4 bar manométricos (≈ 5 bar absolutos) ocupa 5 veces menos que a presión atmosférica. El aire
+      que el compresor tiene que aspirar (**aire libre**) es:
+
+      ```
+      aire libre = A · carrera · (p + 1)        (p en bar manométricos)
+      ```
+
+      - **Simple efecto**: una carrera con aire por ciclo.
+      - **Doble efecto**: dos carreras con aire por ciclo (avance y retroceso). Para simplificar,
+        usaremos el doble del consumo de avance.
+
+      Unidades: mm³ → litros dividiendo entre 1 000 000.
+
+      Ejemplo: Ø20, carrera 50 mm, 4 bar, 10 ciclos, simple efecto:
+      V = 314,16 · 50 = 15 708 mm³ = 0,0157 L → · 5 = 0,0785 L por ciclo → **0,79 L** en 10 ciclos.
+
+      ## Elegir el cilindro
+
+      Para una fuerza necesaria `F` a una presión `p`, elegimos el **diámetro normalizado más pequeño**
+      que dé al menos esa fuerza. Diámetros habituales: 10, 12, 16, 20, 25, 32, 40, 50 mm.
+    examples:
+      - title: "Calculadora de consumo"
+        explanation: "Calcula el aire libre que gasta un cilindro en una hora de trabajo."
+        pico_w: |
+          import math
+
+          def litros(D, carrera, p, ciclos, doble=False):
+              v = math.pi * D * D / 4 * carrera / 1_000_000 * (p + 1) * ciclos
+              return v * 2 if doble else v
+
+          ciclos_hora = 6 * 60            # 6 ciclos por minuto
+          print("Simple efecto Ø20:", round(litros(20, 50, 4, ciclos_hora)), "L/h")
+          print("Doble efecto Ø20:", round(litros(20, 50, 4, ciclos_hora, True)), "L/h")
+        esp32_s3: |
+          import math
+
+          def litros(D, carrera, p, ciclos, doble=False):
+              v = math.pi * D * D / 4 * carrera / 1_000_000 * (p + 1) * ciclos
+              return v * 2 if doble else v
+
+          ciclos_hora = 6 * 60
+          print("Simple efecto Ø20:", round(litros(20, 50, 4, ciclos_hora)), "L/h")
+          print("Doble efecto Ø20:", round(litros(20, 50, 4, ciclos_hora, True)), "L/h")
+    practice: |
+      ### Práctica en clase
+
+      1. Calcula el consumo por hora de los cilindros del taller trabajando a 6 ciclos/minuto.
+      2. Busca el caudal de aire del compresor del taller (en su placa, en L/min). ¿Cuántos cilindros podría alimentar a la vez?
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué el aire libre consumido se multiplica por (p + 1)?"
+          options:
+            - {id: a, text: "Porque el aire está comprimido: a p bar manométricos ocupa (p+1) veces menos que a presión atmosférica."}
+            - {id: b, text: "Para tener en cuenta las fugas.", feedback: "Es la relación entre presión absoluta y atmosférica."}
+            - {id: c, text: "Porque hay dos cámaras.", feedback: "Eso afecta al doble efecto, no a (p+1)."}
+          answer: a
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `consumo_litros(D, carrera, p, ciclos, doble)` que devuelva los litros de aire libre
+            redondeados a 2 decimales. Si `doble` es `True`, el consumo se duplica.
+
+            Ejemplo: `consumo_litros(20, 50, 4, 10, False)` → `0.79`
+          starter: |
+            import math
+
+            def consumo_litros(D, carrera, p, ciclos, doble):
+                pass
+          solution: |
+            import math
+
+            def consumo_litros(D, carrera, p, ciclos, doble):
+                volumen_mm3 = math.pi * D ** 2 / 4 * carrera
+                litros = volumen_mm3 / 1_000_000 * (p + 1) * ciclos
+                if doble:
+                    litros = litros * 2
+                return round(litros, 2)
+          tests:
+            - {desc: "Simple efecto del ejemplo", call: "consumo_litros(20, 50, 4, 10, False)", expected: 0.79}
+            - {desc: "Doble efecto", call: "consumo_litros(20, 50, 4, 10, True)", expected: 1.57}
+            - {desc: "Cilindro Ø32, 100 ciclos a 6 bar", call: "consumo_litros(32, 80, 6, 100, False)", expected: 45.04}
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Escribe `elegir_diametro(F, p, diametros)` que devuelva el **menor** diámetro de la lista (ordenada de
+            menor a mayor) cuya fuerza de avance teórica sea **≥ F**, o `None` si ninguno llega.
+          starter: |
+            import math
+
+            def elegir_diametro(F, p, diametros):
+                pass
+          solution: |
+            import math
+
+            def elegir_diametro(F, p, diametros):
+                for D in diametros:
+                    if p * 0.1 * math.pi * D ** 2 / 4 >= F:
+                        return D
+                return None
+          tests:
+            - {desc: "300 N a 6 bar → Ø32 (Ø25 se queda corto)", call: "elegir_diametro(300, 6, [10, 16, 20, 25, 32])", expected: 32}
+            - {desc: "100 N a 4 bar → Ø20", call: "elegir_diametro(100, 4, [10, 16, 20, 25])", expected: 20}
+            - {desc: "Ninguno llega → None", call: "elegir_diametro(1000, 3, [10, 16])", expected: null}
+
+  - id: m3s4
+    title: "Proyecto corto: elevador neumático con mando directo"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      Diseñar un **elevador** que suba una pequeña carga con un cilindro de **simple efecto** colocado en
+      vertical, mandado **sin microcontrolador**: un **pulsador** alimenta directamente con 12 V la
+      bobina de la **electroválvula 3/2 NC**. Mientras se pulsa, el cilindro sube; al soltar, el muelle
+      lo baja y el aire sale por el escape de la válvula.
+
+      ```
+      Aire (4 bar) ─► 1 [EV 3/2 NC] 2 ─► cilindro simple efecto
+                            3 ─► escape
+      +12 V ─► pulsador ─► bobina EV ─► GND        (+ diodo 1N4007 en paralelo con la bobina)
+      ```
+
+      ## Cálculo de comprobación
+
+      La fuerza necesaria para levantar una masa `m` es su peso `m · 9,81` N. Aplicamos un
+      **coeficiente de seguridad de 1,5** (rozamientos, muelle, aceleración):
+
+      ```
+      F necesaria = m · 9,81 · 1,5
+      ```
+
+      El elevador **sube** si la fuerza teórica del cilindro es ≥ la necesaria.
+    examples:
+      - title: "Comprobación del elevador"
+        explanation: "Calcula si el cilindro puede levantar distintas masas."
+        pico_w: |
+          import math
+
+          def comprobar(masa, p, D):
+              necesaria = masa * 9.81 * 1.5
+              cilindro = p * 0.1 * math.pi * D * D / 4
+              print(masa, "kg:", "SUBE" if cilindro >= necesaria else "NO SUBE",
+                    "(", round(cilindro), "N de", round(necesaria), "N )")
+
+          for m in (2, 5, 8, 10):
+              comprobar(m, 4, 20)
+        esp32_s3: |
+          import math
+
+          def comprobar(masa, p, D):
+              necesaria = masa * 9.81 * 1.5
+              cilindro = p * 0.1 * math.pi * D * D / 4
+              print(masa, "kg:", "SUBE" if cilindro >= necesaria else "NO SUBE",
+                    "(", round(cilindro), "N de", round(necesaria), "N )")
+
+          for m in (2, 5, 8, 10):
+              comprobar(m, 4, 20)
+    practice: |
+      ### Proyecto por equipos (3 sesiones)
+
+      1. **Cálculo**: masa máxima que puede subir vuestro cilindro a 3 y 4 bar.
+      2. **Montaje (con el profesor)**: circuito neumático + mando eléctrico directo con pulsador, fuente de 12 V y diodo. Comprobad la polaridad del diodo antes de conectar.
+      3. **Pruebas y ficha técnica**: masas reales que sube, presión mínima necesaria, esquema neumático y eléctrico.
+    evaluation:
+      intro: "Proyecto corto de la misión 3. Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `informe_elevador(masa, p, D)` que devuelva un diccionario con:
+            - `"necesaria"`: masa · 9,81 · 1,5, redondeada a 1 decimal.
+            - `"cilindro"`: fuerza teórica de avance, redondeada a 1 decimal.
+            - `"sube"`: `True` si cilindro ≥ necesaria.
+          starter: |
+            import math
+
+            def informe_elevador(masa, p, D):
+                pass
+          solution: |
+            import math
+
+            def informe_elevador(masa, p, D):
+                necesaria = round(masa * 9.81 * 1.5, 1)
+                cilindro = round(p * 0.1 * math.pi * D ** 2 / 4, 1)
+                return {"necesaria": necesaria, "cilindro": cilindro, "sube": cilindro >= necesaria}
+          tests:
+            - {desc: "8 kg con Ø20 a 4 bar → sube", call: "informe_elevador(8, 4, 20)", expected: {"necesaria": 117.7, "cilindro": 125.7, "sube": true}}
+            - {desc: "10 kg con Ø20 a 4 bar → no sube", call: "informe_elevador(10, 4, 20)", expected: {"necesaria": 147.2, "cilindro": 125.7, "sube": false}}
+        - id: q1
+          type: quiz
+          points: 1
+          question: "En el mando directo, ¿por qué se pone un diodo en paralelo con la bobina de la electroválvula?"
+          options:
+            - {id: a, text: "Para absorber el pico de tensión que genera la bobina al desconectarla."}
+            - {id: b, text: "Para que la electroválvula abra más rápido.", feedback: "El diodo protege contra la sobretensión al desconectar."}
+            - {id: c, text: "Para que funcione con 3,3 V.", feedback: "No cambia la tensión de trabajo de la bobina."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "Al soltar el pulsador, ¿por dónde sale el aire del cilindro de simple efecto?"
+          options:
+            - {id: a, text: "Por el escape (vía 3) de la electroválvula 3/2."}
+            - {id: b, text: "Por el compresor.", feedback: "El aire nunca vuelve al compresor; sale al exterior por el escape."}
+            - {id: c, text: "No sale: el cilindro se queda arriba.", feedback: "La 3/2 en reposo comunica el cilindro con el escape."}
+          answer: a

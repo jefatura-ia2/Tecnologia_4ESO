@@ -1,0 +1,599 @@
+id: m7
+number: 7
+trimestre: 2
+icon: "🎯"
+title: "Finales de carrera: ciclos por posición"
+subtitle: "Sensores de posición, espera con tiempo límite y diagnóstico de atascos y fugas"
+weeks: [19, 20, 21]
+hours: 9
+objectives:
+  - Conectar y leer finales de carrera para conocer la posición real de los cilindros.
+  - Programar ciclos que avanzan cuando el sensor confirma la posición, no cuando pasa un tiempo.
+  - Vigilar los tiempos de cada movimiento para detectar atascos, fugas o falta de presión.
+materials:
+  - Finales de carrera (microinterruptores con rodillo), soportes y bridas
+  - Placa, módulos MOSFET, 2 electroválvulas 3/2 NC, cilindro de doble efecto
+criteria:
+  - Integra sensores en sistemas automáticos para controlar su funcionamiento en lazo cerrado.
+  - Diagnostica fallos de funcionamiento a partir de la información de los sensores.
+schedule:
+  - {week: 19, session: 1, title: "Finales de carrera: tipos, contactos y montaje", section: m7s1}
+  - {week: 19, session: 2, title: "Conexión a la placa y lectura de la posición", section: m7s1}
+  - {week: 19, session: 3, title: "Esperar a un sensor con tiempo límite", section: m7s2}
+  - {week: 20, session: 1, title: "Ciclo A+ A- por sensores", section: m7s2}
+  - {week: 20, session: 2, title: "Vigilancia de tiempos: atascos y fugas", section: m7s3}
+  - {week: 20, session: 3, title: "Estado seguro ante una alarma", section: m7s3}
+  - {week: 21, session: 1, title: "Proyecto corto: prensa con retorno automático (montaje)", section: m7s4}
+  - {week: 21, session: 2, title: "Proyecto corto: programa con alarmas", section: m7s4}
+  - {week: 21, session: 3, title: "Proyecto corto: pruebas de fallo y presentación", section: m7s4}
+sections:
+  - id: m7s1
+    title: "Finales de carrera"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Saber dónde está el cilindro
+
+      Un **final de carrera** es un interruptor que acciona el propio vástago (o una leva unida a él) al
+      llegar a una posición. Usaremos dos por cilindro:
+
+      - **a0**: cilindro A **dentro** (retraído).
+      - **a1**: cilindro A **fuera** (extendido).
+
+      Con ellos el programa pasa de "creer" a **saber**: es un control en **lazo cerrado**.
+
+      ## Contactos NA y NC
+
+      El microinterruptor tiene tres terminales: **C** (común), **NA** (normalmente abierto) y **NC**
+      (normalmente cerrado). Para leer "pisado" lo conectamos como un pulsador:
+
+      ```
+      GPIO ──── C   [final de carrera]   NA ──── GND        (Pin.PULL_UP)
+      ```
+
+      | Estado | Lectura |
+      |---|---|
+      | Libre | **1** |
+      | Pisado | **0** |
+
+      ## Leer la posición
+
+      | a0 | a1 | Posición |
+      |---|---|---|
+      | 0 (pisado) | 1 | **dentro** |
+      | 1 | 0 (pisado) | **fuera** |
+      | 1 | 1 | **en movimiento** (o a mitad) |
+      | 0 | 0 | **error**: ¡no puede estar dentro y fuera a la vez! (sensor mal montado o cable en corto) |
+
+      ### Pines del curso
+
+      | Sensor | Pico W | ESP32-S3 |
+      |---|---|---|
+      | A0 · A1 | GP18 · GP19 | GPIO 17 · 18 |
+      | B0 · B1 | GP20 · GP21 | GPIO 8 · 9 |
+
+      Montaje: el rodillo debe pisarse **antes** del tope mecánico del cilindro y sin forzar la palanca.
+    examples:
+      - title: "Monitor de posición"
+        explanation: "Muestra la posición del cilindro A cada vez que cambia. Muévelo con el mando manual de la misión 6 o a mano (con el aire cortado)."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          a0 = Pin(18, Pin.IN, Pin.PULL_UP)
+          a1 = Pin(19, Pin.IN, Pin.PULL_UP)
+
+          def posicion(v0, v1):
+              if v0 == 0 and v1 == 0: return "ERROR"
+              if v0 == 0: return "dentro"
+              if v1 == 0: return "fuera"
+              return "en movimiento"
+
+          anterior = None
+          while True:
+              p = posicion(a0.value(), a1.value())
+              if p != anterior:
+                  print(p)
+                  anterior = p
+              time.sleep_ms(10)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          a0 = Pin(17, Pin.IN, Pin.PULL_UP)
+          a1 = Pin(18, Pin.IN, Pin.PULL_UP)
+
+          def posicion(v0, v1):
+              if v0 == 0 and v1 == 0: return "ERROR"
+              if v0 == 0: return "dentro"
+              if v1 == 0: return "fuera"
+              return "en movimiento"
+
+          anterior = None
+          while True:
+              p = posicion(a0.value(), a1.value())
+              if p != anterior:
+                  print(p)
+                  anterior = p
+              time.sleep_ms(10)
+    practice: |
+      ### Práctica en el taller
+
+      1. Identifica C, NA y NC del final de carrera con el polímetro (continuidad).
+      2. Monta a0 y a1 en el cilindro de doble efecto y conéctalos a la placa.
+      3. Ejecuta el monitor y mueve el cilindro. Ajusta la posición de los sensores hasta que detecten de forma fiable.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "Lees a0 = 0 y a1 = 0 a la vez. ¿Qué significa?"
+          options:
+            - {id: a, text: "Hay un error: el cilindro no puede estar dentro y fuera a la vez."}
+            - {id: b, text: "El cilindro está a mitad de carrera.", feedback: "A mitad de carrera ninguno está pisado: 1 y 1."}
+            - {id: c, text: "El cilindro está fuera.", feedback: "Fuera sería a0 = 1 y a1 = 0."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Qué ventaja tiene usar finales de carrera frente a temporizar?"
+          options:
+            - {id: a, text: "El programa sabe que el cilindro ha llegado, aunque tarde más por la carga o la presión."}
+            - {id: b, text: "El cilindro va más rápido.", feedback: "La velocidad no cambia; cambia que el programa conoce la posición real."}
+            - {id: c, text: "Se gasta menos aire.", feedback: "El consumo es similar; la ventaja es la fiabilidad."}
+          answer: a
+        - id: f1
+          type: fill_blank
+          points: 2
+          question: "Completa la creación del sensor a1 en la Pico W."
+          text: "a1 = Pin(___, Pin.IN, Pin.___)"
+          blanks:
+            - {accept: ["19"], hint: "Mira la tabla de pines: A1 en la Pico W."}
+            - {accept: ["PULL_UP"], hint: "La resistencia interna que deja el pin a 1 en reposo."}
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `posicion(a0, a1)` que reciba las lecturas de los dos finales de carrera (0 = pisado) y devuelva
+            `"dentro"`, `"fuera"`, `"en movimiento"` o `"error"`.
+          starter: |
+            def posicion(a0, a1):
+                pass
+          solution: |
+            def posicion(a0, a1):
+                if a0 == 0 and a1 == 0:
+                    return "error"
+                if a0 == 0:
+                    return "dentro"
+                if a1 == 0:
+                    return "fuera"
+                return "en movimiento"
+          tests:
+            - {desc: "a0 pisado → dentro", call: "posicion(0, 1)", expected: "dentro"}
+            - {desc: "a1 pisado → fuera", call: "posicion(1, 0)", expected: "fuera"}
+            - {desc: "Ninguno → en movimiento", call: "posicion(1, 1)", expected: "en movimiento"}
+            - {desc: "Los dos → error", call: "posicion(0, 0)", expected: "error"}
+
+  - id: m7s2
+    title: "Esperar a un sensor con tiempo límite"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Esperar… pero no para siempre
+
+      Tras dar la orden de avance, esperamos a que se pise a1:
+
+      ```python
+      cil.avanzar()
+      while a1.value() == 1:      # ¡PELIGRO!
+          pass
+      ```
+
+      ¿Y si el cilindro se **atasca**, hay una **fuga** o el sensor se ha **soltado**? El programa se queda
+      esperando para siempre con el cilindro empujando. Toda espera debe tener un **tiempo límite**
+      (*timeout*), como el **perro guardián** (*watchdog*) de las máquinas reales:
+
+      ```python
+      def esperar(sensor, timeout_ms, paso_ms=10):
+          inicio = time.ticks_ms()
+          while time.ticks_diff(time.ticks_ms(), inicio) < timeout_ms:
+              if sensor.value() == 0:      # pisado
+                  return True
+              time.sleep_ms(paso_ms)
+          return False                     # no llegó a tiempo
+      ```
+
+      ## Ciclo A+ A- por sensores
+
+      ```python
+      cil.avanzar()
+      if esperar(a1, 3000):
+          cil.retroceder()
+          esperar(a0, 3000)
+      else:
+          print("¡Alarma! No ha llegado a a1")
+      ```
+
+      El tiempo límite se elige midiendo el tiempo normal y dejando un margen amplio (2-3 veces).
+    examples:
+      - title: "Ciclos A+ A- por sensores con timeout"
+        explanation: "Cada pulsación de MARCHA hace un ciclo completo comprobado por sensores."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(11, Pin.OUT), Pin(12, Pin.OUT))
+          a0 = Pin(18, Pin.IN, Pin.PULL_UP)
+          a1 = Pin(19, Pin.IN, Pin.PULL_UP)
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+
+          def esperar(sensor, timeout_ms, paso_ms=10):
+              inicio = time.ticks_ms()
+              while time.ticks_diff(time.ticks_ms(), inicio) < timeout_ms:
+                  if sensor.value() == 0:
+                      return True
+                  time.sleep_ms(paso_ms)
+              return False
+
+          try:
+              cil.retroceder()
+              while True:
+                  if marcha.value() == 0:
+                      cil.avanzar()
+                      if not esperar(a1, 3000):
+                          print("ALARMA en avance"); cil.retroceder(); continue
+                      cil.retroceder()
+                      if not esperar(a0, 3000):
+                          print("ALARMA en retroceso"); cil.liberar(); break
+                      print("Ciclo OK")
+                  time.sleep_ms(20)
+          finally:
+              cil.liberar()
+        esp32_s3: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(5, Pin.OUT), Pin(6, Pin.OUT))
+          a0 = Pin(17, Pin.IN, Pin.PULL_UP)
+          a1 = Pin(18, Pin.IN, Pin.PULL_UP)
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+
+          def esperar(sensor, timeout_ms, paso_ms=10):
+              inicio = time.ticks_ms()
+              while time.ticks_diff(time.ticks_ms(), inicio) < timeout_ms:
+                  if sensor.value() == 0:
+                      return True
+                  time.sleep_ms(paso_ms)
+              return False
+
+          try:
+              cil.retroceder()
+              while True:
+                  if marcha.value() == 0:
+                      cil.avanzar()
+                      if not esperar(a1, 3000):
+                          print("ALARMA en avance"); cil.retroceder(); continue
+                      cil.retroceder()
+                      if not esperar(a0, 3000):
+                          print("ALARMA en retroceso"); cil.liberar(); break
+                      print("Ciclo OK")
+                  time.sleep_ms(20)
+          finally:
+              cil.liberar()
+    practice: |
+      ### Práctica en el taller
+
+      1. Ejecuta el ciclo por sensores a 3 bar.
+      2. Simula un atasco sujetando una pieza de madera delante del vástago (¡con el profesor y a 2 bar!). ¿Salta la alarma?
+      3. Desconecta el cable de a1: ¿qué pasa?
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué toda espera a un sensor necesita un tiempo límite?"
+          options:
+            - {id: a, text: "Para no quedarse esperando para siempre si hay un atasco, una fuga o un sensor averiado."}
+            - {id: b, text: "Para que el cilindro vaya más rápido.", feedback: "No cambia la velocidad; evita que el programa se quede bloqueado."}
+            - {id: c, text: "Porque MicroPython lo exige.", feedback: "Es una buena práctica de seguridad, no una obligación del lenguaje."}
+          answer: a
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Escribe `esperar(sensor, timeout_ms, paso_ms)` como en la teoría: devuelve `True` en cuanto el sensor
+            lee 0 (pisado), o `False` si pasan `timeout_ms` milisegundos sin que ocurra. Usa `time.ticks_ms`,
+            `time.ticks_diff` y `time.sleep_ms(paso_ms)` entre lecturas.
+          starter: |
+            import time
+
+            def esperar(sensor, timeout_ms, paso_ms):
+                pass
+          solution: |
+            import time
+
+            def esperar(sensor, timeout_ms, paso_ms):
+                inicio = time.ticks_ms()
+                while time.ticks_diff(time.ticks_ms(), inicio) < timeout_ms:
+                    if sensor.value() == 0:
+                        return True
+                    time.sleep_ms(paso_ms)
+                return False
+          setup: ["PIN_INPUTS[19] = [1, 1, 1, 0]", "PIN_INPUTS[18] = [1]"]
+          tests:
+            - desc: "El sensor se pisa a la 4.ª lectura → True"
+              before: ["from machine import Pin as _P", "_t0 = _clock.us // 1000", "_r = esperar(_P(19, _P.IN, _P.PULL_UP), 1000, 10)"]
+              check: "_r == True and _clock.us // 1000 - _t0 == 30"
+            - desc: "Nunca se pisa → False tras el timeout"
+              before: ["_t0 = _clock.us // 1000", "_r = esperar(_P(18, _P.IN, _P.PULL_UP), 200, 10)"]
+              check: "_r == False and 200 <= _clock.us // 1000 - _t0 <= 210"
+          forbidden:
+            - {pattern: "while\\s+True", message: "No uses while True: la espera debe terminar al pasar el tiempo límite."}
+          hints:
+            wrong_result: "Guarda inicio = time.ticks_ms() y repite mientras time.ticks_diff(time.ticks_ms(), inicio) < timeout_ms. Si el sensor vale 0, return True; si no, time.sleep_ms(paso_ms). Al salir del bucle, return False."
+
+  - id: m7s3
+    title: "Vigilancia de tiempos: atascos y fugas"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## El tiempo de cada movimiento dice mucho
+
+      Si medimos cuánto tarda cada movimiento (desde la orden hasta que se pisa el sensor) podemos
+      **diagnosticar** la máquina:
+
+      | Resultado | Diagnóstico | Posibles causas |
+      |---|---|---|
+      | Tiempo normal | **OK** | — |
+      | Bastante más lento de lo normal | **LENTO** | fuga, presión baja, rozamiento, carga excesiva |
+      | No llega (timeout) | **ATASCO** | obstáculo, sensor averiado, falta de aire, electroválvula que no abre |
+
+      Es el principio del **mantenimiento predictivo**: detectar que algo empieza a ir mal **antes** de
+      que la máquina se pare.
+
+      ## Estado seguro ante una alarma
+
+      ¿Qué hacemos si salta una alarma? Depende de la máquina, pero la regla general es:
+      **ningún movimiento peligroso** y **avisar al operario**.
+
+      - Si falla el **avance**: ordenar el **retroceso** (volver a la posición de reposo).
+      - Si falla el **retroceso**: **liberar** el cilindro (las dos cámaras al escape) y parar todo hasta
+        que una persona revise la máquina.
+    examples:
+      - title: "Medir y diagnosticar cada movimiento"
+        explanation: "Mide el tiempo de avance y lo clasifica. Tiempo normal medido previamente: 600 ms."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(11, Pin.OUT), Pin(12, Pin.OUT))
+          a1 = Pin(19, Pin.IN, Pin.PULL_UP)
+          T_NORMAL = 600
+
+          def medir(sensor, timeout_ms):
+              t0 = time.ticks_ms()
+              while time.ticks_diff(time.ticks_ms(), t0) < timeout_ms:
+                  if sensor.value() == 0:
+                      return time.ticks_diff(time.ticks_ms(), t0)
+                  time.sleep_ms(5)
+              return None
+
+          cil.avanzar()
+          t = medir(a1, 3 * T_NORMAL)
+          if t is None:
+              print("ATASCO"); cil.retroceder()
+          elif t > T_NORMAL * 1.3:
+              print("LENTO:", t, "ms")
+          else:
+              print("OK:", t, "ms")
+          time.sleep(1); cil.retroceder()
+        esp32_s3: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(5, Pin.OUT), Pin(6, Pin.OUT))
+          a1 = Pin(18, Pin.IN, Pin.PULL_UP)
+          T_NORMAL = 600
+
+          def medir(sensor, timeout_ms):
+              t0 = time.ticks_ms()
+              while time.ticks_diff(time.ticks_ms(), t0) < timeout_ms:
+                  if sensor.value() == 0:
+                      return time.ticks_diff(time.ticks_ms(), t0)
+                  time.sleep_ms(5)
+              return None
+
+          cil.avanzar()
+          t = medir(a1, 3 * T_NORMAL)
+          if t is None:
+              print("ATASCO"); cil.retroceder()
+          elif t > T_NORMAL * 1.3:
+              print("LENTO:", t, "ms")
+          else:
+              print("OK:", t, "ms")
+          time.sleep(1); cil.retroceder()
+    practice: |
+      ### Práctica en el taller
+
+      1. Mide el tiempo normal de avance de tu cilindro a 4 bar (media de 5 medidas).
+      2. Baja la presión a 2 bar y repite: ¿lo detecta como LENTO?
+      3. Afloja un racor para provocar una pequeña fuga (con el profesor): ¿cambia el tiempo?
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "El avance tarda cada día un poco más. ¿Qué es lo más probable?"
+          options:
+            - {id: a, text: "Una fuga o una bajada de presión que conviene revisar antes de que la máquina falle."}
+            - {id: b, text: "El programa va más lento.", feedback: "El microcontrolador no se ralentiza; el problema es neumático."}
+            - {id: c, text: "Es normal, no hay que hacer nada.", feedback: "Un aumento progresivo es una señal de aviso (mantenimiento predictivo)."}
+          answer: a
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `diagnostico(t_medido, t_normal, margen)` que devuelva `"ATASCO"` si `t_medido` es `None`,
+            `"LENTO"` si `t_medido > t_normal * (1 + margen)` y `"OK"` en otro caso.
+          starter: |
+            def diagnostico(t_medido, t_normal, margen):
+                pass
+          solution: |
+            def diagnostico(t_medido, t_normal, margen):
+                if t_medido is None:
+                    return "ATASCO"
+                if t_medido > t_normal * (1 + margen):
+                    return "LENTO"
+                return "OK"
+          tests:
+            - {desc: "No llegó → ATASCO", call: "diagnostico(None, 600, 0.3)", expected: "ATASCO"}
+            - {desc: "900 ms con normal 600 y margen 30 % → LENTO", call: "diagnostico(900, 600, 0.3)", expected: "LENTO"}
+            - {desc: "Justo en el límite (780) → OK", call: "diagnostico(780, 600, 0.3)", expected: "OK"}
+            - {desc: "Más rápido de lo normal → OK", call: "diagnostico(500, 600, 0.3)", expected: "OK"}
+          hints:
+            wrong_result: "Comprueba primero None con «is None»; después compara con t_normal * (1 + margen)."
+
+  - id: m7s4
+    title: "Proyecto corto: prensa con retorno automático"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      Una pequeña prensa (cilindro A de doble efecto con a0 y a1) hace, al pulsar MARCHA:
+
+      1. **Avance** hasta pisar a1 (timeout 3 s).
+      2. **Retroceso** hasta pisar a0 (timeout 3 s).
+
+      Gestión de alarmas:
+
+      - Si no llega a **a1**: ordenar **retroceso** y devolver `"ALARMA_AVANCE"`.
+      - Si no llega a **a0**: **liberar** el cilindro y devolver `"ALARMA_RETROCESO"`.
+      - Si todo va bien: dejarlo retenido dentro y devolver `"OK"`.
+
+      Toda la lógica va en una función `ciclo_prensa(cil, a0, a1, timeout_ms)` que usa tu función `esperar`.
+    examples:
+      - title: "Programa principal de la prensa"
+        explanation: "Pega tus funciones esperar() y ciclo_prensa() del ejercicio. El LED indica alarma."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(11, Pin.OUT), Pin(12, Pin.OUT))
+          a0, a1 = Pin(18, Pin.IN, Pin.PULL_UP), Pin(19, Pin.IN, Pin.PULL_UP)
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          led = Pin("LED", Pin.OUT)
+          # ... pega aquí esperar() y ciclo_prensa() ...
+          try:
+              cil.retroceder()
+              while True:
+                  if marcha.value() == 0:
+                      r = ciclo_prensa(cil, a0, a1, 3000)
+                      print(r)
+                      led.value(r != "OK")
+                      if r == "ALARMA_RETROCESO":
+                          break
+                  time.sleep_ms(20)
+          finally:
+              cil.liberar()
+        esp32_s3: |
+          from machine import Pin
+          import neopixel, time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(5, Pin.OUT), Pin(6, Pin.OUT))
+          a0, a1 = Pin(17, Pin.IN, Pin.PULL_UP), Pin(18, Pin.IN, Pin.PULL_UP)
+          marcha = Pin(14, Pin.IN, Pin.PULL_UP)
+          np = neopixel.NeoPixel(Pin(48), 1)
+          # ... pega aquí esperar() y ciclo_prensa() ...
+          try:
+              cil.retroceder()
+              while True:
+                  if marcha.value() == 0:
+                      r = ciclo_prensa(cil, a0, a1, 3000)
+                      print(r)
+                      np[0] = (0, 30, 0) if r == "OK" else (40, 0, 0); np.write()
+                      if r == "ALARMA_RETROCESO":
+                          break
+                  time.sleep_ms(20)
+          finally:
+              cil.liberar()
+    practice: |
+      ### Proyecto por equipos (3 sesiones)
+
+      1. **Montaje**: cilindro con a0/a1 y "útil" de prensado (por ejemplo, para marcar plastilina).
+      2. **Programa** con las tres salidas posibles.
+      3. **Pruebas de fallo**: provoca cada alarma de forma segura (a 2 bar) y documenta el comportamiento.
+    evaluation:
+      intro: "Proyecto corto de la misión 7. Necesitas un 80 %."
+      items:
+        - id: c1
+          type: code
+          points: 6
+          prompt: |
+            Escribe `ciclo_prensa(cil, a0, a1, timeout_ms)` según la teoría. `cil` tiene `avanzar()`,
+            `retroceder()` y `liberar()`; `a0` y `a1` son pines (0 = pisado). Incluye tu función
+            `esperar(sensor, timeout_ms, paso_ms)` y úsala con `paso_ms = 10`.
+          starter: |
+            import time
+
+            def esperar(sensor, timeout_ms, paso_ms):
+                pass
+
+            def ciclo_prensa(cil, a0, a1, timeout_ms):
+                pass
+          solution: |
+            import time
+
+            def esperar(sensor, timeout_ms, paso_ms):
+                inicio = time.ticks_ms()
+                while time.ticks_diff(time.ticks_ms(), inicio) < timeout_ms:
+                    if sensor.value() == 0:
+                        return True
+                    time.sleep_ms(paso_ms)
+                return False
+
+            def ciclo_prensa(cil, a0, a1, timeout_ms):
+                cil.avanzar()
+                if not esperar(a1, timeout_ms, 10):
+                    cil.retroceder()
+                    return "ALARMA_AVANCE"
+                cil.retroceder()
+                if not esperar(a0, timeout_ms, 10):
+                    cil.liberar()
+                    return "ALARMA_RETROCESO"
+                return "OK"
+          setup: ["PIN_INPUTS[19] = [1, 1, 0]", "PIN_INPUTS[18] = [1, 0]", "PIN_INPUTS[20] = [1]"]
+          tests:
+            - desc: "Ciclo correcto → OK y avanzar, retroceder"
+              before:
+                - "class _Cil:\n    def __init__(self):\n        self.h = []\n    def avanzar(self):\n        self.h.append('avanzar')\n    def retroceder(self):\n        self.h.append('retroceder')\n    def liberar(self):\n        self.h.append('liberar')"
+                - "from machine import Pin as _P"
+                - "_c = _Cil()"
+                - "_r = ciclo_prensa(_c, _P(18, _P.IN, _P.PULL_UP), _P(19, _P.IN, _P.PULL_UP), 3000)"
+              check: "_r == 'OK' and _c.h == ['avanzar', 'retroceder']"
+            - desc: "No llega a a1 → ALARMA_AVANCE y retrocede"
+              before: ["_c2 = _Cil()", "_r2 = ciclo_prensa(_c2, _P(18, _P.IN, _P.PULL_UP), _P(20, _P.IN, _P.PULL_UP), 300)"]
+              check: "_r2 == 'ALARMA_AVANCE' and _c2.h == ['avanzar', 'retroceder']"
+            - desc: "No llega a a0 → ALARMA_RETROCESO y libera"
+              before: ["_c3 = _Cil()", "_r3 = ciclo_prensa(_c3, _P(20, _P.IN, _P.PULL_UP), _P(19, _P.IN, _P.PULL_UP), 300)"]
+              check: "_r3 == 'ALARMA_RETROCESO' and _c3.h == ['avanzar', 'retroceder', 'liberar']"
+          hints:
+            wrong_result: "Sigue la teoría paso a paso: avanzar → esperar a1 (si falla: retroceder y return) → retroceder → esperar a0 (si falla: liberar y return) → return \"OK\"."
+        - id: q1
+          type: quiz
+          points: 1
+          question: "Si falla el retroceso, ¿por qué se libera el cilindro en lugar de seguir empujando hacia dentro?"
+          options:
+            - {id: a, text: "Para quitar la fuerza del cilindro y dejar la máquina sin movimientos hasta que la revise una persona."}
+            - {id: b, text: "Para que avance otra vez.", feedback: "Liberar no hace avanzar: deja las dos cámaras al escape."}
+            - {id: c, text: "Para ahorrar aire.", feedback: "El motivo es de seguridad."}
+          answer: a

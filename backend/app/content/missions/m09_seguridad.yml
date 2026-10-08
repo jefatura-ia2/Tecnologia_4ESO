@@ -1,0 +1,595 @@
+id: m9
+number: 9
+trimestre: 3
+icon: "🛑"
+title: "Seguridad y modos de marcha"
+subtitle: "Paro de emergencia, interrupciones, mando bimanual y ciclo único/continuo"
+weeks: [25, 26, 27]
+hours: 9
+objectives:
+  - Diseñar el paro de emergencia de una máquina con contacto NC (seguridad positiva) y rearme manual.
+  - Usar interrupciones (Pin.irq) para reaccionar al instante.
+  - Programar un mando bimanual y los modos de marcha ciclo único y ciclo continuo.
+  - Integrar todo en una máquina de estados segura.
+materials:
+  - Seta de emergencia con contacto NC (o pulsador NC), 2 pulsadores para el bimanual
+  - Placa, módulos MOSFET, electroválvulas y cilindro de doble efecto con finales de carrera
+criteria:
+  - Aplica criterios de seguridad en el diseño y la programación de máquinas automáticas.
+  - Analiza los riesgos de un sistema automático y propone medidas de protección.
+schedule:
+  - {week: 25, session: 1, title: "Riesgos de una máquina. La seta de emergencia", section: m9s1}
+  - {week: 25, session: 2, title: "Contacto NC y seguridad positiva. Estado seguro", section: m9s1}
+  - {week: 25, session: 3, title: "Interrupciones con Pin.irq", section: m9s2}
+  - {week: 26, session: 1, title: "Mando bimanual", section: m9s3}
+  - {week: 26, session: 2, title: "Modos de marcha: ciclo único y continuo", section: m9s3}
+  - {week: 26, session: 3, title: "Rearme y señalización", section: m9s3}
+  - {week: 27, session: 1, title: "Proyecto corto: prensa segura (diseño de estados)", section: m9s4}
+  - {week: 27, session: 2, title: "Proyecto corto: programación y montaje", section: m9s4}
+  - {week: 27, session: 3, title: "Proyecto corto: pruebas de seguridad y presentación", section: m9s4}
+sections:
+  - id: m9s1
+    title: "Paro de emergencia y estado seguro"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## La seta de emergencia
+
+      Toda máquina con movimientos peligrosos tiene un **paro de emergencia**: una seta roja sobre fondo
+      amarillo que, al pulsarla, se **enclava** (queda pulsada) hasta que se gira para liberarla.
+
+      ## Seguridad positiva: contacto NC
+
+      La seta se conecta con su contacto **NC** (normalmente cerrado) entre el pin y GND:
+
+      | Situación | Contacto | Lectura (pull-up) |
+      |---|---|---|
+      | Reposo | cerrado | **0** |
+      | Seta pulsada | abierto | **1** → EMERGENCIA |
+      | **Cable cortado** | abierto | **1** → EMERGENCIA |
+
+      Si se rompe un cable, la máquina **se para**: falla hacia el lado seguro. Con un contacto NA, un
+      cable roto haría que la seta **no funcionara** sin que nadie lo notara.
+
+      Pin del curso: **GP16** (Pico W) / **GPIO 16** (ESP32-S3).
+
+      ## ¿Qué es el "estado seguro"?
+
+      Depende de la máquina; en nuestro banco:
+
+      - Todas las **electroválvulas desactivadas** (las 3/2 NC llevan las cámaras al escape).
+      - Los cilindros de **simple efecto** retroceden por su muelle; los de **doble efecto** quedan
+        **libres** (sin fuerza).
+      - No se reanuda nada solo: hace falta un **rearme manual** (seta liberada **y** pulsar REARME).
+
+      > En las máquinas reales, la emergencia corta también la alimentación de potencia por hardware (relés
+      > de seguridad). Nuestro programa es la capa de software; en el banco de 12 V puedes añadir un
+      > interruptor que corte la fuente de las electroválvulas.
+    examples:
+      - title: "Vigilancia de la seta en el bucle principal"
+        explanation: "Si la seta se pulsa (o se corta el cable), todas las electroválvulas pasan a reposo y no se rearma hasta liberar la seta y pulsar MARCHA."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          salidas = [Pin(n, Pin.OUT, value=0) for n in (10, 11, 12, 13)]
+          seta = Pin(16, Pin.IN, Pin.PULL_UP)       # contacto NC a GND
+          rearme = Pin(14, Pin.IN, Pin.PULL_UP)
+          led = Pin("LED", Pin.OUT)
+          emergencia = False
+          while True:
+              if seta.value() == 1:
+                  if not emergencia:
+                      print("¡EMERGENCIA!")
+                  emergencia = True
+                  for s in salidas:
+                      s.value(0)
+              elif emergencia and rearme.value() == 0:
+                  emergencia = False
+                  print("Rearmado")
+              led.value(emergencia)
+              time.sleep_ms(5)
+        esp32_s3: |
+          from machine import Pin
+          import neopixel, time
+
+          salidas = [Pin(n, Pin.OUT, value=0) for n in (4, 5, 6, 7)]
+          seta = Pin(16, Pin.IN, Pin.PULL_UP)
+          rearme = Pin(14, Pin.IN, Pin.PULL_UP)
+          np = neopixel.NeoPixel(Pin(48), 1)
+          emergencia = False
+          while True:
+              if seta.value() == 1:
+                  if not emergencia:
+                      print("¡EMERGENCIA!")
+                  emergencia = True
+                  for s in salidas:
+                      s.value(0)
+              elif emergencia and rearme.value() == 0:
+                  emergencia = False
+                  print("Rearmado")
+              np[0] = (40, 0, 0) if emergencia else (0, 0, 0); np.write()
+              time.sleep_ms(5)
+    practice: |
+      ### Práctica en el taller
+
+      1. Conecta la seta (contacto NC) al GP16 / GPIO 16 y ejecuta el ejemplo.
+      2. Desconecta el cable de la seta: ¿qué pasa? ¿Y si la hubieras conectado con el contacto NA?
+      3. Haz un **análisis de riesgos** de tu prensa de la misión 7: ¿qué puede salir mal y cómo lo evitas?
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué la seta de emergencia se conecta con su contacto NC?"
+          options:
+            - {id: a, text: "Para que un cable roto también provoque la parada (seguridad positiva)."}
+            - {id: b, text: "Porque gasta menos energía.", feedback: "El motivo es que el fallo del cableado lleve al estado seguro."}
+            - {id: c, text: "Da igual NA o NC.", feedback: "Con NA, un cable roto dejaría la seta sin efecto sin que nadie lo notara."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "Tras una emergencia, el operario gira la seta para liberarla. ¿Debe la máquina continuar sola?"
+          options:
+            - {id: a, text: "No: hace falta un rearme manual consciente (por ejemplo, pulsar REARME)."}
+            - {id: b, text: "Sí, debe seguir donde se quedó.", feedback: "Un arranque inesperado puede herir a quien esté manipulando la máquina."}
+          answer: a
+        - id: c1
+          type: code
+          points: 2
+          prompt: |
+            Escribe `emergencia(lectura_seta)` que devuelva `True` si la lectura del pin de la seta (contacto NC
+            con pull-up) indica emergencia.
+          starter: |
+            def emergencia(lectura_seta):
+                pass
+          solution: |
+            def emergencia(lectura_seta):
+                return lectura_seta == 1
+          tests:
+            - {desc: "Reposo (0) → no", call: "emergencia(0)", expected: false}
+            - {desc: "Pulsada o cable roto (1) → sí", call: "emergencia(1)", expected: true}
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `estado_seguro(salidas)` que ponga a 0 todas las salidas (pines) de la lista y devuelva
+            cuántas estaban activadas antes.
+          starter: |
+            def estado_seguro(salidas):
+                pass
+          solution: |
+            def estado_seguro(salidas):
+                activas = 0
+                for s in salidas:
+                    if s.value() == 1:
+                        activas += 1
+                    s.value(0)
+                return activas
+          tests:
+            - desc: "Dos activas → las apaga y devuelve 2"
+              before: ["from machine import Pin as _P", "_S = [_P(n, _P.OUT) for n in (10, 11, 12, 13)]", "_S[1].value(1)", "_S[3].value(1)", "_n = estado_seguro(_S)"]
+              check: "_n == 2 and [s.value() for s in _S] == [0, 0, 0, 0]"
+
+  - id: m9s2
+    title: "Interrupciones"
+    hours: 1
+    kind: lesson
+    theory: |
+      ## Reaccionar al instante
+
+      En el bucle principal leemos la seta cada pocos milisegundos… pero si el programa está dentro de un
+      `sleep` o de una espera larga, tarda en enterarse. Una **interrupción** hace que el microcontrolador
+      **deje lo que está haciendo** y ejecute una función en cuanto cambia un pin:
+
+      ```python
+      def al_pulsar_seta(pin):
+          global emergencia
+          emergencia = True
+          for s in salidas:          # acción inmediata y corta
+              s.value(0)
+
+      seta.irq(trigger=Pin.IRQ_RISING, handler=al_pulsar_seta)    # paso de 0 a 1
+      ```
+
+      Reglas de oro para las funciones de interrupción (**handlers**):
+
+      - Deben ser **muy cortas**: poner una marca (*flag*) y, como mucho, apagar salidas.
+      - **Nada de** `sleep`, `print` largos ni crear listas grandes.
+      - El bucle principal revisa la marca y hace el resto (avisar, esperar el rearme…).
+
+      ## Con clases
+
+      Guardar la marca en un objeto evita las variables `global`:
+
+      ```python
+      class Seta:
+          def __init__(self, pin):
+              self.pin = pin
+              self.activada = pin.value() == 1
+              pin.irq(trigger=Pin.IRQ_RISING, handler=self.atender)
+
+          def atender(self, pin):
+              self.activada = True
+      ```
+    examples:
+      - title: "Seta con interrupción"
+        explanation: "Las electroválvulas se apagan dentro de la interrupción, aunque el programa esté en mitad de un sleep largo."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          salidas = [Pin(n, Pin.OUT, value=0) for n in (10, 11, 12, 13)]
+          seta = Pin(16, Pin.IN, Pin.PULL_UP)
+          emergencia = False
+
+          def al_pulsar_seta(pin):
+              global emergencia
+              emergencia = True
+              for s in salidas:
+                  s.value(0)
+
+          seta.irq(trigger=Pin.IRQ_RISING, handler=al_pulsar_seta)
+
+          while not emergencia:
+              salidas[0].value(1)
+              time.sleep(3)          # aunque estemos aquí, la seta actúa al instante
+              salidas[0].value(0)
+              time.sleep(3)
+          print("Parada por emergencia")
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          salidas = [Pin(n, Pin.OUT, value=0) for n in (4, 5, 6, 7)]
+          seta = Pin(16, Pin.IN, Pin.PULL_UP)
+          emergencia = False
+
+          def al_pulsar_seta(pin):
+              global emergencia
+              emergencia = True
+              for s in salidas:
+                  s.value(0)
+
+          seta.irq(trigger=Pin.IRQ_RISING, handler=al_pulsar_seta)
+
+          while not emergencia:
+              salidas[0].value(1)
+              time.sleep(3)
+              salidas[0].value(0)
+              time.sleep(3)
+          print("Parada por emergencia")
+    practice: |
+      ### Práctica en el taller
+
+      1. Ejecuta el ejemplo y pulsa la seta durante el `sleep(3)`: ¿se apaga EV1 al instante?
+      2. Compáralo con la versión sin interrupción de la sección anterior y un `sleep(3)` en el bucle.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué NO se debe hacer dentro de una función de interrupción?"
+          options:
+            - {id: a, text: "Esperar con sleep o hacer tareas largas."}
+            - {id: b, text: "Poner una marca (flag) a True.", feedback: "Es justo lo que se debe hacer: algo corto."}
+            - {id: c, text: "Apagar las salidas.", feedback: "Apagar salidas es rápido y aquí es lo correcto."}
+          answer: a
+        - id: c1
+          type: code
+          points: 5
+          prompt: |
+            Crea la clase `Seta(pin)`:
+            - `__init__`: guarda el pin y `activada = (pin.value() == 1)`. (No hace falta llamar a `irq` en el ejercicio.)
+            - `atender(pin)`: función de interrupción; pone `activada` a `True`.
+            - `rearmar()`: si la seta está liberada (el pin lee 0), pone `activada` a `False`. Devuelve `True` si
+              ha quedado rearmada y `False` si no.
+          starter: |
+            class Seta:
+                def __init__(self, pin):
+                    pass
+
+                def atender(self, pin):
+                    pass
+
+                def rearmar(self):
+                    pass
+          solution: |
+            class Seta:
+                def __init__(self, pin):
+                    self.pin = pin
+                    self.activada = pin.value() == 1
+
+                def atender(self, pin):
+                    self.activada = True
+
+                def rearmar(self):
+                    if self.pin.value() == 0:
+                        self.activada = False
+                    return not self.activada
+          setup: ["PIN_INPUTS[16] = [0, 1, 0]"]
+          tests:
+            - desc: "Al crearla en reposo no está activada"
+              before: ["from machine import Pin as _P", "_p = _P(16, _P.IN, _P.PULL_UP)", "_s = Seta(_p)"]
+              check: "_s.activada == False"
+            - desc: "La interrupción la activa"
+              before: ["_s.atender(_p)"]
+              check: "_s.activada == True"
+            - desc: "Rearmar con la seta aún pulsada → no rearma"
+              call: "(_s.rearmar(), _s.activada)"
+              expected: [false, true]
+            - desc: "Rearmar con la seta liberada → rearma"
+              call: "(_s.rearmar(), _s.activada)"
+              expected: [true, false]
+          hints:
+            wrong_result: "En rearmar(), lee self.pin.value(): solo si es 0 (seta liberada) pones self.activada = False. Devuelve not self.activada."
+
+  - id: m9s3
+    title: "Mando bimanual y modos de marcha"
+    hours: 3
+    kind: lesson
+    theory: |
+      ## El mando bimanual
+
+      En prensas y cizallas, el operario debe pulsar **dos pulsadores a la vez, uno con cada mano**: así es
+      imposible que tenga una mano bajo la prensa. Reglas:
+
+      1. Los dos pulsadores deben pulsarse **casi a la vez**: con menos de **0,5 s** de diferencia.
+      2. Deben mantenerse pulsados **durante** el movimiento peligroso; si se suelta uno, el cilindro retrocede.
+      3. Para empezar un nuevo ciclo hay que **soltar los dos** primero (no vale dejar uno pulsado con cinta).
+
+      Pines: P1 = GP14/GPIO 14 y P2 = GP15/GPIO 15.
+
+      ## Modos de marcha
+
+      - **Ciclo único**: cada orden de MARCHA hace **un** ciclo y la máquina se para en reposo.
+      - **Ciclo continuo**: repite ciclos hasta que se pulsa PARO; entonces **termina el ciclo en curso**
+        y se para en reposo (nunca a mitad).
+      - La **emergencia** está por encima de todo: para **inmediatamente**, en cualquier modo.
+
+      ## Señalización
+
+      Un piloto (LED) indica el estado: apagado = reposo, fijo = en ciclo, parpadeo = emergencia/alarma.
+    examples:
+      - title: "Bimanual con ventana de 0,5 s"
+        explanation: "Registra el instante en que se pulsa cada pulsador; el ciclo solo se permite si la diferencia es ≤ 500 ms y se habían soltado los dos."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          p1 = Pin(14, Pin.IN, Pin.PULL_UP)
+          p2 = Pin(15, Pin.IN, Pin.PULL_UP)
+          t1 = t2 = None
+          soltados = True
+          while True:
+              ahora = time.ticks_ms()
+              if p1.value() == 0 and t1 is None: t1 = ahora
+              if p2.value() == 0 and t2 is None: t2 = ahora
+              if p1.value() == 1: t1 = None
+              if p2.value() == 1: t2 = None
+              if t1 is None and t2 is None:
+                  soltados = True
+              if t1 is not None and t2 is not None and soltados:
+                  if abs(time.ticks_diff(t1, t2)) <= 500:
+                      print("Bimanual OK: ¡ciclo!")
+                  else:
+                      print("Demasiado separados")
+                  soltados = False
+              time.sleep_ms(5)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          p1 = Pin(14, Pin.IN, Pin.PULL_UP)
+          p2 = Pin(15, Pin.IN, Pin.PULL_UP)
+          t1 = t2 = None
+          soltados = True
+          while True:
+              ahora = time.ticks_ms()
+              if p1.value() == 0 and t1 is None: t1 = ahora
+              if p2.value() == 0 and t2 is None: t2 = ahora
+              if p1.value() == 1: t1 = None
+              if p2.value() == 1: t2 = None
+              if t1 is None and t2 is None:
+                  soltados = True
+              if t1 is not None and t2 is not None and soltados:
+                  if abs(time.ticks_diff(t1, t2)) <= 500:
+                      print("Bimanual OK: ¡ciclo!")
+                  else:
+                      print("Demasiado separados")
+                  soltados = False
+              time.sleep_ms(5)
+    practice: |
+      ### Práctica en el taller
+
+      1. Monta los dos pulsadores separados (al menos 30 cm) y prueba el bimanual.
+      2. Intenta "engañarlo": pulsar con 1 s de diferencia, mantener uno pulsado… ¿lo detecta?
+      3. Añade el modo continuo con PARO al final de ciclo.
+    evaluation:
+      intro: "Necesitas un 80 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "En ciclo continuo se pulsa PARO a mitad de un ciclo. ¿Qué debe hacer la máquina?"
+          options:
+            - {id: a, text: "Terminar el ciclo en curso y pararse en reposo."}
+            - {id: b, text: "Pararse inmediatamente donde esté.", feedback: "Eso es la emergencia. PARO termina el ciclo para dejar la máquina en reposo."}
+            - {id: c, text: "Ignorarlo.", feedback: "El PARO siempre debe atenderse."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Por qué el bimanual exige soltar los dos pulsadores antes de un nuevo ciclo?"
+          options:
+            - {id: a, text: "Para que no se pueda dejar uno pulsado permanentemente y usar la máquina con una sola mano."}
+            - {id: b, text: "Para ahorrar aire.", feedback: "Es una medida contra la manipulación del sistema de seguridad."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `bimanual(t1, t2, ventana)` que devuelva `True` si los dos instantes de pulsación existen
+            (no son `None`) y su diferencia (en valor absoluto) es **≤ ventana**.
+          starter: |
+            def bimanual(t1, t2, ventana):
+                pass
+          solution: |
+            def bimanual(t1, t2, ventana):
+                if t1 is None or t2 is None:
+                    return False
+                return abs(t1 - t2) <= ventana
+          tests:
+            - {desc: "200 ms de diferencia → OK", call: "bimanual(1000, 1200, 500)", expected: true}
+            - {desc: "Justo 500 ms → OK", call: "bimanual(2000, 1500, 500)", expected: true}
+            - {desc: "800 ms → no", call: "bimanual(1000, 1800, 500)", expected: false}
+            - {desc: "Falta uno → no", call: "bimanual(1000, None, 500)", expected: false}
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `continuar(modo, paro_pedido)` que, al terminar un ciclo, decida si empieza otro: solo si el
+            modo es `"continuo"` y no se ha pedido PARO.
+          starter: |
+            def continuar(modo, paro_pedido):
+                pass
+          solution: |
+            def continuar(modo, paro_pedido):
+                return modo == "continuo" and not paro_pedido
+          tests:
+            - {desc: "Continuo sin paro → sigue", call: "continuar('continuo', False)", expected: true}
+            - {desc: "Continuo con paro → para", call: "continuar('continuo', True)", expected: false}
+            - {desc: "Ciclo único → para", call: "continuar('unico', False)", expected: false}
+
+  - id: m9s4
+    title: "Proyecto corto: prensa segura"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      La prensa de la misión 7 con todas las medidas de seguridad, programada como **máquina de estados**:
+
+      | Estado | Acción | Transiciones (en este orden de prioridad) |
+      |---|---|---|
+      | cualquiera | — | **seta** → `EMERGENCIA` |
+      | `REPOSO` | cilindro retenido dentro | **bimanual** → `BAJANDO` |
+      | `BAJANDO` | avanzar | **sin bimanual** (se suelta un pulsador) → `SUBIENDO` · **a1** → `SUBIENDO` |
+      | `SUBIENDO` | retroceder | **a0** → `REPOSO` |
+      | `EMERGENCIA` | liberar (todo a 0) | **sin seta y rearme** → `REPOSO` |
+
+      Las entradas llegan en un diccionario:
+
+      ```python
+      ent = {"seta": False, "bimanual": True, "a0": True, "a1": False, "rearme": False}
+      ```
+    examples:
+      - title: "Bucle principal de la prensa segura"
+        explanation: "Pega tu función paso_prensa(). Las entradas se leen en un diccionario y las acciones dependen del estado."
+        pico_w: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(11, Pin.OUT), Pin(12, Pin.OUT))
+          p1, p2 = Pin(14, Pin.IN, Pin.PULL_UP), Pin(15, Pin.IN, Pin.PULL_UP)
+          seta = Pin(16, Pin.IN, Pin.PULL_UP)
+          a0, a1 = Pin(18, Pin.IN, Pin.PULL_UP), Pin(19, Pin.IN, Pin.PULL_UP)
+          # ... pega aquí paso_prensa() ...
+          ACCION = {"REPOSO": cil.retroceder, "BAJANDO": cil.avanzar,
+                    "SUBIENDO": cil.retroceder, "EMERGENCIA": cil.liberar}
+          estado = "EMERGENCIA"          # al arrancar hay que rearmar
+          try:
+              while True:
+                  ent = {"seta": seta.value() == 1,
+                         "bimanual": p1.value() == 0 and p2.value() == 0,
+                         "a0": a0.value() == 0, "a1": a1.value() == 0,
+                         "rearme": p1.value() == 0 and p2.value() == 1}
+                  nuevo = paso_prensa(estado, ent)
+                  if nuevo != estado:
+                      print(estado, "→", nuevo)
+                      estado = nuevo
+                  ACCION[estado]()
+                  time.sleep_ms(5)
+          finally:
+              cil.liberar()
+        esp32_s3: |
+          from machine import Pin
+          import time
+          from taller import CilindroDE
+
+          cil = CilindroDE(Pin(5, Pin.OUT), Pin(6, Pin.OUT))
+          p1, p2 = Pin(14, Pin.IN, Pin.PULL_UP), Pin(15, Pin.IN, Pin.PULL_UP)
+          seta = Pin(16, Pin.IN, Pin.PULL_UP)
+          a0, a1 = Pin(17, Pin.IN, Pin.PULL_UP), Pin(18, Pin.IN, Pin.PULL_UP)
+          # ... pega aquí paso_prensa() ...
+          ACCION = {"REPOSO": cil.retroceder, "BAJANDO": cil.avanzar,
+                    "SUBIENDO": cil.retroceder, "EMERGENCIA": cil.liberar}
+          estado = "EMERGENCIA"
+          try:
+              while True:
+                  ent = {"seta": seta.value() == 1,
+                         "bimanual": p1.value() == 0 and p2.value() == 0,
+                         "a0": a0.value() == 0, "a1": a1.value() == 0,
+                         "rearme": p1.value() == 0 and p2.value() == 1}
+                  nuevo = paso_prensa(estado, ent)
+                  if nuevo != estado:
+                      print(estado, "→", nuevo)
+                      estado = nuevo
+                  ACCION[estado]()
+                  time.sleep_ms(5)
+          finally:
+              cil.liberar()
+    practice: |
+      ### Proyecto por equipos (3 sesiones)
+
+      1. **Diseño**: diagrama de estados y lista de comprobaciones de seguridad (qué debe pasar en cada caso).
+      2. **Programación y montaje** con seta, bimanual y finales de carrera.
+      3. **Pruebas de seguridad** delante del profesor: seta en cada estado, soltar un pulsador al bajar, cable de seta desconectado, arranque tras corte de corriente.
+    evaluation:
+      intro: "Proyecto corto de la misión 9. Necesitas un 80 %."
+      items:
+        - id: c1
+          type: code
+          points: 6
+          prompt: |
+            Escribe `paso_prensa(estado, ent)` según la tabla de la teoría. Recuerda: la seta tiene prioridad
+            sobre todo, y en `BAJANDO` soltar el bimanual o llegar a a1 hace subir.
+          starter: |
+            def paso_prensa(estado, ent):
+                pass
+          solution: |
+            def paso_prensa(estado, ent):
+                if ent.get("seta"):
+                    return "EMERGENCIA"
+                if estado == "REPOSO":
+                    return "BAJANDO" if ent.get("bimanual") else "REPOSO"
+                if estado == "BAJANDO":
+                    if not ent.get("bimanual") or ent.get("a1"):
+                        return "SUBIENDO"
+                    return "BAJANDO"
+                if estado == "SUBIENDO":
+                    return "REPOSO" if ent.get("a0") else "SUBIENDO"
+                if estado == "EMERGENCIA":
+                    return "REPOSO" if ent.get("rearme") else "EMERGENCIA"
+                return estado
+          tests:
+            - {desc: "Reposo + bimanual → bajando", call: "paso_prensa('REPOSO', {'bimanual': True, 'a0': True})", expected: "BAJANDO"}
+            - {desc: "Bajando y se suelta un pulsador → subiendo", call: "paso_prensa('BAJANDO', {'bimanual': False})", expected: "SUBIENDO"}
+            - {desc: "Bajando con bimanual hasta a1 → subiendo", call: "(paso_prensa('BAJANDO', {'bimanual': True}), paso_prensa('BAJANDO', {'bimanual': True, 'a1': True}))", expected: ["BAJANDO", "SUBIENDO"]}
+            - {desc: "Subiendo hasta a0 → reposo", call: "(paso_prensa('SUBIENDO', {}), paso_prensa('SUBIENDO', {'a0': True}))", expected: ["SUBIENDO", "REPOSO"]}
+            - {desc: "La seta manda en cualquier estado", call: "[paso_prensa(e, {'seta': True, 'bimanual': True, 'rearme': True}) for e in ('REPOSO', 'BAJANDO', 'SUBIENDO', 'EMERGENCIA')]", expected: ["EMERGENCIA", "EMERGENCIA", "EMERGENCIA", "EMERGENCIA"]}
+            - {desc: "Rearme solo sin seta", call: "(paso_prensa('EMERGENCIA', {'rearme': False}), paso_prensa('EMERGENCIA', {'rearme': True}))", expected: ["EMERGENCIA", "REPOSO"]}
+          hints:
+            wrong_result: "Empieza la función comprobando la seta (return \"EMERGENCIA\"). Después, un if por estado. Usa ent.get(\"clave\") para que las claves que faltan cuenten como False."
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué la prensa arranca en estado EMERGENCIA al encender la placa?"
+          options:
+            - {id: a, text: "Para obligar a un rearme manual y evitar movimientos inesperados tras un corte de corriente."}
+            - {id: b, text: "Por un error del programa.", feedback: "Es intencionado: tras un corte de luz, nada debe moverse solo."}
+          answer: a
