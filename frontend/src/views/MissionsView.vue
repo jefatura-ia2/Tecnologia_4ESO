@@ -13,6 +13,8 @@
       </div>
     </div>
 
+    <router-link to="/recursos" class="card recursos-aviso">🧩 <strong>Material complementario:</strong> taller PicoLab·IA para diseñar tu propia PCB con IA. Puedes usarlo cuando quieras, en paralelo a las misiones. →</router-link>
+
     <div v-if="error" class="alert bad">{{ error }}</div>
     <div v-if="loading" class="muted">Cargando…</div>
 
@@ -90,6 +92,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.recursos-aviso { display: block; margin-bottom: 16px; padding: 12px 16px; text-decoration: none; color: inherit; border-left: 4px solid #0f766e; }
+.recursos-aviso:hover { background: #f0fdfa; }
 .overall { padding: 10px 16px; min-width: 170px; }
 .big { font-size: 1.6rem; font-weight: 800; }
 .path { display: grid; gap: 16px; }

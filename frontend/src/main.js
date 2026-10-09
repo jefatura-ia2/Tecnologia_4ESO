@@ -9,6 +9,7 @@ import MissionsView from './views/MissionsView.vue'
 import SectionView from './views/SectionView.vue'
 import CalendarView from './views/CalendarView.vue'
 import HardwareView from './views/HardwareView.vue'
+import RecursosView from './views/RecursosView.vue'
 import TeacherView from './views/TeacherView.vue'
 import TeacherStudentView from './views/TeacherStudentView.vue'
 
@@ -18,6 +19,7 @@ const routes = [
   { path: '/seccion/:id', component: SectionView, props: true },
   { path: '/calendario', component: CalendarView },
   { path: '/placas', component: HardwareView },
+  { path: '/recursos', component: RecursosView },
   { path: '/profesor', component: TeacherView, meta: { teacher: true } },
   { path: '/profesor/alumno/:id', component: TeacherStudentView, props: true, meta: { teacher: true } },
   { path: '/:pathMatch(.*)*', redirect: '/' },

@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PicoLab·IA · IES "Valle del Jerte" (Plasencia) — Prof. NachoTEC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#052018; --bg2:#03150f; --panel:#0a3123; --panel2:#0d3b2b;
+  --ink:#eef7f0; --mut:#9dc4ad; --dim:#6f9a84;
+  --cop:#e0913f; --cop2:#f2b64f; --teal:#41d6c3; --red:#ff6b5e; --grn:#6fe3a5;
+  --line:rgba(224,145,63,.30); --line2:rgba(157,196,173,.16);
+  --disp:'Chakra Petch',sans-serif; --body:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body); color:var(--ink); background:var(--bg);
+  background-image:radial-gradient(rgba(242,182,79,.055) 1px, transparent 1.5px);
+  background-size:26px 26px; line-height:1.6; min-height:100vh;
+}
+::selection{background:var(--cop); color:#241300}
+h1,h2,h3,h4{font-family:var(--disp); line-height:1.15}
+button{font-family:inherit; cursor:pointer}
+code,pre,.mono{font-family:var(--mono)}
+
+/* ============ AMBIENT TRACES ============ */
+.ambient{position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:.55}
+.amb{fill:none; stroke:var(--cop); stroke-width:2; opacity:.35; stroke-dasharray:16 940; animation:flow 10s linear infinite}
+.amb2{stroke:var(--teal); opacity:.22; animation-duration:15s; animation-direction:reverse}
+.via{fill:var(--cop); opacity:.28}
+@keyframes flow{to{stroke-dashoffset:-956}}
+
+/* ============ TOPBAR ============ */
+.topbar{
+  position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:18px;
+  padding:10px 20px; background:rgba(4,20,14,.92); backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex; align-items:center; gap:10px; cursor:pointer}
+.brand-pads{display:flex; gap:4px}
+.brand-pads i{width:11px; height:11px; border-radius:50%; background:radial-gradient(circle at 35% 35%, var(--cop2), #8a5416); box-shadow:0 0 6px rgba(242,182,79,.6)}
+.brand-pads i:nth-child(2){background:radial-gradient(circle at 35% 35%, #7df0dd, #14655b); box-shadow:0 0 6px rgba(65,214,195,.6)}
+.brand-name{font-family:var(--disp); font-weight:700; font-size:1.15rem; letter-spacing:.5px}
+.brand-name em{font-style:normal; color:var(--teal)}
+.brand-sub{font-family:var(--mono); font-size:.62rem; color:var(--dim); letter-spacing:2px; display:block; margin-top:-3px}
+.route{flex:1; max-width:520px; margin-left:auto}
+.route-lb{font-family:var(--mono); font-size:.6rem; letter-spacing:2px; color:var(--dim); display:flex; justify-content:space-between; margin-bottom:4px}
+.track{height:9px; background:#072318; border:1px solid var(--line2); border-radius:99px; position:relative; overflow:hidden}
+.fill{height:100%; width:0%; border-radius:99px; background:linear-gradient(90deg,#8a5416,var(--cop),var(--cop2)); transition:width .7s cubic-bezier(.6,0,.2,1); position:relative}
+.fill::after{content:''; position:absolute; right:-3px; top:50%; transform:translateY(-50%); width:9px; height:9px; border-radius:50%; background:#ffe9b0; box-shadow:0 0 10px 3px rgba(255,225,150,.8)}
+.pct{font-family:var(--mono); font-size:.85rem; color:var(--cop2); font-weight:600; min-width:58px; text-align:right}
+
+/* ============ SHELL / NAV ============ */
+.shell{position:relative; z-index:1; display:grid; grid-template-columns:290px 1fr; gap:0; max-width:1420px; margin:0 auto}
+aside{padding:26px 18px 40px; border-right:1px solid var(--line2); position:sticky; top:56px; height:calc(100vh - 56px); overflow-y:auto}
+.nav-lb{font-family:var(--mono); font-size:.62rem; letter-spacing:2.5px; color:var(--cop); margin:14px 6px 8px}
+.nav-it{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  background:transparent; border:1px solid transparent; border-radius:8px;
+  color:var(--mut); padding:8px 10px; font-size:.9rem; transition:all .2s; position:relative;
+}
+.nav-it:hover{border-color:var(--line2); color:var(--ink); transform:translateX(3px)}
+.nav-it.act{background:linear-gradient(90deg, rgba(224,145,63,.14), transparent); border-color:var(--line); color:var(--ink)}
+.nav-it.act::before{content:''; position:absolute; left:-1px; top:8px; bottom:8px; width:3px; background:var(--cop); border-radius:2px}
+.nav-num{font-family:var(--mono); font-size:.68rem; color:var(--cop); border:1px solid var(--line); border-radius:5px; padding:2px 6px; min-width:32px; text-align:center}
+.nav-tt{flex:1; line-height:1.25}
+.nav-dot{width:10px; height:10px; border-radius:50%; border:1.5px solid var(--dim); flex:none; transition:all .3s}
+.nav-dot.on{background:var(--grn); border-color:var(--grn); box-shadow:0 0 8px rgba(111,227,165,.7)}
+.nav-reset{margin:22px 6px 0; background:none; border:none; color:var(--dim); font-family:var(--mono); font-size:.68rem; letter-spacing:1px; text-decoration:underline dotted}
+.nav-reset:hover{color:var(--red)}
+
+/* ============ MAIN ============ */
+main{padding:34px clamp(18px,4vw,52px) 90px; min-width:0}
+.session{display:none}
+.session.active{display:block; animation:fadeUp .45s ease both}
+@keyframes fadeUp{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+
+/* HERO (S0) */
+.hero{display:grid; grid-template-columns:1.05fr .95fr; gap:36px; align-items:center; padding:8px 0 34px}
+.eyebrow{font-family:var(--mono); font-size:.68rem; letter-spacing:3px; color:var(--teal); border:1px solid rgba(65,214,195,.4); display:inline-block; padding:5px 12px; border-radius:4px; background:rgba(65,214,195,.07); margin-bottom:18px}
+h1{font-size:clamp(1.9rem,3.6vw,3rem); font-weight:700; text-transform:uppercase; letter-spacing:.5px}
+h1 .ia{color:var(--teal)}
+h1 .pcb{box-shadow:inset 0 -8px 0 rgba(224,145,63,.4)}
+.lead{color:var(--mut); font-size:1.05rem; margin:16px 0 20px; max-width:56ch}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px}
+.chip{font-family:var(--mono); font-size:.68rem; letter-spacing:.8px; color:var(--cop2); border:1px solid var(--line); padding:5px 11px; border-radius:4px; background:rgba(224,145,63,.06)}
+.cta-row{display:flex; gap:12px; flex-wrap:wrap}
+.board-cap{font-family:var(--mono); font-size:.68rem; color:var(--dim); text-align:center; margin-top:10px; letter-spacing:1.5px}
+.ld{animation:blink 2.2s infinite}
+.ld2{animation-delay:.5s}.ld3{animation-delay:1s}
+@keyframes blink{0%,45%{opacity:1}55%,100%{opacity:.15}}
+.pulse{fill:none; stroke:var(--cop2); stroke-width:2.4; stroke-dasharray:7 260; animation:pflow 5s linear infinite; opacity:.9}
+@keyframes pflow{to{stroke-dashoffset:-267}}
+
+/* BUTTONS */
+.btn{
+  font-family:var(--disp); font-weight:600; letter-spacing:.8px; font-size:.85rem;
+  background:linear-gradient(180deg,var(--cop2),var(--cop)); color:#2a1703; border:none;
+  padding:12px 22px; clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+  transition:transform .18s, box-shadow .18s, filter .18s; text-transform:uppercase;
+}
+.btn:hover{transform:translateY(-2px); filter:brightness(1.08); box-shadow:0 8px 22px rgba(224,145,63,.35)}
+.btn:active{transform:translateY(0)}
+.btn.ghost{background:transparent; color:var(--cop2); border:1px solid var(--cop); clip-path:none; border-radius:6px}
+.btn.ghost:hover{background:rgba(224,145,63,.1)}
+.btn.teal{background:linear-gradient(180deg,#63e6d4,#2bb5a3); color:#032a25}
+.btn.teal:hover{box-shadow:0 8px 22px rgba(65,214,195,.3)}
+.btn.small{padding:8px 14px; font-size:.72rem}
+.btn.done-state{background:linear-gradient(180deg,#7fe8ac,#3aa96b); color:#04240f}
+
+/* PANELS / BLOCKS */
+.panel{background:linear-gradient(180deg,var(--panel), rgba(6,30,21,.85)); border:1px solid var(--line); border-radius:10px; padding:26px clamp(16px,2.6vw,30px); margin:26px 0; position:relative}
+.panel--pads::before,.panel--pads::after{content:''; position:absolute; width:9px; height:9px; border-radius:50%; background:radial-gradient(circle at 35% 35%, var(--cop2), #7a4a12); top:10px}
+.panel--pads::before{left:10px}.panel--pads::after{right:10px}
+.shead{margin:6px 0 10px}
+.s-ref{font-family:var(--mono); font-size:.7rem; letter-spacing:3px; color:var(--cop); margin-bottom:8px}
+.shead h2{font-size:clamp(1.5rem,2.8vw,2.2rem); text-transform:uppercase; letter-spacing:.5px}
+.s-goal{color:var(--mut); margin-top:10px; font-size:1rem; max-width:70ch}
+.s-tags{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px}
+.blk{margin:30px 0}
+.blk-tag{font-family:var(--mono); font-size:.66rem; letter-spacing:2.5px; color:var(--teal); margin-bottom:12px; display:flex; align-items:center; gap:10px}
+.blk-tag::after{content:''; flex:1; height:1px; background:linear-gradient(90deg, rgba(65,214,195,.5), transparent)}
+.blk h3{font-size:1.25rem; margin-bottom:10px; color:var(--cop2)}
+.blk h4{font-size:1rem; margin:16px 0 6px; color:var(--ink)}
+.blk p{margin-bottom:12px; max-width:78ch}
+.blk ul,.blk ol{margin:0 0 14px 22px}
+.blk li{margin-bottom:7px; max-width:74ch}
+.blk strong{color:var(--cop2)}
+.tl{color:var(--teal); border-bottom:1px dotted var(--teal); cursor:help}
+
+/* BOXES */
+.box{border-left:4px solid; border-radius:0 8px 8px 0; padding:14px 18px; margin:16px 0; font-size:.95rem}
+.box .bt{font-family:var(--mono); font-size:.66rem; letter-spacing:2px; display:block; margin-bottom:5px}
+.box.idea{border-color:var(--teal); background:rgba(65,214,195,.07)} .box.idea .bt{color:var(--teal)}
+.box.warn{border-color:var(--cop2); background:rgba(242,182,79,.08)} .box.warn .bt{color:var(--cop2)}
+.box.red{border-color:var(--red); background:rgba(255,107,94,.08)} .box.red .bt{color:var(--red)}
+.box.tip{border-color:var(--grn); background:rgba(111,227,165,.07)} .box.tip .bt{color:var(--grn)}
+
+/* TABLES */
+.tbl{width:100%; border-collapse:collapse; margin:14px 0; font-size:.9rem}
+.tbl th{font-family:var(--mono); font-size:.68rem; letter-spacing:1.5px; text-align:left; color:var(--cop); border-bottom:2px solid var(--line); padding:8px 10px}
+.tbl td{border-bottom:1px solid var(--line2); padding:9px 10px; color:var(--mut)}
+.tbl tr:hover td{background:rgba(224,145,63,.05); color:var(--ink)}
+.tbl td:first-child{color:var(--ink); font-weight:500}
+
+/* CODE */
+.code{position:relative; background:#03170f; border:1px solid var(--line2); border-radius:8px; padding:16px; overflow-x:auto; margin:14px 0}
+.code pre{font-size:.82rem; line-height:1.7; color:#bfe8cf; white-space:pre}
+.code .k{color:var(--teal)} .code .s{color:var(--cop2)} .code .c{color:var(--dim)}
+.copy{position:absolute; top:8px; right:8px; background:rgba(224,145,63,.15); border:1px solid var(--line); color:var(--cop2); font-family:var(--mono); font-size:.62rem; letter-spacing:1px; padding:4px 9px; border-radius:4px; transition:all .2s}
+.copy:hover{background:var(--cop); color:#2a1703}
+
+/* PRACTICE PANEL */
+.prc{border:1px solid var(--cop); border-radius:10px; margin:26px 0; background:rgba(224,145,63,.045); overflow:hidden}
+.prc-h{display:flex; align-items:center; gap:12px; padding:13px 20px; background:linear-gradient(90deg, rgba(224,145,63,.2), transparent); border-bottom:1px dashed var(--line); flex-wrap:wrap}
+.prc-h .n{font-family:var(--disp); font-weight:700; color:#2a1703; background:var(--cop); padding:3px 10px; border-radius:4px; font-size:.8rem; letter-spacing:1px}
+.prc-h .t{font-family:var(--disp); font-weight:600; letter-spacing:.5px; font-size:1.05rem}
+.diff{margin-left:auto; display:flex; gap:4px; align-items:center}
+.diff i{width:9px; height:9px; border-radius:50%; border:1px solid var(--cop); }
+.diff i.f{background:var(--cop)}
+.diff span{font-family:var(--mono); font-size:.6rem; color:var(--dim); letter-spacing:1px; margin-left:6px}
+.prc-b{padding:18px 20px 22px}
+.entrega{display:flex; gap:10px; align-items:flex-start; background:rgba(65,214,195,.06); border:1px dashed rgba(65,214,195,.4); border-radius:8px; padding:12px 15px; margin-top:16px; font-size:.9rem}
+.entrega b{color:var(--teal); font-family:var(--mono); font-size:.7rem; letter-spacing:1.5px; white-space:nowrap}
+
+/* QUIZ */
+.quiz{margin-top:8px}
+.q-done{font-family:var(--mono); font-size:.72rem; color:var(--grn); border:1px solid rgba(111,227,165,.4); border-radius:5px; padding:5px 10px; display:inline-block; margin-bottom:12px; background:rgba(111,227,165,.07)}
+.q-item{border:1px solid var(--line2); border-radius:8px; padding:16px 18px; margin-bottom:14px; background:rgba(3,21,15,.5); transition:border-color .3s}
+.q-num{font-family:var(--mono); font-size:.62rem; color:var(--cop); letter-spacing:2px}
+.q-t{font-weight:600; margin:6px 0 12px; font-size:.98rem}
+.opt{display:block; width:100%; text-align:left; background:rgba(10,49,35,.6); border:1px solid var(--line2); color:var(--ink); border-radius:6px; padding:10px 14px; margin-bottom:7px; font-size:.9rem; transition:all .18s}
+.opt:hover{border-color:var(--cop); transform:translateX(4px)}
+.opt.good{border-color:var(--grn); background:rgba(111,227,165,.13); color:var(--grn); font-weight:600}
+.opt.bad{border-color:var(--red); background:rgba(255,107,94,.1); color:var(--red); animation:shake .35s}
+.opt:disabled{cursor:default; opacity:.85}
+.opt:disabled:hover{transform:none; border-color:var(--line2)}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.why{display:none; margin-top:8px; font-size:.85rem; color:var(--mut); border-left:3px solid var(--teal); padding:8px 12px; background:rgba(65,214,195,.05); border-radius:0 6px 6px 0}
+.why.show{display:block; animation:fadeUp .3s}
+.q-res{font-family:var(--mono); font-size:.8rem; margin-top:6px; padding:12px 16px; border-radius:8px; border:1px solid var(--line); background:rgba(224,145,63,.06)}
+
+/* CHECKLIST */
+.chk-list{list-style:none; margin:10px 0}
+.chk{display:flex; gap:12px; align-items:flex-start; padding:9px 10px; border-radius:6px; cursor:pointer; transition:background .2s; font-size:.93rem}
+.chk:hover{background:rgba(224,145,63,.06)}
+.chk input{display:none}
+.chk .bx{flex:none; width:20px; height:20px; border:2px solid var(--cop); border-radius:4px; position:relative; transition:all .2s; margin-top:2px}
+.chk input:checked + .bx{background:var(--cop)}
+.chk input:checked + .bx::after{content:'✓'; position:absolute; inset:0; display:grid; place-items:center; color:#2a1703; font-weight:700; font-size:.8rem}
+.chk input:checked ~ .ct{color:var(--dim); text-decoration:line-through rgba(157,196,173,.5)}
+
+/* LAYER EXPLORER */
+.lex{display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start}
+.lbar{display:flex; align-items:center; gap:12px; border:1px solid var(--line2); border-radius:6px; padding:10px 14px; margin-bottom:8px; cursor:pointer; transition:all .2s; background:rgba(3,21,15,.4)}
+.lbar:hover{transform:translateX(5px); border-color:var(--cop)}
+.lbar.act{border-color:var(--cop); background:rgba(224,145,63,.1)}
+.lbar .sw{width:34px; height:14px; border-radius:3px; flex:none; box-shadow:0 0 0 1px rgba(0,0,0,.3)}
+.lbar .nm{font-size:.88rem; font-weight:500}
+.linfo{border:1px dashed var(--line); border-radius:8px; padding:18px; min-height:130px; font-size:.93rem; color:var(--mut)}
+.linfo b{color:var(--cop2); display:block; margin-bottom:6px; font-family:var(--disp); letter-spacing:.5px}
+
+/* GAMES */
+.insp-it{border:1px solid var(--line2); border-radius:8px; padding:14px 16px; margin-bottom:12px; background:rgba(3,21,15,.5)}
+.insp-t{font-size:.92rem; margin-bottom:10px}
+.insp-btns{display:flex; gap:8px}
+.vbtn{font-family:var(--mono); font-size:.72rem; letter-spacing:1px; padding:6px 14px; border-radius:5px; border:1px solid var(--line2); background:transparent; color:var(--mut); transition:all .18s}
+.vbtn:hover{border-color:var(--teal); color:var(--teal)}
+.vbtn.picked-good{background:rgba(111,227,165,.15); border-color:var(--grn); color:var(--grn)}
+.vbtn.picked-bad{background:rgba(255,107,94,.12); border-color:var(--red); color:var(--red)}
+.insp-fb{display:none; margin-top:10px; font-size:.84rem; padding:8px 12px; border-radius:6px}
+.insp-fb.ok{display:block; background:rgba(111,227,165,.08); border-left:3px solid var(--grn); color:var(--mut)}
+.insp-fb.ko{display:block; background:rgba(255,107,94,.08); border-left:3px solid var(--red); color:var(--mut)}
+.ro-row{display:flex; align-items:center; gap:10px; border:1px solid var(--line2); border-radius:6px; padding:9px 12px; margin-bottom:7px; background:rgba(3,21,15,.5); font-size:.9rem; transition:border-color .2s}
+.ro-row .idx{font-family:var(--mono); font-size:.7rem; color:var(--cop); min-width:22px}
+.ro-row .txt{flex:1}
+.ro-row .mv{background:none; border:1px solid var(--line2); color:var(--mut); border-radius:4px; width:26px; height:26px; transition:all .15s}
+.ro-row .mv:hover{border-color:var(--cop); color:var(--cop)}
+.ro-row.right{border-color:var(--grn)} .ro-row.wrong{border-color:var(--red)}
+.hs-wrap{display:grid; grid-template-columns:1.5fr 1fr; gap:18px; align-items:start}
+.hs-board{width:100%; height:auto; border:1px solid var(--line); border-radius:10px; background:#04170f}
+.hz{fill:transparent; cursor:pointer}
+.hz:hover{fill:rgba(242,182,79,.12)}
+#hsList{font-size:.85rem}
+#hsList .found{border-left:3px solid var(--red); background:rgba(255,107,94,.07); padding:8px 12px; border-radius:0 6px 6px 0; margin-bottom:8px; animation:fadeUp .3s}
+#hsList .found b{color:var(--red); font-family:var(--mono); font-size:.68rem; letter-spacing:1.5px; display:block}
+.hs-count{font-family:var(--mono); font-size:.75rem; color:var(--cop2); margin-bottom:10px; letter-spacing:1px}
+
+/* BUILDERS */
+.bld{display:grid; grid-template-columns:1fr 1.1fr; gap:22px; align-items:start}
+.fld{margin-bottom:14px}
+.fld label.lb{font-family:var(--mono); font-size:.66rem; letter-spacing:1.8px; color:var(--cop); display:block; margin-bottom:7px}
+select,input[type=text],input[type=number]{
+  width:100%; background:#04170f; border:1px solid var(--line); color:var(--ink);
+  padding:9px 12px; border-radius:6px; font-family:var(--body); font-size:.9rem; transition:border-color .2s;
+}
+select:focus,input:focus{outline:none; border-color:var(--teal)}
+.cbx-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px}
+.cbx{display:flex; gap:8px; align-items:center; font-size:.85rem; padding:7px 10px; border:1px solid var(--line2); border-radius:6px; cursor:pointer; transition:all .18s}
+.cbx:hover{border-color:var(--cop)}
+.cbx input{accent-color:var(--cop); width:15px; height:15px}
+.cbx input:checked ~ span{color:var(--cop2)}
+.out-pre{background:#03170f; border:1px solid var(--line2); border-radius:8px; padding:16px; font-size:.76rem; line-height:1.65; color:#cdeeda; white-space:pre-wrap; max-height:420px; overflow:auto}
+
+/* SIM / TICKET */
+.sim{display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start}
+.ticket{background:#fbf6ea; color:#241a0c; border-radius:8px; padding:22px; font-family:var(--mono); font-size:.8rem; box-shadow:0 10px 30px rgba(0,0,0,.4); position:relative}
+.ticket::before,.ticket::after{content:''; position:absolute; left:0; right:0; height:8px; background:radial-gradient(circle at 6px 0, transparent 5px, #fbf6ea 5px); background-size:14px 8px}
+.ticket::before{top:-7px; transform:rotate(180deg)}
+.ticket h4{font-family:var(--disp); letter-spacing:2px; font-size:.95rem; border-bottom:2px dashed #b39b6d; padding-bottom:8px; margin-bottom:10px}
+.tk-row{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dotted #d8c9a3}
+.tk-row b{font-weight:600}
+.tk-tot{display:flex; justify-content:space-between; font-weight:700; font-size:1rem; margin-top:10px; padding-top:8px; border-top:2px solid #241a0c}
+.tk-note{font-size:.62rem; color:#7a6842; margin-top:10px; line-height:1.5}
+
+/* DIPLOMA */
+.diploma{background:linear-gradient(160deg,#0d3b2b,#062019); border:3px double var(--cop); border-radius:6px; padding:40px 30px; text-align:center; position:relative; margin-top:18px}
+.diploma::before{content:''; position:absolute; inset:8px; border:1px solid var(--line); border-radius:4px; pointer-events:none}
+.dpl-eyebrow{font-family:var(--mono); font-size:.62rem; letter-spacing:4px; color:var(--teal)}
+.dpl-name{font-family:var(--disp); font-size:clamp(1.6rem,4vw,2.6rem); font-weight:700; color:var(--cop2); margin:14px 0; letter-spacing:1px}
+.dpl-txt{color:var(--mut); max-width:60ch; margin:0 auto 8px; font-size:.95rem}
+.dpl-meta{font-family:var(--mono); font-size:.7rem; color:var(--dim); letter-spacing:1.5px; margin-top:16px}
+.dpl-seal{width:74px; height:74px; margin:18px auto 0; border-radius:50%; border:2px solid var(--cop); display:grid; place-items:center; font-family:var(--disp); font-weight:700; color:var(--cop2); font-size:.7rem; letter-spacing:1px; background:radial-gradient(circle, rgba(224,145,63,.15), transparent)}
+
+/* DONE ROW / FOOTER NAV */
+.done-row{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin:34px 0 8px; padding:18px 20px; border:1px solid var(--line); border-radius:10px; background:rgba(3,21,15,.6)}
+.done-row .st{font-family:var(--mono); font-size:.72rem; color:var(--dim); letter-spacing:1px; flex:1; min-width:200px}
+.footnav{display:flex; justify-content:space-between; margin-top:26px; gap:12px}
+
+/* GLOSSARY */
+.gloss{display:flex; flex-wrap:wrap; gap:10px}
+.gt{font-family:var(--mono); font-size:.72rem; color:var(--cop2); border:1px solid var(--line); border-radius:5px; padding:7px 12px; cursor:help; transition:all .2s; position:relative}
+.gt:hover{background:rgba(224,145,63,.12); transform:translateY(-2px)}
+
+/* TOAST */
+#toasts{position:fixed; bottom:22px; right:22px; z-index:100; display:flex; flex-direction:column; gap:8px}
+.toast{background:#0d3b2b; border:1px solid var(--cop); color:var(--ink); padding:11px 18px; border-radius:7px; font-size:.86rem; box-shadow:0 8px 24px rgba(0,0,0,.5); animation:fadeUp .3s; max-width:320px}
+.toast.err{border-color:var(--red)}
+
+.rv{opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease}
+.rv.on{opacity:1; transform:none}
+
+/* ============ BRANDING IES VALLE DEL JERTE · PLASENCIA ============ */
+:root{--ies:#8e0c8c;--ies2:#c437c1}
+.ies-badge{display:flex;align-items:center;gap:10px}
+.ies-badge svg{width:30px;height:29px;flex:none}
+.ies-badge .ies-name{font-family:var(--disp);font-weight:700;font-size:.8rem;color:#f3d9f2;display:block;line-height:1.2}
+.ies-badge .ies-name em{font-style:normal;color:var(--ies2)}
+.ies-badge .ies-teach{font-family:var(--mono);font-size:.58rem;letter-spacing:1.8px;color:var(--ies2);display:block}
+.ies-hero{display:flex;align-items:center;gap:18px;margin:0 0 26px;padding:14px 20px;border:1px solid rgba(196,55,193,.45);border-radius:10px;background:linear-gradient(90deg,rgba(142,12,140,.18),transparent)}
+.ies-hero svg{width:62px;height:58px;flex:none}
+.ies-hero .t1{font-family:var(--disp);font-weight:700;font-size:1.15rem;color:#f6e3f5}
+.ies-hero .t2{font-family:var(--mono);font-size:.64rem;letter-spacing:3px;color:var(--ies2);margin-top:2px}
+.ies-hero .t3{font-size:.85rem;color:var(--mut);margin-top:4px}
+.ies-hero .t3 b{color:var(--ies2)}
+.dpl-ies{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:16px}
+.dpl-ies svg{width:54px;height:51px}
+.dpl-ies .n{font-family:var(--disp);font-weight:700;letter-spacing:1px;color:#f6e3f5;font-size:1.05rem}
+.dpl-ies .p{font-family:var(--mono);font-size:.6rem;letter-spacing:2.6px;color:var(--ies2)}
+.dpl-sign{margin-top:26px;font-family:var(--mono);font-size:.68rem;letter-spacing:1.5px;color:var(--mut)}
+.dpl-sign b{color:var(--ies2);display:block;font-size:.9rem;letter-spacing:2.5px;margin-bottom:4px;border-top:1px solid var(--ies2);padding-top:8px}
+.site-foot{margin:46px 0 10px;padding:18px 8px;border-top:1px solid var(--line2);display:flex;align-items:center;gap:14px;flex-wrap:wrap;color:var(--dim);font-size:.8rem}
+.site-foot svg{width:28px;height:27px;flex:none}
+.site-foot b{color:var(--ies2)}
+
+/* RESPONSIVE */
+@media(max-width:1080px){.hero{grid-template-columns:1fr}.lex,.bld,.sim,.hs-wrap{grid-template-columns:1fr}}
+@media(max-width:920px){
+  .shell{grid-template-columns:1fr}
+  aside{position:static; height:auto; border-right:none; border-bottom:1px solid var(--line2); padding:14px 16px}
+  .nav-list{display:flex; overflow-x:auto; gap:6px; padding-bottom:6px}
+  .nav-it{flex:none; width:auto}
+  .nav-lb,.nav-reset{display:none}
+  .route{display:none}
+  .ies-badge .ies-name,.ies-badge .ies-teach{display:none}
+}
+@media print{
+  body.print-diploma *{visibility:hidden}
+  body.print-diploma #diploma, body.print-diploma #diploma *{visibility:visible}
+  body.print-diploma #diploma{position:fixed; inset:20px; background:#fff; border-color:#8a5416}
+  body.print-diploma .dpl-name{color:#8a5416} body.print-diploma .dpl-txt{color:#333} body.print-diploma .dpl-meta{color:#666}
+  body.print-diploma .dpl-ies .n,body.print-diploma .dpl-ies .p{color:#8e0c8c}
+  body.print-diploma .dpl-sign b{color:#8e0c8c} body.print-diploma .dpl-sign{color:#555}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGO IES (símbolo reutilizable) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="iesV" viewBox="0 0 200 190">
+    <path fill="#9b1298" d="M18 0 H72 L86 48 H74 L92 100 L100 118 L142 0 H190 L100 190 Z"/>
+  </symbol>
+</svg>
+
+<!-- AMBIENT -->
+<svg class="ambient" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <path class="amb" d="M-60 130 H300 L370 200 H820 L890 130 H1520"/>
+  <path class="amb amb2" d="M-60 640 H260 L330 570 H900 L970 640 H1520"/>
+  <path class="amb" style="animation-duration:13s" d="M-60 820 H520 L590 760 H1150 L1220 820 H1520"/>
+  <circle class="via" cx="370" cy="200" r="6"/><circle class="via" cx="890" cy="130" r="6"/>
+  <circle class="via" cx="330" cy="570" r="6"/><circle class="via" cx="970" cy="640" r="6"/>
+  <circle class="via" cx="590" cy="760" r="6"/>
+</svg>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="brand" data-go="s0" title="Inicio">
+    <span class="brand-pads"><i></i><i></i><i></i></span>
+    <span><span class="brand-name">PICO<em>LAB</em>·IA</span><span class="brand-sub">TALLER DE PCB · 8 SESIONES</span></span>
+  </div>
+  <div class="ies-badge" title="IES Valle del Jerte · Plasencia — Prof. NachoTEC">
+    <svg viewBox="0 0 200 190"><use href="#iesV"/></svg>
+    <span><span class="ies-name">IES <em>"Valle del Jerte"</em> · Plasencia</span><span class="ies-teach">PROF. NACHOTEC</span></span>
+  </div>
+  <div class="route">
+    <div class="route-lb"><span>HOJA DE RUTA DE FABRICACIÓN</span><span>PROGRESO</span></div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+  </div>
+  <div class="pct" id="pct">0/9</div>
+</header>
+
+<div class="shell">
+<!-- NAV -->
+<aside>
+  <div class="nav-lb">HOJA DE RUTA</div>
+  <nav class="nav-list">
+    <button class="nav-it act" data-go="s0"><span class="nav-num">S0</span><span class="nav-tt">Bienvenida y preparación</span><span class="nav-dot" data-dot="s0"></span></button>
+    <button class="nav-it" data-go="s1"><span class="nav-num">S1</span><span class="nav-tt">¿Qué es una PCB?</span><span class="nav-dot" data-dot="s1"></span></button>
+    <button class="nav-it" data-go="s2"><span class="nav-num">S2</span><span class="nav-tt">Electricidad y esquemas</span><span class="nav-dot" data-dot="s2"></span></button>
+    <button class="nav-it" data-go="s3"><span class="nav-num">S3</span><span class="nav-tt">La IA como copiloto</span><span class="nav-dot" data-dot="s3"></span></button>
+    <button class="nav-it" data-go="s4"><span class="nav-num">S4</span><span class="nav-tt">La ficha técnica</span><span class="nav-dot" data-dot="s4"></span></button>
+    <button class="nav-it" data-go="s5"><span class="nav-num">S5</span><span class="nav-tt">Esquemático con IA</span><span class="nav-dot" data-dot="s5"></span></button>
+    <button class="nav-it" data-go="s6"><span class="nav-num">S6</span><span class="nav-tt">Diseño del PCB</span><span class="nav-dot" data-dot="s6"></span></button>
+    <button class="nav-it" data-go="s7"><span class="nav-num">S7</span><span class="nav-tt">Fabricación y pedido</span><span class="nav-dot" data-dot="s7"></span></button>
+    <button class="nav-it" data-go="s8"><span class="nav-num">S8</span><span class="nav-tt">Soldadura y prueba</span><span class="nav-dot" data-dot="s8"></span></button>
+  </nav>
+  <div class="nav-lb">RECURSOS</div>
+  <button class="nav-it" data-go="doc"><span class="nav-num">DOC</span><span class="nav-tt">Guía del docente</span><span class="nav-dot" style="visibility:hidden"></span></button>
+  <button class="nav-reset" id="resetBtn">Reiniciar progreso</button>
+</aside>
+
+<main>
+
+<!-- ======================= S0 ======================= -->
+<section class="session active" id="s0">
+  <div class="ies-hero">
+    <svg viewBox="0 0 200 190"><use href="#iesV"/></svg>
+    <div>
+      <div class="t1">IES "Valle del Jerte" — Plasencia</div>
+      <div class="t2">DEPARTAMENTO DE TECNOLOGÍA · CURSO 2026-2027</div>
+      <div class="t3">Taller de electrónica e IA impartido por el profesor <b>NachoTEC</b></div>
+    </div>
+  </div>
+  <div class="hero">
+    <div>
+      <span class="eyebrow">TALLER DE ELECTRÓNICA + IA · NIVEL: CERO EXPERIENCIA</span>
+      <h1>De la idea a la <span class="pcb">placa</span>: diseña tu primera PCB con <span class="ia">inteligencia artificial</span></h1>
+      <p class="lead">En 8 sesiones vas a diseñar, mandar fabricar por internet y soldar tu propia placa para la <strong>Raspberry Pi Pico</strong>, con sensores y actuadores, usando herramientas de IA gratuitas. Empezamos desde cero absoluto.</p>
+      <div class="chips">
+        <span class="chip">8 SESIONES · 55 MIN</span><span class="chip">SOFTWARE GRATUITO</span>
+        <span class="chip">PROYECTO: PICOLAB V1</span><span class="chip">EVALUACIÓN INCLUIDA</span>
+      </div>
+      <div class="cta-row">
+        <button class="btn" data-go="s1">Comenzar el taller ▸</button>
+        <button class="btn ghost" data-go="doc">Guía del docente</button>
+      </div>
+    </div>
+    <div>
+      <svg viewBox="0 0 560 400" style="width:100%;height:auto" aria-label="Placa PicoLab v1">
+        <rect x="18" y="16" width="524" height="368" rx="14" fill="#0c4a31" stroke="#e0913f" stroke-width="2"/>
+        <circle cx="44" cy="42" r="8" fill="#04170f" stroke="#f2b64f" stroke-width="2.5"/>
+        <circle cx="516" cy="42" r="8" fill="#04170f" stroke="#f2b64f" stroke-width="2.5"/>
+        <circle cx="44" cy="358" r="8" fill="#04170f" stroke="#f2b64f" stroke-width="2.5"/>
+        <circle cx="516" cy="358" r="8" fill="#04170f" stroke="#f2b64f" stroke-width="2.5"/>
+        <rect x="192" y="20" width="64" height="30" rx="3" fill="#9aa3ad"/>
+        <rect x="168" y="44" width="224" height="130" rx="6" fill="#1c2126" stroke="#3a4148"/>
+        <g fill="#f2b64f" stroke="#8a5416">
+          <circle cx="182" cy="62" r="4"/><circle cx="182" cy="78" r="4"/><circle cx="182" cy="94" r="4"/><circle cx="182" cy="110" r="4"/><circle cx="182" cy="126" r="4"/><circle cx="182" cy="142" r="4"/><circle cx="182" cy="158" r="4"/>
+          <circle cx="378" cy="62" r="4"/><circle cx="378" cy="78" r="4"/><circle cx="378" cy="94" r="4"/><circle cx="378" cy="110" r="4"/><circle cx="378" cy="126" r="4"/><circle cx="378" cy="142" r="4"/><circle cx="378" cy="158" r="4"/>
+        </g>
+        <rect x="240" y="60" width="80" height="80" rx="4" fill="#111519" stroke="#333a41"/>
+        <text x="280" y="104" text-anchor="middle" fill="#8b959e" font-family="IBM Plex Mono" font-size="11">RP2040</text>
+        <g stroke="#d99a4a" stroke-width="3" fill="none" opacity=".85">
+          <path d="M168 120 H120 L96 144 V210"/>
+          <path d="M168 140 H140 L120 160 V262"/>
+          <path d="M392 100 H452 V128"/>
+          <path d="M392 140 H432 L452 160 V236"/>
+          <path d="M240 174 V210 H188"/>
+          <path d="M320 174 V224 H352"/>
+        </g>
+        <path class="pulse" d="M168 120 H120 L96 144 V210"/>
+        <path class="pulse" style="animation-delay:1.4s" d="M392 100 H452 V128"/>
+        <circle class="ld" cx="150" cy="228" r="10" fill="#ff5148" stroke="#7e1d18" stroke-width="2"/>
+        <circle class="ld ld2" cx="188" cy="228" r="10" fill="#ffb52e" stroke="#7a5210" stroke-width="2"/>
+        <circle class="ld ld3" cx="226" cy="228" r="10" fill="#57e07c" stroke="#1c6b35" stroke-width="2"/>
+        <rect x="136" y="246" width="26" height="9" rx="2" fill="#c9b8a3"/><rect x="176" y="246" width="26" height="9" rx="2" fill="#c9b8a3"/><rect x="212" y="246" width="26" height="9" rx="2" fill="#c9b8a3"/>
+        <rect x="58" y="258" width="66" height="72" rx="6" fill="#2e6db4" stroke="#1a4a80"/>
+        <g fill="#20517f"><rect x="68" y="272" width="46" height="4"/><rect x="68" y="282" width="46" height="4"/><rect x="68" y="292" width="46" height="4"/><rect x="68" y="302" width="46" height="4"/></g>
+        <circle cx="472" cy="150" r="27" fill="#15181b" stroke="#333a41" stroke-width="2.5"/>
+        <circle cx="472" cy="150" r="5" fill="#04170f"/>
+        <rect x="424" y="238" width="46" height="34" rx="4" fill="#1c2126" stroke="#3a4148"/><circle cx="447" cy="255" r="9" fill="#e0913f"/>
+        <rect x="424" y="284" width="46" height="34" rx="4" fill="#1c2126" stroke="#3a4148"/><circle cx="447" cy="301" r="9" fill="#41d6c3"/>
+        <rect x="330" y="330" width="78" height="30" rx="3" fill="#111519" stroke="#333a41"/>
+        <circle cx="348" cy="345" r="5" fill="#f2b64f"/><circle cx="369" cy="345" r="5" fill="#f2b64f"/><circle cx="390" cy="345" r="5" fill="#f2b64f"/>
+        <circle cx="96" cy="166" r="17" fill="#caa46a" stroke="#8a6b3a" stroke-width="2"/>
+        <path d="M86 166 q5 -8 10 0 q5 8 10 0" stroke="#6b4f24" fill="none" stroke-width="2"/>
+        <text x="300" y="342" text-anchor="middle" fill="#eef7f0" font-family="IBM Plex Mono" font-size="15" letter-spacing="3">PICOLAB v1.0</text>
+        <text x="300" y="362" text-anchor="middle" fill="#9dc4ad" font-family="IBM Plex Mono" font-size="9" letter-spacing="2">REV A · 2026 · DISEÑADA CON IA</text>
+        <text x="91" y="246" fill="#eef7f0" font-family="IBM Plex Mono" font-size="9">DHT11</text>
+        <text x="142" y="216" fill="#eef7f0" font-family="IBM Plex Mono" font-size="9">D1 D2 D3</text>
+        <text x="440" y="230" fill="#eef7f0" font-family="IBM Plex Mono" font-size="9">B1 B2</text>
+      </svg>
+      <div class="board-cap">▲ PICOLAB v1.0 — LA PLACA QUE VAS A DISEÑAR, FABRICAR Y SOLDAR</div>
+    </div>
+  </div>
+
+  <div class="panel panel--pads rv">
+    <div class="blk-tag">S0 · QUÉ VAS A CONSTRUIR</div>
+    <p><strong>PicoLab</strong> es una placa base (<em>shield</em>) donde soldarás la Raspberry Pi Pico sobre zócalos, junto con componentes básicos. Cada sesión construye una pieza del camino:</p>
+    <table class="tbl"><thead><tr><th>SESIÓN</th><th>HITO</th><th>ENTREGABLE</th></tr></thead><tbody>
+      <tr><td>S1 – S2</td><td>Entender el terreno: PCB, electricidad y esquemas</td><td>Apuntes + cálculos</td></tr>
+      <tr><td>S3 – S4</td><td>Dominar la IA y escribir la ficha técnica</td><td>Especificación del proyecto</td></tr>
+      <tr><td>S5 – S6</td><td>Generar y validar el esquemático y el layout</td><td>Diseño con DRC sin errores</td></tr>
+      <tr><td>S7</td><td>Exportar Gerbers y encargar la fabricación</td><td>Pedido real o simulado</td></tr>
+      <tr><td>S8</td><td>Soldar, probar y programar la placa</td><td>Placa funcionando + diploma</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="panel rv">
+    <div class="blk-tag">S0 · CHECKLIST DE DESPEGUE</div>
+    <p>Marca lo que ya tienes listo. Sin esto no despegamos:</p>
+    <ul class="chk-list">
+      <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Ordenador con navegador actualizado (Chrome, Firefox o Edge)</span></label></li>
+      <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Conexión a internet estable</span></label></li>
+      <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Una cuenta de correo para crear cuentas gratuitas (Flux.ai u OSHWLab)</span></label></li>
+      <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct"><strong>Bitácora de diseño</strong>: cuaderno o documento donde anotarás TODO (obligatorio)</span></label></li>
+      <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Para la Sesión 8: soldador, estaño, multímetro y componentes (los trae el aula)</span></label></li>
+    </ul>
+    <div class="entrega"><b>📓 BITÁCORA</b><span>Crea tu bitácora ahora mismo. Ponle de título <strong>“Bitácora PicoLab — [tu nombre]”</strong> y escribe la fecha de hoy. Será tu cuaderno de ingeniería durante todo el curso.</span></div>
+  </div>
+
+  <div class="panel rv">
+    <div class="blk-tag">S0 · GLOSARIO DE EMERGENCIA</div>
+    <p>Pasa el ratón por cada término. Los necesitarás pronto:</p>
+    <div class="gloss">
+      <span class="gt" title="Placa de Circuito Impreso: la lámina verde donde viven los componentes unidos por pistas de cobre.">PCB</span>
+      <span class="gt" title="General Purpose Input/Output: los pines programables de la Pico (GP0 a GP28).">GPIO</span>
+      <span class="gt" title="Dibujo técnico del circuito con símbolos y conexiones. Es el plano eléctrico.">Esquemático</span>
+      <span class="gt" title="La huella física de un componente: los pads y taladros donde se soldará.">Footprint</span>
+      <span class="gt" title="Archivos que describen cada capa de la PCB. Es lo que envías a la fábrica.">Gerber</span>
+      <span class="gt" title="Design Rules Check: comprobación automática de que tu diseño cumple las reglas de fabricación.">DRC</span>
+      <span class="gt" title="Barniz verde que protege el cobre y deja libres solo los pads.">Solder mask</span>
+      <span class="gt" title="Taladro metalizado que conecta la capa superior con la inferior.">Vía</span>
+      <span class="gt" title="Microcontrolador de la Raspberry Pi Pico: doble núcleo, 26 GPIO, USB.">RP2040</span>
+    </div>
+  </div>
+
+  <div class="done-row">
+    <span class="st" data-st="s0">ESTADO: pendiente</span>
+    <button class="btn small btn-mark" data-id="s0">Marcar sesión completada</button>
+    <button class="btn small teal" data-go="s1">Ir a la Sesión 1 ▸</button>
+  </div>
+</section>
+
+<!-- ======================= S1 ======================= -->
+<section class="session" id="s1">
+  <header class="shead">
+    <div class="s-ref">SESIÓN 01 · 55 MIN · TEORÍA + EXPLORACIÓN</div>
+    <h2>Conocer el terreno: ¿qué es una PCB?</h2>
+    <p class="s-goal"><strong>Objetivo:</strong> entender qué es una placa de circuito impreso, de qué capas está hecha, y distinguir sensores de actuadores. Conocer a la protagonista: la Raspberry Pi Pico.</p>
+    <div class="s-tags"><span class="chip">DIFICULTAD ●○○</span><span class="chip">SIN SOLDADOR TODAVÍA</span></div>
+  </header>
+
+  <section class="blk rv">
+    <div class="blk-tag">01 · TEORÍA</div>
+    <h3>Una PCB es un sándwich eléctrico</h3>
+    <p>Una <strong>PCB</strong> (Printed Circuit Board) es una placa rígida que sujeta los componentes electrónicos y los conecta eléctricamente mediante <strong>pistas de cobre</strong>, sin necesidad de cables sueltos. Dentro de tu teclado, de un mando de consola o de una lavadora hay una.</p>
+    <p>Imagina un sándwich: dos rebanadas de cobre (por donde circula la corriente) abrazando un núcleo aislante rígido llamado <strong>FR4</strong>. Casi todo se recubre con un barniz verde (<span class="tl" title="Solder mask: protege el cobre y evita que el estaño se pegue donde no debe.">máscara antisoldadura</span>) y encima se imprimen textos y símbolos (la <strong>serigrafía</strong>).</p>
+    <p><strong>Haz clic en cada capa</strong> para explorarla:</p>
+    <div class="lex">
+      <div id="layerBars"></div>
+      <div class="linfo" id="layerInfo"><b>ELIGE UNA CAPA ▸</b>Pulsa sobre las capas de la izquierda para descubrir su función en la placa.</div>
+    </div>
+    <h4 style="margin-top:22px">¿THT o SMD?</h4>
+    <p>Hay dos familias de componentes: <strong>THT</strong> (through-hole: con “patitas” que atraviesan la placa y se sueldan por detrás) y <strong>SMD</strong> (montaje superficial: diminutos, pegados sobre la superficie). En este curso usaremos <strong>solo THT</strong>: es la vía perfecta para aprender a soldar a mano.</p>
+    <h4>Sensores y actuadores: los sentidos y los músculos</h4>
+    <table class="tbl"><thead><tr><th>COMPONENTE</th><th>TIPO</th><th>QUÉ HACE EN PICOLAB</th></tr></thead><tbody>
+      <tr><td>LED ×3</td><td>Actuador</td><td>Semáforo luminoso controlado por la Pico</td></tr>
+      <tr><td>Zumbador (buzzer)</td><td>Actuador</td><td>Avisos sonoros</td></tr>
+      <tr><td>Servo SG90 (extra)</td><td>Actuador</td><td>Mueve un brazo o aguja</td></tr>
+      <tr><td>DHT11</td><td>Sensor</td><td>Mide temperatura y humedad</td></tr>
+      <tr><td>LDR</td><td>Sensor</td><td>Mide luz ambiente</td></tr>
+      <tr><td>HC-SR04 (extra)</td><td>Sensor</td><td>Mide distancia con ultrasonido</td></tr>
+      <tr><td>Pulsadores ×2</td><td>Entrada</td><td>Órdenes del usuario</td></tr>
+    </tbody></table>
+    <h4>La Raspberry Pi Pico, en 6 datos</h4>
+    <ul>
+      <li>Es una placa <strong>microcontroladora</strong> con el chip <strong>RP2040</strong> (doble núcleo).</li>
+      <li>Tiene <strong>40 pines</strong>: 26 son GPIO programables (GP0–GP28).</li>
+      <li>Se alimenta por <strong>USB</strong> (5 V) y ofrece <strong>3,3 V</strong> para los componentes.</li>
+      <li><strong>¡Ojo!</strong> Sus GPIO solo toleran <strong>3,3 V</strong>. Lo veremos en la Sesión 5.</li>
+      <li>Incluye un LED integrado (GP25) y un botón <strong>BOOTSEL</strong> para programarla.</li>
+      <li>Cuesta unos 4–5 €: ideal para equivocarse sin drama.</li>
+    </ul>
+  </section>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 1.1</span><span class="t">Anatomía de una PCB</span><span class="diff"><i class="f"></i><i></i><i></i><span>FÁCIL</span></span></div>
+    <div class="prc-b">
+      <ol>
+        <li>Vuelve al explorador de capas y pulsa las <strong>6 capas</strong> una a una.</li>
+        <li>Dibuja el “sándwich” en tu bitácora y etiqueta cada capa con su función en una frase tuya.</li>
+        <li>Pregunta trampa: <em>¿por qué el FR4 tiene que ser aislante?</em> Escríbelo también.</li>
+      </ol>
+      <div class="entrega"><b>📓 ENTREGA</b><span>Dibujo de capas etiquetado + respuesta a la pregunta trampa.</span></div>
+    </div>
+  </div>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 1.2</span><span class="t">Clasifica los componentes</span><span class="diff"><i class="f"></i><i class="f"></i><i></i><span>MEDIA</span></span></div>
+    <div class="prc-b">
+      <p>Demuestra que distingues la función de cada pieza. Supera el mini-quiz:</p>
+      <div class="quiz" id="q-s1b"></div>
+    </div>
+  </div>
+
+  <section class="blk rv">
+    <div class="blk-tag">02 · AUTOEVALUACIÓN</div>
+    <div class="quiz" id="q-s1"></div>
+  </section>
+
+  <div class="done-row">
+    <span class="st" data-st="s1">ESTADO: pendiente</span>
+    <button class="btn small btn-mark" data-id="s1">Marcar sesión completada</button>
+    <button class="btn small teal" data-go="s2">Sesión 2 ▸</button>
+  </div>
+  <div class="footnav"><button class="btn ghost small" data-go="s0">◂ Sesión 0</button><button class="btn ghost small" data-go="s2">Sesión 2 ▸</button></div>
+</section>
+
+<!-- ======================= S2 ======================= -->
+<section class="session" id="s2">
+  <header class="shead">
+    <div class="s-ref">SESIÓN 02 · 55 MIN · TEORÍA + CÁLCULO</div>
+    <h2>Electricidad mínima y el lenguaje del esquemático</h2>
+    <p class="s-goal"><strong>Objetivo:</strong> comprender tensión, corriente y resistencia; calcular la resistencia de un LED; y entender qué es un esquemático, el plano del que nace toda PCB.</p>
+    <div class="s-tags"><span class="chip">DIFICULTAD ●●○</span><span class="chip">PRIMERA HERRAMIENTA: CALCULADORA</span></div>
+  </header>
+
+  <section class="blk rv">
+    <div class="blk-tag">01 · TEORÍA EN 5 MINUTOS</div>
+    <h3>Las tres magnitudes, explicadas con agua</h3>
+    <ul>
+      <li><strong>Tensión (V, voltios):</strong> la “presión” que empuja la electricidad. La Pico da <strong>3,3 V</strong> y <strong>5 V</strong> por USB.</li>
+      <li><strong>Corriente (A, amperios):</strong> el “caudal” de electrones. Se suele medir en miliamperios (mA). Un LED típico funciona con unos <strong>10 mA</strong>.</li>
+      <li><strong>Resistencia (Ω, ohmios):</strong> el “estrechamiento” de la tubería que limita el caudal.</li>
+    </ul>
+    <p>La <strong>Ley de Ohm</strong> las une: <code class="mono" style="color:var(--cop2)">V = I × R</code>. De ella sale la fórmula que usarás hoy: <code class="mono" style="color:var(--cop2)">R = (Vfuente − Vled) / I</code>.</p>
+    <div class="box warn"><span class="bt">⚠ POR QUÉ IMPORTA</span>Un LED conectado directo a 3,3 V pide más corriente de la que soporta y <strong>se quema en segundos</strong>. La resistencia en serie es su “guardaespaldas”. Es el error nº 1 que cometen las IA… y las personas.</div>
+    <h3>El esquemático: el plano del circuito</h3>
+    <p>El esquemático dibuja el circuito con <strong>símbolos normalizados</strong> (resistencia, LED, botón, tierra…). Cada cable dibujado se llama <strong>red</strong> (<em>net</em>): todos los puntos de una misma red quedan conectados en la placa real. La red más importante es <strong>GND</strong> (tierra/masa): el retorno común de toda la corriente.</p>
+    <h3>Cómo leer el pinout de la Pico</h3>
+    <p>No confundas <strong>número de pin físico</strong> (1 a 40) con <strong>GP</strong> (la función programable). Ejemplos clave de PicoLab:</p>
+    <table class="tbl"><thead><tr><th>RED</th><th>PIN</th><th>PARA QUÉ</th></tr></thead><tbody>
+      <tr><td>3V3</td><td>Pin 36</td><td>Alimenta sensores y LEDs (3,3 V)</td></tr>
+      <tr><td>VBUS</td><td>Pin 40</td><td>5 V del USB: servo y ultrasonidos</td></tr>
+      <tr><td>GND</td><td>Varios (3, 8, 13…)</td><td>Tierra común</td></tr>
+      <tr><td>GP26 (ADC0)</td><td>Pin 31</td><td>Único mundo “analógico”: aquí va la LDR</td></tr>
+    </tbody></table>
+  </section>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 2.1</span><span class="t">Calculadora de resistencias para LEDs</span><span class="diff"><i class="f"></i><i class="f"></i><i></i><span>MEDIA</span></span></div>
+    <div class="prc-b">
+      <p>Ajusta los valores y observa el cálculo en vivo. La Pico entrega <strong>3,3 V</strong>; trabajaremos con <strong>10 mA</strong> para no forzar el GPIO.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;max-width:640px">
+        <div class="fld"><label class="lb">TENSIÓN FUENTE (V)</label><input type="number" id="cVs" value="3.3" step="0.1"></div>
+        <div class="fld"><label class="lb">CAÍDA DEL LED Vf (V)</label><input type="number" id="cVf" value="2.0" step="0.1"></div>
+        <div class="fld"><label class="lb">CORRIENTE (mA)</label><input type="number" id="cI" value="10" step="1"></div>
+      </div>
+      <div class="q-res" id="cOut" style="margin-top:8px"></div>
+      <ol style="margin-top:14px">
+        <li>Calcula para los 3 LEDs de PicoLab: <strong>rojo</strong> Vf = 2,0 V · <strong>ámbar</strong> Vf = 2,1 V · <strong>verde</strong> Vf = 2,2 V.</li>
+        <li>Anota en la bitácora la tabla con los valores comerciales (E12) elegidos.</li>
+      </ol>
+      <div class="entrega"><b>📓 ENTREGA</b><span>Tabla: LED → resistencia exacta → resistencia E12 que montarás. Pista: la serie E12 tiene 100, 120, 150, 180, 220, 270, 330…</span></div>
+    </div>
+  </div>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 2.2</span><span class="t">Ordena el proceso de un esquemático</span><span class="diff"><i class="f"></i><i></i><i></i><span>FÁCIL</span></span></div>
+    <div class="prc-b">
+      <p>Estos son los pasos para crear un esquemático… pero se han desordenado. Usa las flechas y comprueba:</p>
+      <div id="ro-s2"></div>
+      <button class="btn small" id="ro-s2-check" style="margin-top:10px">Comprobar orden</button>
+    </div>
+  </div>
+
+  <section class="blk rv">
+    <div class="blk-tag">02 · AUTOEVALUACIÓN</div>
+    <div class="quiz" id="q-s2"></div>
+  </section>
+
+  <div class="done-row">
+    <span class="st" data-st="s2">ESTADO: pendiente</span>
+    <button class="btn small btn-mark" data-id="s2">Marcar sesión completada</button>
+    <button class="btn small teal" data-go="s3">Sesión 3 ▸</button>
+  </div>
+  <div class="footnav"><button class="btn ghost small" data-go="s1">◂ Sesión 1</button><button class="btn ghost small" data-go="s3">Sesión 3 ▸</button></div>
+</section>
+
+<!-- ======================= S3 ======================= -->
+<section class="session" id="s3">
+  <header class="shead">
+    <div class="s-ref">SESIÓN 03 · 55 MIN · IA + PROMPTS</div>
+    <h2>La IA como copiloto de diseño</h2>
+    <p class="s-goal"><strong>Objetivo:</strong> conocer las herramientas gratuitas de IA para electrónica, entender sus límites (¡alucinaciones!) y aprender a escribir prompts de ingeniero.</p>
+    <div class="s-tags"><span class="chip">DIFICULTAD ●●○</span><span class="chip">HERRAMIENTA: PROMPT BUILDER</span></div>
+  </header>
+
+  <section class="blk rv">
+    <div class="blk-tag">01 · QUÉ SABE HACER (Y QUÉ NO) UNA IA</div>
+    <table class="tbl"><thead><tr><th>CONFÍA PARA…</th><th>VERIFICA SIEMPRE…</th></tr></thead><tbody>
+      <tr><td>Redactar especificaciones y listas de requisitos</td><td>Valores de componentes (¡a veces los inventa!)</td></tr>
+      <tr><td>Proponer qué componente usar para una tarea</td><td>Pines exactos: contrasta con el datasheet</td></tr>
+      <tr><td>Revisar esquemas y detectar errores típicos</td><td>Footprints poco comunes</td></tr>
+      <tr><td>Generar código MicroPython de prueba</td><td>Cualquier resultado: la IA propone, tú decides</td></tr>
+    </tbody></table>
+    <div class="box red"><span class="bt">⛔ ALUCINACIÓN</span>Una IA puede afirmar con total seguridad que “el pin 17 del DHT11 alimenta el servo”… y que sea mentira. En electrónica, una mentira bien redactada quema componentes. <strong>Regla del curso: nada llega a la placa sin pasar por tu revisión.</strong></div>
+    <h3>Mapa de herramientas gratuitas (edición 2026)</h3>
+    <table class="tbl"><thead><tr><th>HERRAMIENTA</th><th>QUÉ ES</th><th>ROL EN EL CURSO</th></tr></thead><tbody>
+      <tr><td>Flux.ai</td><td>Editor de PCB en el navegador con <strong>Copiloto IA</strong> que conversa sobre tu circuito</td><td>Opción A recomendada</td></tr>
+      <tr><td>OSHWLab</td><td>Editor web gratuito con asistente y pedido directo a fábrica</td><td>Opción B recomendada</td></tr>
+      <tr><td>EasyEDA</td><td>El clásico gratuito, con librerías enormes; integrado con JLCPCB</td><td>Alternativa</td></tr>
+      <tr><td>CELUS</td><td>Le describes el circuito en lenguaje natural y genera el esquemático</td><td>Plan maker gratis</td></tr>
+      <tr><td>KiCad</td><td>Software libre profesional; combínalo con un chatbot para dudas</td><td>Si quieres ir más allá</td></tr>
+      <tr><td>Chatbots (ChatGPT, Claude, Gemini)</td><td>Texto: especificaciones, revisiones, código</td><td>Apoyo continuo</td></tr>
+    </tbody></table>
+    <p style="font-size:.85rem;color:var(--dim)">Los planes gratuitos cambian con el tiempo: verifica las condiciones de cada servicio antes de empezar.</p>
+    <h3>Anatomía del prompt perfecto</h3>
+    <p>Un prompt de ingeniero tiene <strong>5 piezas</strong>: <strong>1)</strong> Rol (“actúa como ingeniero electrónico”), <strong>2)</strong> Contexto (nivel, plataforma, placa destino), <strong>3)</strong> Tarea concreta, <strong>4)</strong> Restricciones (tamaño, capas, THT, voltajes) y <strong>5)</strong> Formato de salida. Cuantas más restricciones des, menos inventa la IA.</p>
+  </section>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 3.1</span><span class="t">El constructor de prompts</span><span class="diff"><i class="f"></i><i class="f"></i><i></i><span>MEDIA</span></span></div>
+    <div class="prc-b">
+      <p>Configura tu pedido y la app redactará un prompt profesional. Cópialo y pégalo en tu herramienta de IA.</p>
+      <div class="bld">
+        <div>
+          <div class="fld"><label class="lb">COMPONENTES DE LA PLACA</label>
+            <div class="cbx-grid">
+              <label class="cbx"><input type="checkbox" name="pbcomp" value="3 LEDs (rojo, ámbar, verde) como semáforo en GP6, GP7 y GP8" checked><span>Semáforo 3 LEDs</span></label>
+              <label class="cbx"><input type="checkbox" name="pbcomp" value="2 pulsadores en GP14 y GP15 (pull-up interno)" checked><span>2 pulsadores</span></label>
+              <label class="cbx"><input type="checkbox" name="pbcomp" value="Zumbador activo en GP9" checked><span>Buzzer</span></label>
+              <label class="cbx"><input type="checkbox" name="pbcomp" value="Sensor DHT11 (temperatura/humedad) en GP16 con pull-up 4,7k" checked><span>DHT11</span></label>
+              <label class="cbx"><input type="checkbox" name="pbcomp" value="LDR con divisor de tensión en GP26 (ADC0)" checked><span>LDR</span></label>
+              <label class="cbx"><input type="checkbox" name="pbcomp" value="Sensor ultrasónico HC-SR04: TRIG GP10, ECHO GP11 con divisor 1k/2k"><span>HC-SR04</span></label>
+              <label class="cbx"><input type="checkbox" name="pbcomp" value="Conector para servo SG90: señal GP0, alimentación VBUS 5V"><span>Conector servo</span></label>
+            </div>
+          </div>
+          <div class="fld"><label class="lb">FORMATO DE SALIDA</label>
+            <select id="pbOut"><option>Genera el esquemático completo y explícame cada decisión.</option><option>Dame la lista de componentes con footprints y la netlist.</option><option>Dame instrucciones paso a paso para montarlo en la herramienta.</option></select>
+          </div>
+          <button class="btn small" id="pbGo">⚙ Redactar prompt</button>
+        </div>
+        <div>
+          <div class="out-pre" id="pbPre">Pulsa “Redactar prompt” para generar el texto…</div>
+          <button class="btn small ghost" data-copy="#pbPre" style="margin-top:10px">⧉ Copiar prompt</button>
+        </div>
+      </div>
+      <div class="entrega"><b>📓 ENTREGA</b><span>Pega tu prompt en la IA elegida, guarda la respuesta y anota: <strong>1 acierto</strong> que tuvo y <strong>1 cosa que tuviste que corregir o verificar</strong>.</span></div>
+    </div>
+  </div>
+
+  <section class="blk rv">
+    <div class="blk-tag">02 · AUTOEVALUACIÓN</div>
+    <div class="quiz" id="q-s3"></div>
+  </section>
+
+  <div class="done-row">
+    <span class="st" data-st="s3">ESTADO: pendiente</span>
+    <button class="btn small btn-mark" data-id="s3">Marcar sesión completada</button>
+    <button class="btn small teal" data-go="s4">Sesión 4 ▸</button>
+  </div>
+  <div class="footnav"><button class="btn ghost small" data-go="s2">◂ Sesión 2</button><button class="btn ghost small" data-go="s4">Sesión 4 ▸</button></div>
+</section>
+
+<!-- ======================= S4 ======================= -->
+<section class="session" id="s4">
+  <header class="shead">
+    <div class="s-ref">SESIÓN 04 · 55 MIN · ESPECIFICACIÓN</div>
+    <h2>La ficha técnica de PicoLab: tu contrato de diseño</h2>
+    <p class="s-goal"><strong>Objetivo:</strong> escribir la especificación completa de la placa (el documento que guiará a la IA y te permitirá auditarla). Asignar cada componente a su GPIO.</p>
+    <div class="s-tags"><span class="chip">DIFICULTAD ●●○</span><span class="chip">ENTREGABLE CLAVE DEL CURSO</span></div>
+  </header>
+
+  <section class="blk rv">
+    <div class="blk-tag">01 · POR QUÉ UNA FICHA TÉCNICA</div>
+    <p>Ningún ingeniero empieza a diseñar sin una <strong>especificación</strong>: la lista cerrada de lo que el producto debe tener. Con la IA es aún más crítica: <strong>la spec es tu prompt más poderoso y tu lupa de verificación</strong>. Si la IA genera algo que no está en la ficha, se corrige. Si falta algo de la ficha, se añade.</p>
+    <h3>Especificación PicoLab v1 (la oficial del curso)</h3>
+    <table class="tbl"><thead><tr><th>COMPONENTE</th><th>CONEXIÓN</th><th>NOTA CRÍTICA</th></tr></thead><tbody>
+      <tr><td>Raspberry Pi Pico</td><td>Zócalo hembra 2×20</td><td>Se suelda la última, montada encima</td></tr>
+      <tr><td>LED rojo / ámbar / verde</td><td>GP6 · GP7 · GP8</td><td>Resistencia en serie (tus cálculos de la S2)</td></tr>
+      <tr><td>Pulsadores B1, B2</td><td>GP14 · GP15</td><td>Entre GPIO y GND; pull-up por software</td></tr>
+      <tr><td>Zumbador activo</td><td>GP9</td><td>Modelo de bajo consumo (&lt;12 mA)</td></tr>
+      <tr><td>DHT11</td><td>Datos GP16, VCC 3V3</td><td>Pull-up 4,7 kΩ entre datos y 3V3</td></tr>
+      <tr><td>LDR</td><td>GP26 (ADC0)</td><td>Divisor: 3V3→LDR→GP26→10 kΩ→GND</td></tr>
+      <tr><td>HC-SR04 (extra)</td><td>TRIG GP10 · ECHO GP11</td><td><strong>ECHO va a 5 V: divisor 1 kΩ/2 kΩ obligatorio</strong></td></tr>
+      <tr><td>Servo SG90 (extra)</td><td>Señal GP0 · VBUS 5 V</td><td>Tierras unidas; pista gruesa de 5 V</td></tr>
+    </tbody></table>
+    <div class="box idea"><span class="bt">💡 REGLAS FÍSICAS DE LA PLACA</span>Tamaño máximo <strong>70 × 55 mm</strong> · <strong>2 capas</strong> · Solo componentes <strong>THT</strong> · Conectores de alimentación y servo en el borde · Tornillos de montaje Ø3 mm en las esquinas.</div>
+  </section>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 4.1</span><span class="t">Construye tu ficha y genera el mega-prompt</span><span class="diff"><i class="f"></i><i class="f"></i><i></i><span>MEDIA</span></span></div>
+    <div class="prc-b">
+      <p>Elige tus extras, escribe tu nombre de diseñadora/o y genera la ficha. Luego cópiala tal cual dentro de tu prompt a la IA.</p>
+      <div class="bld">
+        <div>
+          <div class="fld"><label class="lb">DISEÑADO POR</label><input type="text" id="spName" placeholder="Tu nombre"></div>
+          <div class="fld"><label class="lb">EXTRAS INCLUIDOS</label>
+            <div class="cbx-grid">
+              <label class="cbx"><input type="checkbox" id="spServo" checked><span>Conector servo SG90</span></label>
+              <label class="cbx"><input type="checkbox" id="spUltra" checked><span>Ultrasonidos HC-SR04</span></label>
+            </div>
+          </div>
+          <button class="btn small" id="spGo">⚙ Generar ficha</button>
+        </div>
+        <div>
+          <div class="out-pre" id="spPre">Pulsa “Generar ficha”…</div>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn small ghost" data-copy="#spPre">⧉ Copiar ficha</button>
+            <button class="btn small ghost" id="spDl">⬇ Descargar .txt</button>
+          </div>
+        </div>
+      </div>
+      <div class="entrega"><b>📓 ENTREGA</b><span>Copia la ficha completa en tu bitácora. A partir de hoy, cualquier discrepancia entre la IA y esta ficha se resuelve… <strong>a favor de la ficha</strong> (o corrigiendo la ficha con ayuda del profe).</span></div>
+    </div>
+  </div>
+
+  <section class="blk rv">
+    <div class="blk-tag">02 · AUTOEVALUACIÓN</div>
+    <div class="quiz" id="q-s4"></div>
+  </section>
+
+  <div class="done-row">
+    <span class="st" data-st="s4">ESTADO: pendiente</span>
+    <button class="btn small btn-mark" data-id="s4">Marcar sesión completada</button>
+    <button class="btn small teal" data-go="s5">Sesión 5 ▸</button>
+  </div>
+  <div class="footnav"><button class="btn ghost small" data-go="s3">◂ Sesión 3</button><button class="btn ghost small" data-go="s5">Sesión 5 ▸</button></div>
+</section>
+
+<!-- ======================= S5 ======================= -->
+<section class="session" id="s5">
+  <header class="shead">
+    <div class="s-ref">SESIÓN 05 · 55 MIN · PRÁCTICA GUIADA EN LA HERRAMIENTA</div>
+    <h2>Generar el esquemático con IA (y auditarlo como profesionales)</h2>
+    <p class="s-goal"><strong>Objetivo:</strong> crear el proyecto en tu plataforma, generar el esquemático con ayuda de la IA y superarlo todo por tu checklist de auditoría.</p>
+    <div class="s-tags"><span class="chip">DIFICULTAD ●●●</span><span class="chip">FLUX / OSHWLAB / EASYEDA</span></div>
+  </header>
+
+  <section class="blk rv">
+    <div class="blk-tag">01 · EL FLUJO DE TRABAJO EN 6 PASOS</div>
+    <ol>
+      <li><strong>Crea un proyecto nuevo</strong> en tu plataforma (Flux u OSHWLab) y llámalo <code class="mono">PicoLab-v1</code>.</li>
+      <li><strong>Pega tu especificación + prompt</strong> (Sesión 4) en el copiloto o asistente.</li>
+      <li><strong>Deja que la IA genere</strong> el esquemático. Si la plataforma no tiene copiloto, pide la lista de conexiones a un chatbot y dibuja tú.</li>
+      <li><strong>Audita</strong> conexión por conexión con la checklist de abajo. Este paso NO es opcional.</li>
+      <li><strong>Corrige</strong> lo que la IA haya entendido mal (añade resistencias, pull-ups, divisores…).</li>
+      <li><strong>Asigna footprints THT</strong> a cada componente: resistencia axial, LED 5 mm, zócalo 2×20, etc. Sin footprint no hay placa.</li>
+    </ol>
+    <div class="box warn"><span class="bt">⚠ CHECKLIST DE AUDITORÍA</span>
+      ✔ Cada LED tiene su resistencia en serie · ✔ DHT11 con pull-up de 4,7 kΩ · ✔ ECHO del HC-SR04 pasa por divisor 1k/2k · ✔ Buzzer de bajo consumo (&lt;12 mA) · ✔ Todo componente tiene footprint THT · ✔ Una única red GND común · ✔ 3V3 solo a lógica/sensores; VBUS 5 V solo a servo y ultrasónico.
+    </div>
+    <h3>El error clásico de la IA (víctima real)</h3>
+    <p>Los modelos de lenguaje han leído miles de esquemas… y también miles de esquemas mal dibujados en internet. Por eso olvidan la resistencia del LED, confunden módulos de 3 y 4 pines, o ponen el ECHO de 5 V directo al GPIO. <strong>Tu checklist existe exactamente para esto.</strong></p>
+  </section>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 5.1</span><span class="t">Entrenamiento: sé el inspector de la IA</span><span class="diff"><i class="f"></i><i class="f"></i><i></i><span>MEDIA</span></span></div>
+    <div class="prc-b">
+      <p>Una IA “generó” este esquemático. Juzga cada afirmación: <strong>¿válido o error?</strong></p>
+      <div id="inspector"></div>
+      <div class="q-res" id="inspRes" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 5.2</span><span class="t">Tu esquemático real</span><span class="diff"><i class="f"></i><i class="f"></i><i class="f"></i><span>ALTA</span></span></div>
+    <div class="prc-b">
+      <p>Trabaja en la plataforma y marca cuando lo tengas:</p>
+      <ul class="chk-list">
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Proyecto PicoLab-v1 creado</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Esquemático generado/pegado con ayuda de la IA</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Checklist de auditoría pasada línea a línea</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Todos los footprints asignados (THT)</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">El corrector/ERC de la herramienta no marca errores</span></label></li>
+      </ul>
+      <div class="entrega"><b>📓 ENTREGA</b><span>Captura del esquemático final + lista de correcciones que le hiciste a la IA (mínimo 2). Si la IA no se equivocó en nada… sospecha y revisa otra vez 😉.</span></div>
+    </div>
+  </div>
+
+  <section class="blk rv">
+    <div class="blk-tag">02 · AUTOEVALUACIÓN</div>
+    <div class="quiz" id="q-s5"></div>
+  </section>
+
+  <div class="done-row">
+    <span class="st" data-st="s5">ESTADO: pendiente</span>
+    <button class="btn small btn-mark" data-id="s5">Marcar sesión completada</button>
+    <button class="btn small teal" data-go="s6">Sesión 6 ▸</button>
+  </div>
+  <div class="footnav"><button class="btn ghost small" data-go="s4">◂ Sesión 4</button><button class="btn ghost small" data-go="s6">Sesión 6 ▸</button></div>
+</section>
+
+<!-- ======================= S6 ======================= -->
+<section class="session" id="s6">
+  <header class="shead">
+    <div class="s-ref">SESIÓN 06 · 55 MIN · LAYOUT + DRC</div>
+    <h2>Del esquemático al PCB: colocar, enrutar y verificar</h2>
+    <p class="s-goal"><strong>Objetivo:</strong> convertir el esquemático en placa física: colocar componentes, enrutar pistas (con autorouter/IA), crear el plano de masa y pasar el DRC a cero errores.</p>
+    <div class="s-tags"><span class="chip">DIFICULTAD ●●●</span><span class="chip">JUEGO: CAZA DE ERRORES</span></div>
+  </header>
+
+  <section class="blk rv">
+    <div class="blk-tag">01 · REGLAS DE ORO DEL LAYOUT</div>
+    <ul>
+      <li><strong>Coloca antes de enrutar:</strong> agrupa por función (semáforo junto, sensores juntos), conectores en el borde, la Pico arriba centrada. Una buena colocación hace el ruteo casi automático.</li>
+      <li><strong>Anchos de pista:</strong> señales (LEDs, datos): <strong>0,4 mm</strong>. Corrientes grandes (VBUS, servo): <strong>0,8 mm o más</strong>. Nunca bajes de 0,2 mm.</li>
+      <li><strong>Giros:</strong> evita ángulos de 90°; usa 45° o curvas.</li>
+      <li><strong>Plano de masa:</strong> inunda la capa inferior con cobre conectado a GND. Es el retorno común, reduce ruido y te ahorra cablear la mitad de las pistas.</li>
+      <li><strong>DRC:</strong> el Design Rules Check compara tu placa con las reglas (distancias mínimas, anchos, cortos). <strong>0 errores</strong> antes de seguir.</li>
+      <li><strong>Vista 3D:</strong> mírala en 3D: ¿choca algo? ¿los conectores están accesibles?</li>
+    </ul>
+  </section>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 6.1</span><span class="t">Caza de errores: encuentra los 5 fallos</span><span class="diff"><i class="f"></i><i class="f"></i><i class="f"></i><span>ALTA</span></span></div>
+    <div class="prc-b">
+      <p>Esta placa de un alumno imaginario tiene <strong>5 defectos de fabricación</strong>. Haz clic en las zonas sospechosas. Las zonas correctas también existen: ¡no dispares a todo!</p>
+      <div class="hs-wrap">
+        <div>
+          <div class="hs-count" id="hsCount">ERRORES ENCONTRADOS: 0 / 5</div>
+          <svg id="hsSvg" class="hs-board" viewBox="0 0 660 430"></svg>
+        </div>
+        <div id="hsList"><p style="color:var(--dim);font-size:.85rem">Aquí aparecerá el informe de inspección…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 6.2</span><span class="t">Tu placa real</span><span class="diff"><i class="f"></i><i class="f"></i><i class="f"></i><span>ALTA</span></span></div>
+    <div class="prc-b">
+      <ul class="chk-list">
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Importé el esquemático al editor de PCB</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Placa definida 70 × 55 mm, 2 capas</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Componentes colocados por grupos funcionales</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Enrutado con autorouter/IA y retocado a mano</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Plano de GND en la capa inferior + vías</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct"><strong>DRC: 0 errores</strong></span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Vista 3D revisada</span></label></li>
+      </ul>
+      <div class="entrega"><b>📓 ENTREGA</b><span>Captura de la vista 3D + nota literal del DRC: “0 errores”.</span></div>
+    </div>
+  </div>
+
+  <section class="blk rv">
+    <div class="blk-tag">02 · AUTOEVALUACIÓN</div>
+    <div class="quiz" id="q-s6"></div>
+  </section>
+
+  <div class="done-row">
+    <span class="st" data-st="s6">ESTADO: pendiente</span>
+    <button class="btn small btn-mark" data-id="s6">Marcar sesión completada</button>
+    <button class="btn small teal" data-go="s7">Sesión 7 ▸</button>
+  </div>
+  <div class="footnav"><button class="btn ghost small" data-go="s5">◂ Sesión 5</button><button class="btn ghost small" data-go="s7">Sesión 7 ▸</button></div>
+</section>
+
+<!-- ======================= S7 ======================= -->
+<section class="session" id="s7">
+  <header class="shead">
+    <div class="s-ref">SESIÓN 07 · 55 MIN · GERBERS + PEDIDO</div>
+    <h2>Fabricación: exportar Gerbers y encargar la placa por internet</h2>
+    <p class="s-goal"><strong>Objetivo:</strong> entender los archivos de fabricación (Gerber + taladrado), exportarlos desde tu herramienta y completar (real o simulado) un pedido a fábrica.</p>
+    <div class="s-tags"><span class="chip">DIFICULTAD ●●○</span><span class="chip">SIMULADOR DE PEDIDO</span></div>
+  </header>
+
+  <section class="blk rv">
+    <div class="blk-tag">01 · EL IDIOMA DE LAS FÁBRICAS</div>
+    <p>Las fábricas no leen tu proyecto: leen <strong>archivos Gerber</strong> (el “PDF” de cada capa: cobre superior, cobre inferior, máscaras, serigrafía, contorno) más el archivo de <strong>taladrado</strong>. Todo se sube comprimido en un <strong>.zip</strong>. En cualquier plataforma: <em>Export → Fabrication / Gerber → descargar zip</em>.</p>
+    <table class="tbl"><thead><tr><th>PARÁMETRO</th><th>VALOR PARA PICOLAB</th><th>COMENTARIO</th></tr></thead><tbody>
+      <tr><td>Capas</td><td>2</td><td>Top + Bottom</td></tr>
+      <tr><td>Dimensiones</td><td>70 × 55 mm</td><td>Verifica que la fábrica las detecta solas</td></tr>
+      <tr><td>Espesor</td><td>1,6 mm</td><td>El estándar de toda la vida</td></tr>
+      <tr><td>Acabado</td><td>HASL sin plomo</td><td>El más barato; ENIG es más fino pero caro</td></tr>
+      <tr><td>Color</td><td>Verde</td><td>Suele ser el gratuito</td></tr>
+      <tr><td>Cantidad</td><td>5</td><td>Casi todas fabrican 5 por precio base</td></tr>
+    </tbody></table>
+    <div class="box red"><span class="bt">⛔ REGLA DE ORO DEL PEDIDO</span>Siempre, SIEMPRE, mira la <strong>previsualización</strong> de la fábrica antes de pagar. Si el contorno aparece vacío o falta una capa, tu zip está mal. Un error aquí cuesta dinero y 2 semanas de espera.</div>
+    <p><strong>Fabricantes habituales:</strong> <strong>JLCPCB</strong> y <strong>PCBWay</strong> (China, ~2–10 € por 5 placas + envío, 1–3 semanas) y <strong>OSH Park</strong> (EE. UU., cobra por pulgada², calidad excelente). Para el aula, la relación calidad-precio de JLCPCB suele ganar.</p>
+  </section>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 7.1</span><span class="t">Simulador de pedido</span><span class="diff"><i class="f"></i><i class="f"></i><i></i><span>MEDIA</span></span></div>
+    <div class="prc-b">
+      <p>Configura el pedido y compara fabricantes. Precios orientativos con fines didácticos.</p>
+      <div class="sim">
+        <div>
+          <div class="fld"><label class="lb">FABRICANTE</label>
+            <select id="smMfr"><option value="jlc">JLCPCB</option><option value="pcbway">PCBWay</option><option value="osh">OSH Park</option></select></div>
+          <div class="fld"><label class="lb">CANTIDAD</label>
+            <select id="smQty"><option>5</option><option>10</option><option>20</option></select></div>
+          <div class="fld"><label class="lb">ACABADO SUPERFICIAL</label>
+            <select id="smFin"><option value="hasl">HASL sin plomo</option><option value="enig">ENIG (oro)</option></select></div>
+          <div class="fld"><label class="lb">COLOR DE MÁSCARA</label>
+            <select id="smCol"><option value="green">Verde</option><option value="blue">Azul</option><option value="black">Negro</option><option value="red">Rojo</option></select></div>
+          <div class="fld"><label class="lb">ENVÍO</label>
+            <select id="smShip"><option value="std">Estándar (más barato)</option><option value="exp">Exprés (más rápido)</option></select></div>
+          <button class="btn small" id="smGo">Calcular pedido</button>
+          <button class="btn small teal" id="smOrder" style="display:none;margin-left:8px">Enviar pedido (simulado)</button>
+        </div>
+        <div id="smOut"><div class="ticket"><h4>TICKET DE PEDIDO</h4><p style="font-size:.7rem;color:#7a6842">Configura las opciones y pulsa “Calcular pedido”.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 7.2</span><span class="t">Exportación real de Gerbers</span><span class="diff"><i class="f"></i><i class="f"></i><i></i><span>MEDIA</span></span></div>
+    <div class="prc-b">
+      <ul class="chk-list">
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Exporté el zip de Gerber + taladrado desde mi herramienta</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Abrí el zip y contiene archivos de ambas capas, máscara, serigrafía, contorno y drill</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Subí el zip a la fábrica (cuenta de prueba o real) y revisé la previsualización</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Las dimensiones detectadas coinciden: ~70 × 55 mm</span></label></li>
+      </ul>
+      <div class="entrega"><b>📓 ENTREGA</b><span>Captura de la previsualización del fabricante con el zip subido + el ticket del simulador (o el nº de pedido real si el aula lo confirma).</span></div>
+    </div>
+  </div>
+
+  <section class="blk rv">
+    <div class="blk-tag">02 · AUTOEVALUACIÓN</div>
+    <div class="quiz" id="q-s7"></div>
+  </section>
+
+  <div class="done-row">
+    <span class="st" data-st="s7">ESTADO: pendiente</span>
+    <button class="btn small btn-mark" data-id="s7">Marcar sesión completada</button>
+    <button class="btn small teal" data-go="s8">Sesión 8 ▸</button>
+  </div>
+  <div class="footnav"><button class="btn ghost small" data-go="s6">◂ Sesión 6</button><button class="btn ghost small" data-go="s8">Sesión 8 ▸</button></div>
+</section>
+
+<!-- ======================= S8 ======================= -->
+<section class="session" id="s8">
+  <header class="shead">
+    <div class="s-ref">SESIÓN 08 · 55 MIN · SOLDADURA + EVALUACIÓN FINAL</div>
+    <h2>Soldar, verificar y darle vida a PicoLab</h2>
+    <p class="s-goal"><strong>Objetivo:</strong> soldar la placa con seguridad, comprobar que no hay cortocircuitos, montar la Pico y ejecutar el primer programa. Después: evaluación final y diploma.</p>
+    <div class="s-tags"><span class="chip">DIFICULTAD ●●●</span><span class="chip">🔥 SOLDADOR EN MARCHA</span></div>
+  </header>
+
+  <section class="blk rv">
+    <div class="blk-tag">01 · SEGURIDAD Y TÉCNICA</div>
+    <ul>
+      <li><strong>El soldador quema a 330 °C.</strong> Siempre en su soporte, gafas puestas, zona ventilada y esponja húmeda lista.</li>
+      <li><strong>La técnica de los 5 pasos:</strong> ① calienta pad + pata del componente (2 s) → ② acerca el estaño a la unión, no a la punta → ③ retira el estaño → ④ retira el soldador → ⑤ deja enfriar sin soplar ni mover.</li>
+      <li><strong>Soldadura buena:</strong> brillante, con forma de cono/volcán. <strong>Soldadura fría:</strong> bola mate y granulosa → recalienta y corrige.</li>
+      <li><strong>Orden sagrado:</strong> de lo más bajo a lo más alto (resistencias → zócalos → botones/LEDs → DHT11 → buzzer/conectores). La Pico se monta la última, pinchada en sus zócalos.</li>
+    </ul>
+    <div class="box red"><span class="bt">⛔ ANTES DE CONECTAR EL USB</span>Con el multímetro en modo continuidad, mide entre <strong>3V3 y GND</strong> en el zócalo de la Pico: <strong>NO debe pitar</strong>. Si pita, hay cortocircuito: desconecta todo y busca la gota de estaño rebelde. Este test salva placas (y ordenadores).</div>
+    <h3>Primer programa: que parpadee</h3>
+    <p>Instala <strong>Thonny</strong> (gratis), conecta la Pico manteniendo pulsado <strong>BOOTSEL</strong> y flashea MicroPython. Luego ejecuta:</p>
+    <div class="code"><button class="copy" data-copy="#code1">⧉ COPIAR</button><pre id="code1"><span class="c"># Parpadeo de prueba — LED integrado de la Pico</span>
+<span class="k">from</span> machine <span class="k">import</span> Pin
+<span class="k">from</span> time <span class="k">import</span> sleep
+
+led = Pin(<span class="s">"LED"</span>, Pin.OUT)   <span class="c"># LED interno en GP25</span>
+<span class="k">while</span> True:
+    led.toggle()
+    sleep(0.5)</pre></div>
+    <div class="code"><button class="copy" data-copy="#code2"> COPIAR</button><pre id="code2"><span class="c"># Lectura del DHT11 (GP16) — requiere módulo dht</span>
+<span class="k">import</span> dht, machine
+<span class="k">from</span> time <span class="k">import</span> sleep
+s = dht.DHT11(machine.Pin(16))
+<span class="k">while</span> True:
+    s.measure()
+    print(<span class="s">"Temp:"</span>, s.temperature(), <span class="s">"°C   Hum:"</span>, s.humidity(), <span class="s">"%"</span>)
+    sleep(2)</pre></div>
+    <h3>Guía rápida de averías</h3>
+    <table class="tbl"><thead><tr><th>SÍNTOMA</th><th>DIAGNÓSTICO</th></tr></thead><tbody>
+      <tr><td>La Pico no aparece en el PC</td><td>Mantén BOOTSEL pulsado al conectar el USB</td></tr>
+      <tr><td>El multímetro pita entre 3V3 y GND</td><td>Cortocircuito: desconecta YA y busca puentes de estaño</td></tr>
+      <tr><td>Un LED no luce</td><td>Polaridad: la pata corta (cátodo) va a GND; revisa su resistencia</td></tr>
+      <tr><td>El DHT11 lee basura</td><td>Falta el pull-up de 4,7 kΩ o el cable es muy largo</td></tr>
+      <tr><td>El buzzer calla</td><td>¿Es activo? Solo necesita ON/OFF. Si es pasivo, necesita PWM</td></tr>
+    </tbody></table>
+  </section>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 8.1</span><span class="t">Ordena el protocolo de soldadura</span><span class="diff"><i class="f"></i><i class="f"></i><i></i><span>MEDIA</span></span></div>
+    <div class="prc-b">
+      <p>Antes de encender el soldador demuestra que conoces el protocolo:</p>
+      <div id="ro-s8"></div>
+      <button class="btn small" id="ro-s8-check" style="margin-top:10px">Comprobar orden</button>
+    </div>
+  </div>
+
+  <div class="prc rv">
+    <div class="prc-h"><span class="n">PRÁCTICA 8.2</span><span class="t">Checklist final de placa viva</span><span class="diff"><i class="f"></i><i class="f"></i><i class="f"></i><span>ALTA</span></span></div>
+    <div class="prc-b">
+      <ul class="chk-list">
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Todos los componentes soldados y repasados visualmente</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Test de continuidad 3V3–GND: NO pita ✓</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Pico montada en los zócalos, orientación correcta (USB hacia fuera)</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Programa de parpadeo funcionando</span></label></li>
+        <li><label class="chk"><input type="checkbox"><span class="bx"></span><span class="ct">Semáforo, botones, buzzer y DHT11 responden</span></label></li>
+      </ul>
+      <div class="box tip"><span class="bt">🚀 RETO PARA VALIENTES</span>Haz que el semáforo cambie más rápido mientras mantienes pulsado B1, y que el buzzer suene si la temperatura pasa de 28 °C. ¿Se lo pides a la IA? Recuerda: luego lo verificas tú.</div>
+    </div>
+  </div>
+
+  <section class="blk rv">
+    <div class="blk-tag">02 · EVALUACIÓN FINAL DEL CURSO · 10 PREGUNTAS</div>
+    <div class="quiz" id="q-final"></div>
+  </section>
+
+  <section class="blk rv">
+    <div class="blk-tag">03 · DIPLOMA DE FABRICANTE</div>
+    <p>¿Superaste la evaluación final (≥6/10)? Escribe tu nombre y emite tu diploma:</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:12px 0">
+      <input type="text" id="dpName" placeholder="Nombre y apellidos" style="max-width:320px">
+      <button class="btn" id="dpGo">Emitir diploma</button>
+    </div>
+    <div class="diploma" id="diploma" style="display:none">
+      <div class="dpl-ies">
+        <svg viewBox="0 0 200 190"><use href="#iesV"/></svg>
+        <span class="n">IES "Valle del Jerte" · Plasencia</span>
+        <span class="p">DEPARTAMENTO DE TECNOLOGÍA</span>
+      </div>
+      <div class="dpl-eyebrow">TALLER PICOLAB·IA · CERTIFICADO DE FINALIZACIÓN</div>
+      <div class="dpl-name" id="dpShow">—</div>
+      <p class="dpl-txt">ha diseñado con herramientas de inteligencia artificial gratuitas, encargado la fabricación y soldado la placa</p>
+      <p class="dpl-txt" style="color:var(--cop2);font-family:var(--disp);font-weight:700;letter-spacing:2px;font-size:1.2rem">PICOLAB v1.0 · SHIELD PARA RASPBERRY PI PICO</p>
+      <div class="dpl-seal">PCB<br>★<br>IA</div>
+      <div class="dpl-meta" id="dpMeta"></div>
+      <div class="dpl-sign"><b>Prof. NachoTEC</b>Docente del taller · IES "Valle del Jerte", Plasencia</div>
+      <button class="btn small" style="margin-top:20px" onclick="window.print()">🖨 Imprimir / guardar PDF</button>
+    </div>
+  </section>
+
+  <div class="done-row">
+    <span class="st" data-st="s8">ESTADO: pendiente</span>
+    <button class="btn small btn-mark" data-id="s8">Marcar sesión completada</button>
+    <button class="btn small teal" data-go="doc">Guía del docente ▸</button>
+  </div>
+  <div class="footnav"><button class="btn ghost small" data-go="s7">◂ Sesión 7</button><button class="btn ghost small" data-go="s0">Volver al inicio</button></div>
+</section>
+
+<!-- ======================= DOCENTE ======================= -->
+<section class="session" id="doc">
+  <header class="shead">
+    <div class="s-ref">RECURSO · SOLO DOCENTE · IES "VALLE DEL JERTE" · PROF. NACHOTEC</div>
+    <h2>Guía didáctica del taller</h2>
+    <p class="s-goal">Resumen ejecutivo para impartir el curso: secuenciación, evaluación, materiales y trucos de aula.</p>
+  </header>
+
+  <div class="box idea"><span class="bt">👤 AUTORÍA DEL MATERIAL</span>Taller diseñado e impartido por el <strong>Prof. NachoTEC</strong> — Departamento de Tecnología, IES "Valle del Jerte" (Plasencia). Curso 2026-2027. App autocontenida: un único archivo HTML para el aula.</div>
+
+  <section class="blk">
+    <div class="blk-tag">SECUENCIACIÓN Y TEMPORIZACIÓN (55 MIN/SESIÓN)</div>
+    <p>Esquema sugerido por sesión: <strong>10 min</strong> teoría dialogada · <strong>30 min</strong> práctica (en parejas) · <strong>15 min</strong> quiz + puesta en común.</p>
+    <table class="tbl"><thead><tr><th>S</th><th>OBJETIVO DIDÁCTICO</th><th>ENTREGABLE EVALUABLE</th></tr></thead><tbody>
+      <tr><td>S1</td><td>Modelo mental de PCB y vocabulario base</td><td>Dibujo de capas + quiz</td></tr>
+      <tr><td>S2</td><td>Ley de Ohm aplicada; lectura de esquemas</td><td>Tabla de resistencias + quiz</td></tr>
+      <tr><td>S3</td><td>Pensamiento crítico frente a la IA; prompting</td><td>2 prompts + análisis de fallos de la IA</td></tr>
+      <tr><td>S4</td><td>Especificación como contrato de ingeniería</td><td>Ficha técnica PicoLab</td></tr>
+      <tr><td>S5</td><td>Generación y auditoría del esquemático</td><td>Esquemático auditado + correcciones</td></tr>
+      <tr><td>S6</td><td>Layout, plano de masa, DRC</td><td>PCB con DRC 0 errores + vista 3D</td></tr>
+      <tr><td>S7</td><td>Flujo de fabricación industrial real</td><td>Gerbers exportados + ticket/pedido</td></tr>
+      <tr><td>S8</td><td>Soldadura segura, test eléctrico, depuración</td><td>Placa funcional + evaluación final</td></tr>
+    </tbody></table>
+  </section>
+
+  <section class="blk">
+    <div class="blk-tag">MATERIALES POR AULA</div>
+    <table class="tbl"><thead><tr><th>PARA CADA PAREJA</th><th>CANTIDAD / NOTA</th></tr></thead><tbody>
+      <tr><td>Soldador + soporte + estaño (sin plomo)</td><td>1 puesto; 320–350 °C</td></tr>
+      <tr><td>Multímetro con continuidad</td><td>1</td></tr>
+      <tr><td>Raspberry Pi Pico</td><td>1 (+1 de repuesto por aula)</td></tr>
+      <tr><td>Zócalo hembra 2×20, 3 LEDs, 3 resistencias, 2 pulsadores, buzzer activo, DHT11, LDR + R 10 kΩ</td><td>Kit básico ≈ 6–8 €</td></tr>
+      <tr><td>Extras: servo SG90, HC-SR04, resistencias 1 kΩ y 2 kΩ</td><td>Para grupos avanzados</td></tr>
+    </tbody></table>
+    <div class="box idea"><span class="bt">💡 SIN PRESUPUESTO PARA FABRICAR</span>Si no es posible encargar las placas, el curso sigue siendo válido: cada pareja completa el diseño y el pedido simulado, y el aula fabrica <strong>una sola placa de demostración</strong> que el docente suelda en directo con la clase dirigiendo cada paso.</div>
+  </section>
+
+  <section class="blk">
+    <div class="blk-tag">EVALUACIÓN (RÚBRICA SOBRE 10)</div>
+    <table class="tbl"><thead><tr><th>CRITERIO</th><th>PESO</th></tr></thead><tbody>
+      <tr><td>Bitácora de diseño completa y ordenada</td><td>1,5</td></tr>
+      <tr><td>Especificación (S4)</td><td>1,5</td></tr>
+      <tr><td>Esquemático auditado (S5)</td><td>2</td></tr>
+      <tr><td>PCB con DRC 0 errores (S6)</td><td>2</td></tr>
+      <tr><td>Gerbers + pedido (S7)</td><td>1</td></tr>
+      <tr><td>Placa soldada y funcionando (S8)</td><td>1</td></tr>
+      <tr><td>Evaluación final (quiz de 10)</td><td>1</td></tr>
+    </tbody></table>
+    <p style="font-size:.85rem;color:var(--mut)">Criterios y pesos definidos por el <strong style="color:var(--ies2)">Prof. NachoTEC</strong> (IES "Valle del Jerte", Plasencia). La firma docente del diploma acredita el cumplimiento de esta rúbrica.</p>
+    <div class="box warn"><span class="bt">⚠ CONSEJOS DE AULA</span>
+      ① Exige que TODA respuesta de la IA pase por la checklist de la S5: es donde está el aprendizaje real. ② Haz una puesta en común de “el peor error que encontró mi IA”: normaliza el fallo. ③ Si pides placas reales, hazlo en la S7 sin falta: los envíos tardan 1–3 semanas. ④ El progreso del alumnado se puede supervisar pidiendo capturas de la barra superior de esta app.</div>
+  </section>
+  <div class="footnav"><button class="btn ghost small" data-go="s8">◂ Volver a la Sesión 8</button><button class="btn ghost small" data-go="s0">Inicio</button></div>
+</section>
+
+<footer class="site-foot">
+  <svg viewBox="0 0 200 190"><use href="#iesV"/></svg>
+  <span><b>IES "Valle del Jerte"</b> · Plasencia — Taller PicoLab·IA · Profesor: <b>NachoTEC</b> · Curso 2026-2027</span>
+</footer>
+
+</main>
+</div>
+<div id="toasts"></div>
+
+<script>
+/* ================= UTILIDADES ================= */
+const $=(s,c)=>(c||document).querySelector(s), $$=(s,c)=>[...(c||document).querySelectorAll(s)];
+function toast(m,err){const t=document.createElement('div');t.className='toast'+(err?' err':'');t.textContent=m;$('#toasts').appendChild(t);setTimeout(()=>{t.style.opacity=0;t.style.transition='opacity .4s';setTimeout(()=>t.remove(),400)},2600)}
+document.addEventListener('click',e=>{
+  const cp=e.target.closest('[data-copy]');
+  if(cp){const src=$(cp.dataset.copy);const txt=src?src.innerText:'';
+    if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>toast('⧉ Copiado al portapapeles'))}
+    else{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast('⧉ Copiado')}}
+  const go=e.target.closest('[data-go]');
+  if(go) navGo(go.dataset.go);
+});
+
+/* ================= ESTADO / PROGRESO ================= */
+const KEY='picolab-v1';
+let ST={done:[],pass:[]};
+try{ST=JSON.parse(localStorage.getItem(KEY))||ST}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}}
+const MODULES=['s0','s1','s2','s3','s4','s5','s6','s7','s8'];
+function renderProgress(){
+  const n=ST.done.filter(d=>MODULES.includes(d)).length;
+  $('#fill').style.width=(n/MODULES.length*100)+'%';
+  $('#pct').textContent=n+'/'+MODULES.length;
+  $$('.nav-dot').forEach(d=>d.classList.toggle('on',ST.done.includes(d.dataset.dot)));
+  $$('.btn-mark').forEach(b=>{
+    const on=ST.done.includes(b.dataset.id);
+    b.classList.toggle('done-state',on);
+    b.textContent=on?'✔ Sesión completada':'Marcar sesión completada';
+  });
+  $$('[data-st]').forEach(s=>{s.textContent=ST.done.includes(s.dataset.st)?'ESTADO: ✔ completada':'ESTADO: pendiente';s.style.color=ST.done.includes(s.dataset.st)?'var(--grn)':'var(--dim)'});
+}
+$$('.btn-mark').forEach(b=>b.addEventListener('click',()=>{
+  const id=b.dataset.id;
+  if(ST.done.includes(id)){ST.done=ST.done.filter(x=>x!==id);toast('Sesión marcada como pendiente')}
+  else{ST.done.push(id);toast('✔ ¡Sesión completada!')};save();renderProgress();
+}));
+$('#resetBtn').addEventListener('click',()=>{if(confirm('¿Borrar todo el progreso del curso?')){ST={done:[],pass:[]};save();renderProgress();toast('Progreso reiniciado',true)}});
+
+/* ================= NAVEGACIÓN ================= */
+function navGo(id){
+  const sec=$('#'+id); if(!sec)return;
+  $$('.session').forEach(s=>s.classList.remove('active'));
+  sec.classList.add('active');
+  $$('.nav-it').forEach(n=>n.classList.toggle('act',n.dataset.go===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+  try{history.replaceState(null,'','#'+id)}catch(e){}
+  requestAnimationFrame(observeReveals);
+}
+window.addEventListener('hashchange',()=>{const id=location.hash.slice(1);if($('#'+id))navGo(id)});
+
+/* ================= QUIZZES ================= */
+const QZ={
+s1:[
+{q:'¿Qué capa le da el color verde clásico a la mayoría de las PCBs?',o:['El cobre','La máscara antisoldadura (solder mask)','El sustrato FR4','La serigrafía'],a:1,w:'La máscara es el barniz protector; suele ser verde, aunque también hay azules, rojas o negras.'},
+{q:'¿Qué es una «vía»?',o:['Un componente SMD','Un taladro metalizado que conecta capas de cobre','El borde de la placa','Una pista muy ancha'],a:1,w:'Las vías permiten que una pista pase de la capa superior a la inferior.'},
+{q:'La Raspberry Pi Pico es…',o:['Un sensor de temperatura','Una placa microcontroladora con chip RP2040','Una fábrica de PCBs','Un tipo de soldadura'],a:1,w:'Es el “cerebro” que montaremos en PicoLab: ejecuta nuestro código MicroPython.'},
+{q:'¿Cuál de estos componentes es un ACTUADOR?',o:['El DHT11','La LDR','El zumbador','La serigrafía'],a:2,w:'Un actuador transforma electricidad en acción (sonido, luz, movimiento). Los sensores miden el mundo.'},
+{q:'La serigrafía de una PCB sirve para…',o:['Conducir corriente','Imprimir textos, logos y marcas de referencia','Proteger del agua','Sujetar la placa al chasis'],a:1,w:'Es la “tinta blanca”: nombres de componentes, polaridad, logotipos…'}],
+s1b:[
+{q:'Un LED es…',o:['Sensor','Actuador','Ninguno: es pasivo'],a:1,w:'Convierte electricidad en luz: acción sobre el mundo = actuador.'},
+{q:'Una LDR (resistencia dependiente de luz) es…',o:['Sensor','Actuador','Ninguno: es pasivo'],a:0,w:'Su resistencia cambia con la luz: mide el mundo = sensor.'},
+{q:'El DHT11 es…',o:['Sensor','Actuador','Ninguno: es pasivo'],a:0,w:'Mide temperatura y humedad: sensor ambiental.'},
+{q:'Un pulsador es…',o:['Sensor','Actuador','Ninguno: es pasivo'],a:0,w:'Es una entrada: detecta una acción humana. Lo trataremos como sensor de usuario.'},
+{q:'Una resistencia es…',o:['Sensor','Actuador','Ninguno: es pasivo'],a:2,w:'No mide ni actúa: solo limita la corriente. Componente pasivo.'},
+{q:'Un servo SG90 es…',o:['Sensor','Actuador','Ninguno: es pasivo'],a:1,w:'Un motor que se posiciona donde le ordenes: actuador puro.'}],
+s2:[
+{q:'Según la Ley de Ohm, la resistencia se calcula como…',o:['R = V × I','R = V / I','R = I / V','R = V + I'],a:1,w:'R = V/I. De ahí sale R = (Vfuente − Vf_LED) / I para el LED.'},
+{q:'Con 3,3 V, un LED de Vf = 2 V y 10 mA deseados, ¿qué resistencia necesitas?',o:['13 Ω','≈130 Ω (comercial 150 Ω)','1,3 kΩ','330 kΩ'],a:1,w:'(3,3 − 2) / 0,01 = 130 Ω. Se redondea al valor E12 superior más cercano: 150 Ω.'},
+{q:'¿Por qué el LED lleva resistencia en serie?',o:['Para que brille más','Para limitar la corriente y que no se queme','Por estética del esquemático','Para ahorrar energía'],a:1,w:'Sin resistencia, el LED pediría más corriente de la soportada y moriría en segundos.'},
+{q:'En un esquemático, una «red» (net) es…',o:['Un componente especial','El conjunto de puntos conectados eléctricamente entre sí','El nombre del archivo','Una capa de cobre'],a:1,w:'Todo lo que comparte nombre de red queda unido en la placa final.'},
+{q:'Un pulsador conectado a un GPIO funciona mejor…',o:['Entre GPIO y 3V3 sin nada más','Con pull-up (interno por software) para lectura estable','Conectado solo a GND','En un pin analógico cualquiera'],a:1,w:'Con pull-up el GPIO lee 1 en reposo y 0 al pulsar: señal limpia y sin flotaciones.'}],
+s3:[
+{q:'¿Cuál es el mayor riesgo de usar IA para diseñar electrónica?',o:['Que sea lenta','Las alucinaciones: respuestas falsas pero convincentes','Que cobre por palabra','Que no entienda español'],a:1,w:'Por eso el curso insiste: la IA propone y TÚ verificas con checklist y datasheets.'},
+{q:'El mejor prompt es el que…',o:['Es lo más corto posible','Incluye rol, contexto, tarea, restricciones y formato','Usa muchas mayúsculas','Pide “algo bonito”'],a:1,w:'Cuantas más restricciones das, menos espacio tiene la IA para inventar.'},
+{q:'¿Qué afirmación es correcta?',o:['La IA sustituye al diseñador','La IA propone y el humano verifica con checklist y DRC','La IA nunca se equivoca con footprints','El DRC lo hace la IA por definición'],a:1,w:'El flujo profesional es colaborativo: máquina acelera, humano valida.'},
+{q:'Un «autorouter» con IA se encarga de…',o:['Soldar componentes','Proponer el trazado de las pistas de cobre','Comprar piezas','Escribir la serigrafía'],a:1,w:'Automatiza el ruteo, pero siempre conviene retocar a mano y pasar el DRC.'}],
+s4:[
+{q:'¿Por qué la especificación se redacta ANTES de diseñar?',o:['Porque lo dice el profesor','Fija los requisitos y permite auditar lo que genere la IA','Para gastar más tiempo','No es necesaria si la IA es buena'],a:1,w:'La spec es tu contrato: cualquier salida de la IA se juzga contra ella.'},
+{q:'La LDR se conecta a…',o:['Cualquier GPIO digital','Un pin con ADC (GP26), porque entrega un valor analógico','Directamente a VBUS','Al pin 3V3'],a:1,w:'La LDR varía su resistencia con la luz: necesitamos leer un voltaje variable → ADC.'},
+{q:'El pin ECHO del HC-SR04 entrega 5 V. ¿Qué hacemos?',o:['Nada, la Pico aguanta','Un divisor de tensión (1 kΩ / 2 kΩ) antes del GPIO','Conectarlo a GND','Subir el voltaje de la Pico'],a:1,w:'Los GPIO de la Pico solo toleran 3,3 V. El divisor baja el ECHO a un nivel seguro.'},
+{q:'El servo SG90 se alimenta de…',o:['3V3','VBUS (5 V del USB), con la señal PWM en un GP','La batería del ratón','GND'],a:1,w:'Los motores piden 5 V y bastante corriente: VBUS es su sitio; nunca de 3V3.'}],
+s5:[
+{q:'La IA te entrega un esquemático. ¿Primer paso?',o:['Exportar Gerbers ya','Revisarlo conexión a conexión contra la especificación','Imprimirlo','Borrarlo y regenerar'],a:1,w:'Auditar antes de avanzar es la diferencia entre aprender y quemar componentes.'},
+{q:'¿Cuál es un error típico de la IA en esquemáticos?',o:['Poner demasiadas vías','Olvidar la resistencia en serie de un LED','Usar colores raros','Nombrar mal el archivo'],a:1,w:'El clásico: LED directo a la alimentación. Tu checklist lo caza al instante.'},
+{q:'Un «footprint» es…',o:['La huella física del componente: pads y taladros en la PCB','El logo del fabricante','Un tipo de solder mask','El nombre del cobre'],a:0,w:'El esquema dice QUÉ componente es; el footprint dice CÓMO se suelda físicamente.'},
+{q:'THT significa…',o:['Through-Hole Technology: componentes con patas que atraviesan la placa','Thin Heat Transfer','Total Hardware Test','Un formato de archivo'],a:0,w:'Es la tecnología ideal para aprender a soldar a mano. La otra familia es SMD.'}],
+s6:[
+{q:'¿Qué es el DRC?',o:['Un tipo de vía','La comprobación automática de las reglas de diseño','Un fabricante chino','El visor 3D'],a:1,w:'Design Rules Check: verifica distancias, anchos y cortocircuitos. Hay que llegar a 0 errores.'},
+{q:'Ancho de pista razonable para las señales de los LEDs…',o:['0,05 mm','0,4–0,5 mm','3 cm','Da igual'],a:1,w:'0,4 mm es cómodo de fabricar y de sobra para señales de pocos mA.'},
+{q:'El plano de masa (cobre inundado en GND) sirve para…',o:['Decorar la capa inferior','Retorno común de corriente y menos ruido, ahorrando pistas','Subir el voltaje','Enfriar la placa'],a:1,w:'Es la técnica estrella del layout de 2 capas: casi todo “vuelve” por el plano.'},
+{q:'Antes de exportar Gerbers debes…',o:['Apagar el ordenador','DRC con 0 errores y revisión de la vista 3D','Pintar la placa','Cambiar el color a morado'],a:1,w:'DRC + 3D son el último control de calidad antes de mandar la placa a fábrica.'}],
+s7:[
+{q:'Los archivos Gerber describen…',o:['El código MicroPython','Cada capa de la PCB (cobre, máscara, serigrafía, contorno) para fabricarla','El precio del pedido','El esquema eléctrico'],a:1,w:'Son el “PDF industrial”: la fábrica los lee tal cual, sin interpretar nada más.'},
+{q:'Espesor estándar de una PCB de FR4…',o:['0,1 mm','1,6 mm','5 cm','10 mm'],a:1,w:'1,6 mm es el estándar de facto de la industria; casi todas lo traen por defecto.'},
+{q:'El acabado HASL es…',o:['Un baño de estaño/plomo (o sin plomo) sobre los pads','Un tipo de LED','El embalaje','Un formato de taladrado'],a:0,w:'Es el acabado más económico: estaño fundido que protege el cobre expuesto.'},
+{q:'Antes de pagar el pedido debes…',o:['Revisar la previsualización: capas, contorno y taladros','Cerrar la pestaña rápido','Pedir 100 unidades','Cambiar el tamaño a 200 mm'],a:0,w:'El preview es tu última oportunidad de cazar un zip corrupto o incompleto.'}],
+s8:[
+{q:'Una soldadura correcta se ve…',o:['Como una bola mate','Brillante y con forma de cono/volcán','De color azul','Plana e invisible'],a:1,w:'Cono brillante = buena unión térmica y eléctrica. Bola mate = soldadura fría.'},
+{q:'Detectas una soldadura fría (bola mate). ¿Qué haces?',o:['Nada, funciona igual','Recalentar la unión aportando un poco de estaño','Arrancar el componente','Pintarla'],a:1,w:'Se corrige en 3 segundos: calienta, aporta estaño, retira y deja enfriar sin mover.'},
+{q:'El orden lógico de soldadura es…',o:['De lo más alto a lo más bajo','De lo más bajo a lo más alto: resistencias y zócalos primero','Cualquiera','La Pico lo primero'],a:1,w:'Si montas lo alto primero, apoyar la placa al revés se vuelve imposible.'},
+{q:'Antes de alimentar la placa por primera vez mides…',o:['Continuidad entre 3V3 y GND: NO debe pitar','La temperatura ambiente','El peso de la placa','La longitud del USB'],a:0,w:'Si pita hay corto: mejor descubrirlo con el multímetro que con humo.'}],
+final:[
+{q:'¿Qué va primero en el flujo de trabajo?',o:['El ruteo de pistas','La especificación (ficha técnica)','El pedido a fábrica','La soldadura'],a:1,w:'Sin spec no hay criterio para juzgar nada. Es el paso 1 de todo proyecto.'},
+{q:'La IA te propone un footprint que no coincide con tu componente real. ¿Qué haces?',o:['Lo aceptas, la IA sabe','Lo corriges tú consultando el datasheet','Borras el componente','Cambias de fábrica'],a:1,w:'El datasheet manda. La IA asesora; la responsabilidad técnica es tuya.'},
+{q:'Los GPIO de la Raspberry Pi Pico trabajan a…',o:['5 V','3,3 V','12 V','220 V'],a:1,w:'Por eso el ECHO del ultrasónico necesita divisor: viene a 5 V.'},
+{q:'El ECHO del HC-SR04 se protege con…',o:['Una resistencia en serie cualquiera','Un divisor 1 kΩ / 2 kΩ','Un LED','Nada, es seguro'],a:1,w:'El divisor baja 5 V ≈ 3,3 V, nivel seguro para el GPIO.'},
+{q:'El DHT11 necesita…',o:['Pull-up de ~4,7 kΩ en la línea de datos','Alimentación de 12 V','Un ADC obligatorio','Conectarse a VBUS'],a:0,w:'Sin pull-up las lecturas fallan; muchos módulos chinos ya lo traen integrado.'},
+{q:'“DRC: 0 errores” significa que…',o:['La placa ya está fabricada','Puedes exportar los archivos de fabricación con confianza','El pedido llegó','La soldadura está lista'],a:1,w:'Es la luz verde del diseño: adelante con los Gerbers.'},
+{q:'Precio típico de 5 placas de 2 capas en JLCPCB (sin envío)…',o:['Unos 2–10 €','Unos 300 €','Es gratis siempre','1 € por milímetro'],a:0,w:'El precio base es casi simbólico; lo que más pesa es el envío.'},
+{q:'El estaño humea demasiado y la punta se ve sucia. ¿Qué pasa?',o:['Es normal, sigue','La punta está sucia o muy caliente: limpia en la esponja y ajusta temperatura','Falta electricidad','La placa es defectuosa'],a:1,w:'Punta limpia y temperatura correcta = soldaduras limpias y sin humo.'},
+{q:'El PC no reconoce la Pico. Solución clásica:',o:['Cambiar de soldador','Mantener BOOTSEL pulsado mientras conectas el USB','Reinstalar el navegador','Fundir más estaño'],a:1,w:'BOOTSEL la pone en modo de carga: aparece como una unidad USB (RPI-RP2).'},
+{q:'El primer programa de prueba ideal es…',o:['Un servidor web','El parpadeo del LED integrado (GP25)','Un juego 3D','Leer el ultrasonidos'],a:1,w:'El blink confirma alimentación, conexión USB y MicroPython de un plumazo.'}]
+};
+
+function renderQuiz(id,key){
+  const el=$('#'+id); if(!el)return; const data=QZ[key];
+  let answered=0, correct=0;
+  if(ST.pass.includes(key)){const b=document.createElement('div');b.className='q-done';b.textContent='✔ SUPERADA ANTERIORMENTE';el.appendChild(b);}
+  data.forEach((it,i)=>{
+    const box=document.createElement('div');box.className='q-item';
+    box.innerHTML=`<div class="q-num">PREGUNTA ${i+1} / ${data.length}</div><div class="q-t">${it.q}</div>`;
+    it.o.forEach((op,oi)=>{
+      const b=document.createElement('button');b.className='opt';b.textContent=String.fromCharCode(65+oi)+' · '+op;
+      b.onclick=()=>{
+        $$('.opt',box).forEach(x=>x.disabled=true); answered++;
+        if(oi===it.a){b.classList.add('good');correct++}else{b.classList.add('bad');$$('.opt',box)[it.a].classList.add('good')}
+        const w=document.createElement('div');w.className='why show';w.innerHTML='<strong>Por qué:</strong> '+it.w;box.appendChild(w);
+        if(answered===data.length){
+          const r=document.createElement('div');r.className='q-res';
+          const pct=Math.round(correct/data.length*100);
+          r.innerHTML=`RESULTADO: <b style="color:${pct>=60?'var(--grn)':'var(--red)'}">${correct}/${data.length} (${pct}%)</b> ${pct>=60?'— ✔ superado':'— necesitas 60 % para superarlo'}`;
+          el.appendChild(r);
+          if(pct>=60 && !ST.pass.includes(key)){ST.pass.push(key);save();if(key==='final')scoreFinal=pct;toast('🏅 ¡Quiz superado!')}
+          else if(pct<60){toast('Sigue repasando: puedes reintentar recargando',true)}
+        }
+      };
+      box.appendChild(b);
+    });
+    el.appendChild(box);
+  });
+}
+let scoreFinal=null;
+['q-s1b','q-s1','q-s2','q-s3','q-s4','q-s5','q-s6','q-s7','q-s8'].forEach(id=>renderQuiz(id,id.slice(2)));
+renderQuiz('q-final','final');
+
+/* ================= EXPLORADOR DE CAPAS ================= */
+const LAYERS=[
+ {n:'Serigrafía (superior)',c:'#f4f8f4',d:'La «impresión» blanca de la placa: nombres de componentes, marcas de polaridad y logos. No conduce electricidad: es solo información para humanos.'},
+ {n:'Máscara antisoldadura',c:'#0f7a4d',d:'El barniz verde que protege el cobre y deja libres solo los pads donde soldarás. Es la responsable del color clásico de las PCBs.'},
+ {n:'Cobre superior (Top)',c:'#e0913f',d:'Aquí viven las pistas y los pads de la cara de arriba. Es el “cableado impreso” por donde circula la corriente.'},
+ {n:'Sustrato FR4',c:'#d9c27e',d:'El corazón rígido y aislante del sándwich (fibra de vidrio). Espesor estándar: 1,6 mm. Si no fuera aislante, todo haría cortocircuito.'},
+ {n:'Cobre inferior (Bottom)',c:'#c9803a',d:'Segunda capa de pistas. En PicoLab la usaremos sobre todo para el plano de masa (GND) inundado.'},
+ {n:'Máscara inferior',c:'#0c6b43',d:'El mismo barniz protector, pero por la cara de abajo, donde quedan las soldaduras de los componentes THT.'}
+];
+const lb=$('#layerBars');
+LAYERS.forEach((l,i)=>{
+  const b=document.createElement('div');b.className='lbar';
+  b.innerHTML=`<span class="sw" style="background:${l.c}"></span><span class="nm">${l.n}</span>`;
+  b.onclick=()=>{ $$('.lbar').forEach(x=>x.classList.remove('act'));b.classList.add('act');
+    $('#layerInfo').innerHTML=`<b>${l.n.toUpperCase()}</b>${l.d}`; };
+  lb.appendChild(b);
+});
+
+/* ================= CALCULADORA LED ================= */
+const E12=[100,120,150,180,220,270,330,390,470,560,680,820,1000];
+function calc(){
+  const vs=+$('#cVs').value||0, vf=+$('#cVf').value||0, i=+$('#cI').value||1;
+  const r=(vs-vf)/(i/1000); const p=(i/1000)*(i/1000)*r*1000;
+  if(r<=0){$('#cOut').innerHTML='⚠ La caída del LED no puede ser mayor que la fuente.';return}
+  let best=E12.find(x=>x>=r)||1000;
+  $('#cOut').innerHTML=`R exacta = <b style="color:var(--cop2)">${r.toFixed(1)} Ω</b> &nbsp;→&nbsp; comercial E12: <b style="color:var(--teal)">${best} Ω</b> &nbsp;·&nbsp; disipación ≈ ${p.toFixed(1)} mW (una resistencia normal soporta 125–250 mW ✔)`;
+}
+['cVs','cVf','cI'].forEach(id=>$('#'+id).addEventListener('input',calc)); calc();
+
+/* ================= JUEGO DE ORDEN ================= */
+function initRO(id,items,checkId){
+  const wrap=$('#'+id); if(!wrap)return;
+  let arr=[...items];
+  do{arr.sort(()=>Math.random()-.5)}while(arr.join('|')===items.join('|'));
+  function draw(){
+    wrap.innerHTML='';
+    arr.forEach((t,i)=>{
+      const r=document.createElement('div');r.className='ro-row';
+      r.innerHTML=`<span class="idx">${i+1}.</span><span class="txt">${t}</span><button class="mv" ${i===0?'disabled':''}>▲</button><button class="mv" ${i===arr.length-1?'disabled':''}>▼</button>`;
+      const ups=$$('.mv',r);
+      ups[0].onclick=()=>{if(i>0){[arr[i-1],arr[i]]=[arr[i],arr[i-1]];draw()}};
+      ups[1].onclick=()=>{if(i<arr.length-1){[arr[i+1],arr[i]]=[arr[i],arr[i+1]];draw()}};
+      wrap.appendChild(r);
+    });
+  }
+  draw();
+  $('#'+checkId).onclick=()=>{
+    let ok=0;$$('#'+id+' .ro-row').forEach((r,i)=>{
+      const right=arr[i]===items[i];r.classList.toggle('right',right);r.classList.toggle('wrong',!right);if(right)ok++;
+    });
+    toast(ok===items.length?'🏅 ¡Orden perfecto!':'Hay '+ok+'/'+items.length+' en su sitio. Corrige las rojas.',ok!==items.length);
+  };
+}
+initRO('ro-s2',['Definir qué debe hacer el circuito','Elegir componentes y leer sus datos clave','Dibujar símbolos y conectar las redes','Asignar un footprint a cada componente','Revisar con la checklist y pasar el corrector (ERC)'],'ro-s2-check');
+initRO('ro-s8',['Preparar el puesto: estaño, esponja húmeda, gafas, soldador a ~330 °C','Verificar componentes contra la lista (BOM)','Soldar lo más bajo: resistencias y zócalos de la Pico','Soldar pulsadores, LEDs (¡polaridad!) y DHT11','Terminar con buzzer y conectores altos','Inspección visual + test de continuidad 3V3–GND antes de alimentar'],'ro-s8-check');
+
+/* ================= PROMPT BUILDER ================= */
+$('#pbGo').onclick=()=>{
+  const comps=$$('input[name=pbcomp]:checked').map(c=>c.value);
+  if(!comps.length){toast('Selecciona al menos un componente',true);return}
+  const out=$('#pbOut').value;
+  const txt=
+`Actúa como ingeniero/a electrónico senior especializado en diseño de PCB.
+
+CONTEXTO: estoy aprendiendo y necesito diseñar una placa base para Raspberry Pi Pico (RP2040). La placa tendrá 2 capas, SOLO componentes through-hole (THT) y tamaño máximo 70 x 55 mm.
+
+TAREA: genera el esquemático completo de la placa "PicoLab v1" con estos bloques:
+${comps.map(c=>'  - '+c).join('\n')}
+
+RESTRICCIONES OBLIGATORIAS:
+  - Todos los LEDs con resistencia en serie (calcula el valor para 3,3 V y 10 mA).
+  - DHT11 con pull-up de 4,7 kΩ entre datos y 3V3.
+  - HC-SR04: el pin ECHO entrega 5 V; añade divisor 1 kΩ / 2 kΩ antes del GPIO.
+  - Servo: alimentación por VBUS (5 V), señal PWM en GP0, tierras unidas.
+  - Una única red GND común. Footprints THT estándar en todos los componentes.
+
+FORMATO DE SALIDA: ${out}
+Cierra tu respuesta con la lista de componentes (referencia, valor y footprint) y una checklist de verificación.`;
+  $('#pbPre').textContent=txt; toast('⚙ Prompt redactado: cópialo y pruébalo');
+};
+
+/* ================= SPEC BUILDER ================= */
+function buildSpec(){
+  const nm=$('#spName').value.trim()||'(sin nombre)';
+  const servo=$('#spServo').checked, ultra=$('#spUltra').checked;
+  let rows=[
+'| LED rojo / ámbar / verde | GP6 · GP7 · GP8 con resistencia en serie |',
+'| Pulsadores B1, B2 | GP14, GP15 a GND (pull-up por software) |',
+'| Zumbador activo | GP9 (modelo < 12 mA) |',
+'| DHT11 | GP16, pull-up 4,7 kΩ |',
+'| LDR | GP26 (ADC0), divisor con 10 kΩ |'];
+  if(ultra)rows.push('| HC-SR04 | TRIG GP10 · ECHO GP11 con divisor 1k/2k |');
+  if(servo)rows.push('| Conector servo SG90 | Señal GP0 · VBUS 5 V |');
+  $('#spPre').textContent=
+`ESPECIFICACIÓN TÉCNICA — PICOLAB v1
+Diseñado por: ${nm}
+
+OBJETIVO: placa base (shield) para Raspberry Pi Pico con sensores y actuadores básicos.
+
+| Bloque | Conexión |
+${rows.join('\n')}
+
+REGLAS FÍSICAS:
+- Dimensiones: 70 x 55 mm · 2 capas · solo THT
+- Alimentación: USB de la Pico (3V3 para lógica/sensores, VBUS 5 V para motores)
+- Zócalo hembra 2x20 para montar la Pico la última
+- Taladros de montaje Ø3 mm en las 4 esquinas`;
+  toast('⚙ Ficha generada');
+}
+$('#spGo').onclick=buildSpec;
+$('#spDl').onclick=()=>{
+  buildSpec();
+  const blob=new Blob([$('#spPre').textContent],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='especificacion_PicoLab.txt';a.click();
+};
+
+/* ================= INSPECTOR IA ================= */
+const INSP=[
+{t:'«El LED rojo queda conectado directo a 3V3 para que brille al máximo.»',ok:false,w:'Sin resistencia en serie el LED se quema (o daña el GPIO). Hay que añadir la resistencia calculada en la S2.'},
+{t:'«La línea de datos del DHT11 lleva pull-up de 4,7 kΩ a 3V3.»',ok:true,w:'Correcto: el DHT11 necesita pull-up; muchos módulos ya lo traen integrado.'},
+{t:'«El ECHO del HC-SR04 va directo al GP11, tal como sale del módulo.»',ok:false,w:'ECHO entrega 5 V y el GPIO solo tolera 3,3 V: falta el divisor 1 kΩ / 2 kΩ.'},
+{t:'«Todas las tierras del esquema se unen en una única red GND.»',ok:true,w:'Sí: una sola masa común evita lecturas erráticas y comportamientos raros.'},
+{t:'«El buzzer toma del GPIO toda la corriente que necesite.»',ok:false,w:'Un GPIO entrega ~12 mA máximo. Hay que usar un buzzer de bajo consumo o un transistor.'},
+{t:'«El servo se alimenta de VBUS (5 V) y recibe la señal PWM por GP0.»',ok:true,w:'Correcto: potencia a 5 V, señal a 3,3 V y las tierras unidas.'}
+];
+const inspEl=$('#inspector'); let inspOk=0,inspDone=0;
+INSP.forEach(it=>{
+  const d=document.createElement('div');d.className='insp-it';
+  d.innerHTML=`<div class="insp-t">${it.t}</div><div class="insp-btns"><button class="vbtn" data-v="1">✔ VÁLIDO</button><button class="vbtn" data-v="0">✘ ES ERROR</button></div><div class="insp-fb"></div>`;
+  $$('.vbtn',d).forEach(b=>b.onclick=()=>{
+    const said=+b.dataset.v; const right=(said===1)===it.ok;
+    $$('.vbtn',d).forEach(x=>x.disabled=true);
+    b.classList.add(right?'picked-good':'picked-bad');
+    const fb=$('.insp-fb',d); fb.className='insp-fb '+(right?'ok':'ko');
+    fb.innerHTML=(right?'✔ Bien visto. ':'✘ Cuidado. ')+it.w;
+    if(right)inspOk++; inspDone++;
+    if(inspDone===INSP.length){const r=$('#inspRes');r.style.display='block';r.innerHTML=`OJO CLÍNICO: <b style="color:${inspOk>=5?'var(--grn)':'var(--red)'}">${inspOk}/${INSP.length}</b> ${inspOk>=5?'— puedes auditar esquemas de IA con garantías.':'— repasa la teoría antes de auditar tu esquemático real.'}`;}
+  });
+  inspEl.appendChild(d);
+});
+
+/* ================= CAZA DE ERRORES (HOTSPOTS) ================= */
+const hsSvg=$('#hsSvg');
+const ART=`
+<rect x="14" y="14" width="632" height="402" rx="16" fill="#0b3d2a" stroke="#1f6a4a" stroke-width="2"/>
+<circle cx="40" cy="40" r="8" fill="#04170f" stroke="#c98a3e" stroke-width="3"/>
+<circle cx="620" cy="40" r="8" fill="#04170f" stroke="#c98a3e" stroke-width="3"/>
+<circle cx="40" cy="390" r="8" fill="#04170f" stroke="#c98a3e" stroke-width="3"/>
+<circle cx="620" cy="390" r="8" fill="#04170f" stroke="#c98a3e" stroke-width="3"/>
+<rect x="60" y="60" width="34" height="120" rx="4" fill="#111519" stroke="#333a41"/>
+<g><circle cx="77" cy="78" r="9" fill="#04170f" stroke="#e0a35c" stroke-width="3"/><circle cx="77" cy="106" r="9" fill="#04170f" stroke="#e0a35c" stroke-width="3"/><circle cx="77" cy="134" r="9" fill="#04170f" stroke="#e0a35c" stroke-width="3"/><circle cx="77" cy="162" r="9" fill="#04170f" stroke="#e0a35c" stroke-width="3"/></g>
+<ellipse cx="77" cy="92" rx="7" ry="11" fill="#e7a04b" opacity=".95"/>
+<text x="102" y="72" fill="#eef7f0" font-family="IBM Plex Mono" font-size="11">J1</text>
+<path d="M96 134 H250" stroke="#d99a4a" stroke-width="4" fill="none"/>
+<circle cx="250" cy="134" r="9" fill="#03170f" stroke="#8a5416" stroke-width="3"/>
+<path d="M96 162 H290 V186" stroke="#d99a4a" stroke-width="4" fill="none"/>
+<circle cx="320" cy="210" r="27" fill="#caa050" stroke="#8a5416" stroke-width="3"/>
+<rect x="336" y="184" width="11" height="52" fill="#20262b" opacity=".85"/>
+<text x="296" y="256" fill="#eef7f0" font-family="IBM Plex Mono" font-size="11">+</text>
+<text x="344" y="256" fill="#eef7f0" font-family="IBM Plex Mono" font-size="11">−</text>
+<text x="285" y="180" fill="#eef7f0" font-family="IBM Plex Mono" font-size="11">C1</text>
+<path d="M250 134 H420 L470 184 H560" stroke="#d99a4a" stroke-width="4" fill="none"/>
+<path d="M560 184 H600" stroke="#d99a4a" stroke-width="1.3" fill="none"/>
+<rect x="596" y="160" width="34" height="84" rx="4" fill="#111519" stroke="#333a41"/>
+<circle cx="613" cy="184" r="7" fill="#04170f" stroke="#e0a35c" stroke-width="3"/><circle cx="613" cy="206" r="7" fill="#04170f" stroke="#e0a35c" stroke-width="3"/><circle cx="613" cy="228" r="7" fill="#04170f" stroke="#e0a35c" stroke-width="3"/>
+<text x="520" y="176" fill="#eef7f0" font-family="IBM Plex Mono" font-size="13" transform="rotate(-8 520 176)">SERVO 5V</text>
+<path d="M250 134 V360 H440" stroke="#d99a4a" stroke-width="4" fill="none"/>
+<path d="M440 360 L470 330 H560" stroke="#d99a4a" stroke-width="4" fill="none"/>
+<rect x="120" y="290" width="300" height="92" fill="#c98a3e" opacity=".25" rx="6"/>
+<text x="140" y="342" fill="#e0913f" font-family="IBM Plex Mono" font-size="16" opacity=".8">GND PLANE</text>
+<text x="130" y="60" fill="#eef7f0" font-family="IBM Plex Mono" font-size="12">PICOLAB · INSPECCIÓN FINAL</text>`;
+hsSvg.innerHTML=ART;
+const ZONES=[
+{cx:77,cy:92,err:1,t:'CORTOCIRCUITO EN J1',w:'El cobre une dos pads vecinos del conector. La fresa no “corta” cobre: hay que redibujar la pista separándola.'},
+{cx:250,cy:134,err:1,t:'TALADRO SOBRE UNA PISTA',w:'Un taladro (que no es vía) atraviesa la pista y la corta. Los taladros de montaje van sobre cobre limpio.'},
+{cx:320,cy:210,err:1,t:'C1 CON POLARIDAD INVERTIDA',w:'La franja del electrolítico queda en el lado “+” de la serigrafía. Soldado así, el condensador puede reventar.'},
+{cx:600,cy:184,err:1,t:'PISTA FINÍSIMA AL SERVO',w:'0,1 mm no alimenta a un servo: se calienta o se corta. Las líneas de potencia piden ≥0,8 mm (o plano de cobre).'},
+{cx:540,cy:176,err:1,t:'SERIGRAFÍA SOBRE LOS PADS',w:'La tinta sobre los pads impide que el estaño moje bien. La serigrafía nunca pisa zonas de soldadura.'},
+{cx:270,cy:336,err:0,w:'Zona correcta: el plano de masa está bien definido.'},
+{cx:470,cy:330,err:0,w:'Zona correcta: giro a 45°, todo un clásico del buen ruteo.'}
+];
+let hsFound=0;
+const NS='http://www.w3.org/2000/svg';
+ZONES.forEach(z=>{
+  const c=document.createElementNS(NS,'circle');
+  c.setAttribute('cx',z.cx);c.setAttribute('cy',z.cy);c.setAttribute('r',17);c.setAttribute('class','hz');
+  c.addEventListener('click',()=>{
+    if(c.dataset.done)return; c.dataset.done=1;
+    if(z.err){
+      hsFound++;
+      const g=document.createElementNS(NS,'g');
+      g.innerHTML=`<circle cx="${z.cx}" cy="${z.cy}" r="15" fill="rgba(255,107,94,.15)" stroke="#ff6b5e" stroke-width="2.5"/><path d="M${z.cx-7} ${z.cy-7} l14 14 M${z.cx+7} ${z.cy-7} l-14 14" stroke="#ff6b5e" stroke-width="3"/>`;
+      hsSvg.appendChild(g);
+      const card=document.createElement('div');card.className='found';card.innerHTML=`<b>✘ DEFECTO ${hsFound}: ${z.t}</b>${z.w}`;
+      $('#hsList').appendChild(card);
+      $('#hsCount').textContent='ERRORES ENCONTRADOS: '+hsFound+' / 5';
+      if(hsFound===5){$('#hsCount').innerHTML='🏅 <b>¡5 DE 5! OJO DE INSPECTOR CERTIFICADO</b>';toast('🏅 Placa inspeccionada al completo')}
+    } else {
+      const g=document.createElementNS(NS,'circle');
+      g.setAttribute('cx',z.cx);g.setAttribute('cy',z.cy);g.setAttribute('r',15);
+      g.setAttribute('fill','none');g.setAttribute('stroke','#6fe3a5');g.setAttribute('stroke-width','2.5');
+      hsSvg.appendChild(g); setTimeout(()=>g.remove(),1200);
+      toast('✔ '+z.w);
+    }
+  });
+  hsSvg.appendChild(c);
+});
+
+/* ================= SIMULADOR DE PEDIDO ================= */
+const MFR={
+ jlc:{n:'JLCPCB',base:2,per:.35,enig:3.5,ships:{std:[9,'10–15 días'],exp:[26,'3–6 días']},fab:'24–48 h'},
+ pcbway:{n:'PCBWay',base:5,per:.55,enig:4.5,ships:{std:[13,'10–18 días'],exp:[32,'4–7 días']},fab:'24–48 h'},
+ osh:{n:'OSH Park',in2:5,ships:{std:[8,'8–12 días'],exp:[22,'4–6 días']},fab:'3–5 días'}};
+let lastCalc=null;
+function calcSm(){
+  const m=MFR[$('#smMfr').value]; const qty=+$('#smQty').value;
+  const fin=$('#smFin').value; const col=$('#smCol').value; const sh=$('#smShip').value;
+  const osh=$('#smMfr').value==='osh';
+  $('#smCol').disabled=osh; if(osh){$('#smCol').value='purple';}
+  const boards=osh? (7*5.5/6.4516*m.in2) : (m.base+Math.max(0,qty-5)*m.per);
+  const surface=(fin==='enig'&&!osh)?m.enig:0;
+  const color=(col!=='green'&&!osh)?1.5:0;
+  const ship=m.ships[sh][0];
+  const tot=boards+surface+color+ship;
+  const nB=osh?5:qty;
+  lastCalc={m,qty:nB,tot};
+  $('#smOut').innerHTML=`<div class="ticket"><h4>TICKET DE PEDIDO · ${m.n.toUpperCase()}</h4>
+  <div class="tk-row"><span>Placas (70×55 mm, 2 capas, 1,6 mm)</span><b>${nB} uds</b></div>
+  <div class="tk-row"><span>Fabricación</span><b>${boards.toFixed(2)} $</b></div>
+  <div class="tk-row"><span>Acabado ${fin==='enig'?'ENIG':'HASL sin plomo'}</span><b>${osh?'incluido':surface.toFixed(2)+' $'}</b></div>
+  <div class="tk-row"><span>Máscara ${osh?'púrpura (única)':col}</span><b>${color?color.toFixed(2)+' $':'gratis'}</b></div>
+  <div class="tk-row"><span>Envío (${m.ships[sh][1]})</span><b>${ship.toFixed(2)} $</b></div>
+  <div class="tk-row"><span>Tiempo de fabricación</span><b>${m.fab}</b></div>
+  <div class="tk-tot"><span>TOTAL ESTIMADO</span><span>${tot.toFixed(2)} $</span></div>
+  <div class="tk-row"><span>Precio por placa</span><b>${(tot/nB).toFixed(2)} $/ud</b></div>
+  <div class="tk-note">* Simulación didáctica con precios orientativos de 2025-2026. Consulta siempre la web del fabricante.</div></div>`;
+  $('#smOrder').style.display='inline-block';
+}
+$('#smGo').onclick=calcSm;
+['smMfr','smQty','smFin','smCol','smShip'].forEach(id=>$('#'+id).addEventListener('change',calcSm));
+$('#smOrder').onclick=()=>{
+  if(!lastCalc){calcSm()}
+  const num='PL-'+new Date().getFullYear()+'-'+Math.floor(1000+Math.random()*9000);
+  $('#smOut').insertAdjacentHTML('beforeend',`<div class="q-res" style="margin-top:14px">📦 PEDIDO SIMULADO REGISTRADO<br>Nº <b style="color:var(--cop2)">${num}</b> · ${lastCalc.m.n} · ${lastCalc.qty} placas · ${lastCalc.tot.toFixed(2)} $<br><span style="font-size:.72rem;color:var(--dim)">Firma: el alumno/a más paciente del taller.</span></div>`);
+  toast('📦 Pedido simulado nº '+num+' registrado');
+};
+
+/* ================= DIPLOMA ================= */
+$('#dpGo').onclick=()=>{
+  const nm=$('#dpName').value.trim();
+  if(!nm){toast('Escribe tu nombre primero',true);return}
+  if(!ST.pass.includes('final')){toast('Primero supera la evaluación final (≥6/10)',true)}
+  $('#dpShow').textContent=nm.toUpperCase();
+  const f=new Intl.DateTimeFormat('es-ES',{dateStyle:'long'}).format(new Date());
+  const nota=ST.pass.includes('final')?' · EVALUACIÓN FINAL: SUPERADA':' · EVALUACIÓN FINAL: PENDIENTE';
+  $('#dpMeta').innerHTML=f+' · TALLER PICOLAB·IA · 8 SESIONES'+nota;
+  $('#diploma').style.display='block';
+  $('#diploma').scrollIntoView({behavior:'smooth'});
+  toast('🎓 Diploma emitido para '+nm);
+};
+
+/* ================= REVEAL ON SCROLL ================= */
+let io;
+function observeReveals(){
+  if(!('IntersectionObserver' in window)){$$('.rv').forEach(e=>e.classList.add('on'));return}
+  if(io)io.disconnect();
+  io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target)}}),{threshold:.1});
+  $$('.rv').forEach(e=>io.observe(e));
+}
+
+/* ================= ARRANQUE ================= */
+renderProgress();
+observeReveals();
+const h=location.hash.slice(1); if(h&&$('#'+h))navGo(h);
+</script>
+</body>
+</html>

@@ -10,6 +10,7 @@
         <router-link to="/">Misiones</router-link>
         <router-link to="/calendario">Calendario</router-link>
         <router-link to="/placas">Material</router-link>
+        <router-link to="/recursos">Recursos</router-link>
       </nav>
       <div class="spacer"></div>
       <div class="user row">

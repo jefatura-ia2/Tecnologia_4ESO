@@ -22,6 +22,7 @@ Plataforma web para un **curso completo de Tecnología de 4º ESO** (36 semanas 
 - **Desbloqueo progresivo**, **pistas** que no revelan la respuesta, **anti-trampa** (tiempo mínimo, espera tras fallos seguidos, alertas de código copiado).
 - **Panel del profesorado**: progreso, alertas, dificultad por pregunta, soluciones, desbloqueo para toda la clase, notas manuales y exportación CSV.
 - **Ilustraciones** de los montajes de prácticas, del osciloscopio y de los circuitos neumáticos dentro de las lecciones.
+- **Recursos** (material complementario de acceso libre, en paralelo a las sesiones): taller **PicoLab·IA** para diseñar, fabricar y soldar una PCB para la Pico con ayuda de IA. Para añadir otro recurso: copia su HTML a `frontend/public/recursos/` y añádelo en `frontend/src/lib/recursos.js`.
 - **Calendario** del curso que salta las semanas de vacaciones. Programación sesión a sesión en [`docs/temporalizacion.md`](docs/temporalizacion.md).
 
 ---
@@ -111,7 +112,7 @@ Pruebas del servidor Python: `cd backend && pip install -r requirements.txt pyte
 ```
 netlify.toml                    configuración de Netlify
 netlify/functions/api.mjs       API (Netlify Function) · lib/: auth, corrección, anti-trampa, almacenamiento
-frontend/                       Vue 3 + Vite · public/sandbox/worker.mjs (Pyodide en un Web Worker)
+frontend/                       Vue 3 + Vite · public/recursos/: material complementario (HTML autocontenidos) · public/sandbox/worker.mjs (Pyodide en un Web Worker)
 backend/app/content/missions/   ← EL TEMARIO (YAML, editable sin programar). Lo usan Netlify y Docker.
 backend/app/sandbox/harness.py  simulador de MicroPython (machine, time, neopixel, network, bluetooth…)
 backend/                        servidor alternativo FastAPI (Docker)
