@@ -40,6 +40,9 @@ sections:
       aire ─► EV_B (3/2 NC) ─► cámara delantera (retroceso)
       ```
 
+      ![Cilindro de doble efecto con dos electroválvulas 3/2](/img/neum_doble_efecto.svg)
+      *Cada cámara del cilindro tiene su propia electroválvula 3/2 NC.*
+
       Recuerda la tabla de la misión 5: (1,0) avanza · (0,1) retrocede · (0,0) libre · **(1,1) prohibido**.
 
       ## Enclavamiento por software

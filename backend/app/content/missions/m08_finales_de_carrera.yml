@@ -56,6 +56,9 @@ sections:
       | Libre | **1** |
       | Pisado | **0** |
 
+      ![Cilindro con finales de carrera a0 y a1 conectados a la placa](/img/finales_carrera.svg)
+      *Finales de carrera a0 (dentro) y a1 (fuera) con contacto NA a GND.*
+
       ## Leer la posición
 
       | a0 | a1 | Posición |

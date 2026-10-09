@@ -49,6 +49,9 @@ sections:
 
       ## La pantalla: una cuadrícula
 
+      ![Panel de un osciloscopio digital con sus mandos numerados](/img/osc_panel.svg)
+      *Mandos principales de un osciloscopio digital (esquema genérico de la serie OD-600).*
+
       - Eje **vertical** = tensión. Mando **VOLTS/DIV** (V/div): cuántos voltios vale cada cuadro.
       - Eje **horizontal** = tiempo. Mando **SEC/DIV** (s/div): cuánto tiempo vale cada cuadro.
       - La pantalla tiene normalmente **10 divisiones horizontales** y **8 verticales**.
@@ -63,12 +66,19 @@ sections:
       Ejemplo: una onda cuadrada ocupa 3,3 divisiones de alto con 1 V/div → **3,3 V**. Un ciclo ocupa
       5 divisiones con 0,2 ms/div → T = 1 ms → **f = 1000 Hz**.
 
+      ![Lectura de tensión, periodo y ciclo de trabajo en la pantalla](/img/osc_lectura_pwm.svg)
+      *Contar divisiones y multiplicar por la escala.*
+
       ## Primeros pasos con el PROMAX
 
       1. Conecta la **sonda** al canal 1 (CH1). Pon el conmutador de la sonda en **x10** y, en el menú
          del canal (botón **CH1**), indica **Sonda/Probe x10**: si no coinciden, las medidas salen 10 veces mal.
       2. **Compensa la sonda**: engancha la punta al terminal de calibración del osciloscopio (onda cuadrada
          de 1 kHz) y la pinza a su masa. Si las esquinas no son rectas, gira el tornillo de ajuste de la sonda.
+
+      ![Tres ondas: sonda subcompensada, correcta y sobrecompensada](/img/osc_compensacion.svg)
+      *Compensación de la sonda con la salida de calibración de 1 kHz.*
+
       3. Pulsa **AUTOSET** (ajuste automático) para que el osciloscopio elija escalas. Después afina con
          VOLTS/DIV y SEC/DIV.
       4. **Disparo (TRIGGER)**: fija la imagen. Elige fuente CH1, flanco de subida y un nivel a media altura
@@ -121,6 +131,9 @@ sections:
               time.sleep(5)
     practice: |
       ### Práctica de laboratorio (por parejas)
+
+      ![Pico W con la sonda del osciloscopio en GP22 y la pinza en GND](/img/montaje_pwm.svg)
+      *Montaje: sonda en la salida PWM y pinza de masa en GND.*
 
       1. **Compensa la sonda** con la señal de calibración del osciloscopio. Dibuja en el cuaderno la onda
          antes y después del ajuste.
@@ -265,6 +278,9 @@ sections:
 
       Fíjate: el **TX** de uno va al **RX** del otro.
 
+      ![Conexión del PN532 V3 a la Pico W por puerto serie](/img/montaje_pn532.svg)
+      *PN532 en modo HSU (SEL0 y SEL1 en OFF) conectado a la UART1.*
+
       ## Cómo «habla» el PN532: tramas
 
       Cada mensaje viaja en una **trama** con comprobación de errores:
@@ -408,15 +424,8 @@ sections:
       La placa (3,3 V, pocos mA) **no** puede mover la cerradura (12 V, ≈ 0,5-1 A). Usamos el mismo
       **módulo MOSFET** que con las electroválvulas:
 
-      ```
-      +12 V ──┬────────────┐
-              │          bobina de la cerradura
-            diodo 1N4007   │
-       (banda hacia +12 V) │
-              └────────────┤
-                       MOSFET (drenador)
-      GP10 / GPIO 4 ── señal del módulo        GND común: fuente, módulo y placa
-      ```
+      ![Montaje de la cerradura de 12 V con módulo MOSFET, diodo y Pico W](/img/montaje_cerradura.svg)
+      *Montaje completo con los dos puntos de medida para el osciloscopio.*
 
       - El **diodo de libre circulación** absorbe el pico de tensión que genera la bobina al cortar la
         corriente. Sin él, el MOSFET puede romperse.
@@ -432,6 +441,9 @@ sections:
 
       Con la sonda en **x10**, mide en el **drenador del MOSFET** (pinza a GND): con la cerradura cerrada verás
       12 V; al abrir, la tensión cae a casi 0 V. Gracias al diodo, al cerrar no aparece un pico peligroso.
+
+      ![Dos canales del osciloscopio: señal de la placa y drenador del MOSFET](/img/osc_cerradura.svg)
+      *CH1: orden de la placa · CH2: drenador del MOSFET durante una apertura de 3 s.*
     examples:
       - title: "Abrir la cerradura 3 segundos al pulsar"
         explanation: "Cerradura en el canal 1 del módulo MOSFET. Pulsador MARCHA para probar. try/finally garantiza que la cerradura no se quede activada."

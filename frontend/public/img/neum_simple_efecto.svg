@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520" role="img" aria-label="Cilindro de simple efecto gobernado por una electroválvula 3/2 NC"><title>Cilindro de simple efecto gobernado por una electroválvula 3/2 NC</title><rect width="100%" height="100%" fill="#ffffff"/><circle cx="80" cy="380" r="26" fill="white" stroke="#1f2937" stroke-width="2.5"/>
+<path d="M80,362 L68,384 L92,384 Z" stroke="#1f2937" stroke-width="1.5" fill="#1f2937" stroke-linejoin="round" stroke-linecap="round"  />
+<line x1="80" y1="406" x2="80" y2="420" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<text x="80" y="438" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Compresor</text>
+<rect x="160" y="350" width="120" height="60" rx="4" fill="white" stroke="#1f2937" stroke-width="2" />
+<path d="M190,360 L205,380 L190,400 L175,380 Z" stroke="#1f2937" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<line x1="175" y1="380" x2="205" y2="380" stroke="#1f2937" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3,3" />
+<rect x="218" y="362" width="24" height="36" rx="0" fill="white" stroke="#1f2937" stroke-width="2" />
+<line x1="220" y1="394" x2="240" y2="366" stroke="#1f2937" stroke-width="1.5" stroke-linecap="round"  />
+<path d="M240.0,366.0 L238.5,374.9 L232.1,370.3 Z" fill="#1f2937" stroke="#1f2937" stroke-width="1"/>
+<circle cx="262" cy="378" r="11" fill="white" stroke="#1f2937" stroke-width="2"/>
+<line x1="262" y1="382" x2="268" y2="372" stroke="#1f2937" stroke-width="1.2" stroke-linecap="round"  />
+<path d="M268.0,372.0 L267.2,380.4 L261.0,376.6 Z" fill="#1f2937" stroke="#1f2937" stroke-width="1"/>
+<text x="220" y="430" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Unidad de</text>
+<text x="220" y="446" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >acondicionamiento</text>
+<path d="M106.0,380.0 L160.0,380.0" stroke="#0ea5e9" stroke-width="3.5" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<rect x="470" y="250" width="56" height="56" rx="0" fill="white" stroke="#1f2937" stroke-width="2" />
+<rect x="526" y="250" width="56" height="56" rx="0" fill="white" stroke="#1f2937" stroke-width="2" />
+<line x1="484.0" y1="306" x2="498.0" y2="254" stroke="#1f2937" stroke-width="1.8" stroke-linecap="round"  />
+<path d="M498.0,254.0 L499.8,263.4 L491.7,261.3 Z" fill="#1f2937" stroke="#1f2937" stroke-width="1"/>
+<line x1="512.0" y1="306" x2="512.0" y2="294" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<line x1="505.0" y1="294" x2="519.0" y2="294" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<line x1="554.0" y1="254" x2="568.0" y2="306" stroke="#1f2937" stroke-width="1.8" stroke-linecap="round"  />
+<path d="M568.0,306.0 L561.7,298.7 L569.8,296.6 Z" fill="#1f2937" stroke="#1f2937" stroke-width="1"/>
+<line x1="540.0" y1="306" x2="540.0" y2="294" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<line x1="533.0" y1="294" x2="547.0" y2="294" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<rect x="448" y="264.0" width="22" height="28.0" rx="0" fill="white" stroke="#1f2937" stroke-width="2" />
+<line x1="448" y1="292.0" x2="470" y2="264.0" stroke="#1f2937" stroke-width="1.5" stroke-linecap="round"  />
+<path d="M582.0,278.0 L586.0,269.0 L590.0,287.0 L594.0,269.0 L598.0,287.0 L602.0,269.0 L606.0,287.0 L610.0,269.0 L614.0,278.0" stroke="#1f2937" stroke-width="1.8" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<line x1="554.0" y1="250" x2="554.0" y2="236" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<line x1="540.0" y1="306" x2="540.0" y2="320" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<line x1="568.0" y1="306" x2="568.0" y2="316" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<path d="M560.0,316 L576.0,316 L568.0,328 Z" stroke="#1f2937" stroke-width="1.5" fill="white" stroke-linejoin="round" stroke-linecap="round"  />
+<text x="560.0" y="246" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >2</text>
+<text x="528.0" y="320" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >1</text>
+<text x="578.0" y="320" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >3</text>
+<text x="444" y="282.0" font-size="13" fill="#ea580c" text-anchor="end" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >EV1</text>
+<text x="444" y="300.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >3/2 NC 12 V</text>
+<path d="M280.0,380.0 L540.0,380.0 L540.0,320.0" stroke="#0ea5e9" stroke-width="3.5" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<rect x="400" y="70" width="220" height="60" rx="0" fill="white" stroke="#1f2937" stroke-width="2.5" />
+<rect x="439.0" y="72" width="10" height="56" rx="0" fill="#1f2937" stroke="#1f2937" stroke-width="1" />
+<rect x="449.0" y="94.0" width="261.0" height="12" rx="0" fill="#e5e7eb" stroke="#1f2937" stroke-width="2" />
+<path d="M450.0,100.0 L454.0,78.0 L472.4,122.0 L490.9,78.0 L509.3,122.0 L527.8,78.0 L546.2,122.0 L564.7,78.0 L583.1,122.0 L601.6,78.0 L618.0,100.0" stroke="#1f2937" stroke-width="1.5" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<line x1="414" y1="130" x2="414" y2="144" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<path d="M554.0,236.0 L554.0,175.0 L414.0,175.0 L414.0,144.0" stroke="#0ea5e9" stroke-width="3.5" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<text x="510" y="58" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Cilindro de simple efecto (retorno por muelle)</text>
+<rect x="640" y="210" width="240" height="150" rx="8" fill="#f8fafc" stroke="#ea580c" stroke-width="1.5" />
+<text x="652" y="232" font-size="14" fill="#ea580c" text-anchor="start" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Mando eléctrico</text>
+<text x="652" y="254" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Placa GP10 → módulo MOSFET</text>
+<text x="652" y="273" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >MOSFET → bobina EV1 (12 V)</text>
+<text x="652" y="292" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Diodo 1N4007 en la bobina</text>
+<text x="652" y="311" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >EV1 = 1 → el cilindro avanza</text>
+<text x="652" y="330" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >EV1 = 0 → vuelve por el muelle</text>
+<path d="M640.0,340.0 L459.0,340.0 L459.0,292.0" stroke="#ea580c" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="6,4" />
+<text x="410" y="402" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >3-4 bar en el aula</text>
+<text x="450.0" y="506" font-size="13" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >En reposo la vía 2 está unida al escape 3: el muelle mantiene el vástago dentro.</text></svg>

@@ -219,6 +219,9 @@ sections:
 
       ### Pines del curso
 
+      ![Pico W con cuatro LEDs en GP10-GP13 y un pulsador en GP14](/img/montaje_leds.svg)
+      *Montaje de práctica: cada LED representa una electroválvula.*
+
       | Salida | Pico W | ESP32-S3 |
       |---|---|---|
       | EV1 · EV2 · EV3 · EV4 | GP10 · GP11 · GP12 · GP13 | GPIO 4 · 5 · 6 · 7 |

@@ -321,6 +321,9 @@ sections:
       Con una 3/2 NC y un cilindro de simple efecto, un "golpe" es: activar, esperar a que avance,
       desactivar. El muelle lo hará volver.
 
+      ![Circuito neumático: compresor, unidad de acondicionamiento, electroválvula 3/2 y cilindro de simple efecto](/img/neum_simple_efecto.svg)
+      *Cilindro de simple efecto con una electroválvula 3/2 NC de 12 V.*
+
       ```python
       def golpe(ev, t_avance):
           ev.activar()

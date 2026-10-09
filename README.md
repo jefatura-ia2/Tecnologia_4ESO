@@ -21,6 +21,7 @@ Plataforma web para un **curso completo de Tecnología de 4º ESO** (36 semanas 
 - Cada misión acaba con un **proyecto corto** (3 h): contador de piezas, semáforo, **control de acceso NFC**, elevador, puerta desde dos puntos, expulsor, barrera, prensa, estampadora A+ B+ B− A−, prensa segura con bimanual, panel web… y un **proyecto final** con GRAFCET.
 - **Desbloqueo progresivo**, **pistas** que no revelan la respuesta, **anti-trampa** (tiempo mínimo, espera tras fallos seguidos, alertas de código copiado).
 - **Panel del profesorado**: progreso, alertas, dificultad por pregunta, soluciones, desbloqueo para toda la clase, notas manuales y exportación CSV.
+- **Ilustraciones** de los montajes de prácticas, del osciloscopio y de los circuitos neumáticos dentro de las lecciones.
 - **Calendario** del curso que salta las semanas de vacaciones. Programación sesión a sesión en [`docs/temporalizacion.md`](docs/temporalizacion.md).
 
 ---
@@ -116,6 +117,7 @@ backend/app/sandbox/harness.py  simulador de MicroPython (machine, time, neopixe
 backend/                        servidor alternativo FastAPI (Docker)
 scripts/build.mjs               genera el temario para la función y copia Pyodide y el simulador
 scripts/dev-server.mjs          servidor local que imita Netlify
+scripts/ilustraciones/          generadores de las imágenes SVG de las lecciones (frontend/public/img)
 tests/                          pruebas Node (API y soluciones en Pyodide)
 firmware/                       taller.py (Electrovalvula, CilindroDE, Seta), pn532_uart.py (lector NFC), secretos.py
 docs/temporalizacion.md         programación sesión a sesión y calificación sugerida
