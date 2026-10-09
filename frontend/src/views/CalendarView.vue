@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>Calendario del curso</h1>
-    <p class="muted">{{ cal?.regular_weeks || 33 }} semanas · {{ cal?.hours_per_week || 3 }} sesiones de 1 h por semana · inicio el {{ fmt(cal?.start) }} · las vacaciones se saltan con la variable SKIP_WEEKS</p>
+    <p class="muted">{{ cal?.regular_weeks || 36 }} semanas · {{ cal?.hours_per_week || 3 }} sesiones de 1 h por semana · inicio el {{ fmt(cal?.start) }} · las vacaciones se saltan con la variable SKIP_WEEKS</p>
     <div v-if="error" class="alert bad">{{ error }}</div>
     <div class="weeks">
       <article v-for="w in cal?.weeks || []" :key="w.week" class="card week" :class="{ now: isCurrent(w) }">

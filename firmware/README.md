@@ -2,8 +2,9 @@
 
 | Archivo | Para qué |
 |---|---|
-| `taller.py` | Biblioteca del banco neumático: `Electrovalvula`, `CilindroDE` (con enclavamiento), `Entrada`, `Seta`, `esperar()` y `estado_seguro()`. Detecta la placa y usa los pines del curso. Ejecútala sola para probar el cableado. Úsala a partir de la misión 9 (antes, el alumnado escribe estas clases en las misiones 5-7). |
-| `secretos.py` | Plantilla con el nombre y la contraseña de la WiFi (misión 10). Se sube a la placa. |
+| `taller.py` | Biblioteca del banco neumático: `Electrovalvula`, `CilindroDE` (con enclavamiento), `Entrada`, `Seta`, `esperar()` y `estado_seguro()`. Detecta la placa y usa los pines del curso. Ejecútala sola para probar el cableado. Úsala a partir de la misión 10 (antes, el alumnado escribe estas clases en las misiones 6-8). |
+| `pn532_uart.py` | Controlador del lector **PN532 NFC RFID V3** por puerto serie (modo HSU): `PN532(uart).leer_uid()`. Misión 3. |
+| `secretos.py` | Plantilla con el nombre y la contraseña de la WiFi (misión 11). Se sube a la placa. |
 
 ## Instalar MicroPython
 

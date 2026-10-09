@@ -1,10 +1,10 @@
-id: m6
-number: 6
+id: m7
+number: 7
 trimestre: 2
 icon: "↔️"
 title: "Cilindros de doble efecto y enclavamientos"
 subtitle: "Dos electroválvulas 3/2 por cilindro, enclavamiento por software, temporización y velocidad"
-weeks: [16, 17, 18]
+weeks: [19, 20, 21]
 hours: 9
 objectives:
   - Gobernar un cilindro de doble efecto con dos electroválvulas 3/2 NC.
@@ -18,17 +18,17 @@ criteria:
   - Programa sistemas automáticos con actuadores neumáticos aplicando condiciones de seguridad.
   - Comprueba y ajusta el funcionamiento de un automatismo midiendo sus magnitudes.
 schedule:
-  - {week: 16, session: 1, title: "Doble efecto con dos 3/2: montaje", section: m6s1}
-  - {week: 16, session: 2, title: "Enclavamiento: nunca las dos a la vez", section: m6s1}
-  - {week: 16, session: 3, title: "La clase CilindroDE", section: m6s1}
-  - {week: 17, session: 1, title: "Ciclo temporizado avance-espera-retroceso", section: m6s2}
-  - {week: 17, session: 2, title: "Ciclos repetidos y contador", section: m6s2}
-  - {week: 17, session: 3, title: "Velocidad del cilindro y regulación", section: m6s3}
-  - {week: 18, session: 1, title: "Proyecto corto: barrera neumática (diseño)", section: m6s4}
-  - {week: 18, session: 2, title: "Proyecto corto: programación y montaje", section: m6s4}
-  - {week: 18, session: 3, title: "Proyecto corto: pruebas y presentación", section: m6s4}
+  - {week: 19, session: 1, title: "Doble efecto con dos 3/2: montaje", section: m7s1}
+  - {week: 19, session: 2, title: "Enclavamiento: nunca las dos a la vez", section: m7s1}
+  - {week: 19, session: 3, title: "La clase CilindroDE", section: m7s1}
+  - {week: 20, session: 1, title: "Ciclo temporizado avance-espera-retroceso", section: m7s2}
+  - {week: 20, session: 2, title: "Ciclos repetidos y contador", section: m7s2}
+  - {week: 20, session: 3, title: "Velocidad del cilindro y regulación", section: m7s3}
+  - {week: 21, session: 1, title: "Proyecto corto: barrera neumática (diseño)", section: m7s4}
+  - {week: 21, session: 2, title: "Proyecto corto: programación y montaje", section: m7s4}
+  - {week: 21, session: 3, title: "Proyecto corto: pruebas y presentación", section: m7s4}
 sections:
-  - id: m6s1
+  - id: m7s1
     title: "Doble efecto con dos 3/2: el enclavamiento"
     hours: 3
     kind: lesson
@@ -40,7 +40,7 @@ sections:
       aire ─► EV_B (3/2 NC) ─► cámara delantera (retroceso)
       ```
 
-      Recuerda la tabla de la misión 4: (1,0) avanza · (0,1) retrocede · (0,0) libre · **(1,1) prohibido**.
+      Recuerda la tabla de la misión 5: (1,0) avanza · (0,1) retrocede · (0,0) libre · **(1,1) prohibido**.
 
       ## Enclavamiento por software
 
@@ -228,7 +228,7 @@ sections:
           hints:
             wrong_result: "En avanzar(), PRIMERO self.b.value(0) y DESPUÉS self.a.value(1). En retroceder(), al revés."
 
-  - id: m6s2
+  - id: m7s2
     title: "Ciclos temporizados"
     hours: 2
     kind: lesson
@@ -349,7 +349,7 @@ sections:
           hints:
             wrong_result: "Cuatro órdenes: cil.avanzar(), time.sleep(t_avance + t_espera), cil.retroceder(), time.sleep(t_avance)."
 
-  - id: m6s3
+  - id: m7s3
     title: "Velocidad del cilindro y regulación"
     hours: 1
     kind: lesson
@@ -375,7 +375,7 @@ sections:
       presión del regulador (menos fuerza y menos velocidad).
     examples:
       - title: "Cronómetro de carrera con la placa"
-        explanation: "Mide el tiempo entre MARCHA (inicio del avance) y PARO (lo pulsas cuando ves llegar el cilindro). En la misión 7 lo medirá un final de carrera."
+        explanation: "Mide el tiempo entre MARCHA (inicio del avance) y PARO (lo pulsas cuando ves llegar el cilindro). En la misión 8 lo medirá un final de carrera."
         pico_w: |
           from machine import Pin
           import time
@@ -452,7 +452,7 @@ sections:
             - {desc: "50 mm en 0,3 s", call: "velocidad(50, 0.3)", expected: 167}
             - {desc: "Tiempo para 80 mm a 160 mm/s", call: "tiempo_necesario(80, 160)", expected: 0.5}
 
-  - id: m6s4
+  - id: m7s4
     title: "Proyecto corto: barrera neumática"
     hours: 3
     kind: challenge
@@ -534,7 +534,7 @@ sections:
       2. **Programación y montaje** con el doble efecto y dos 3/2.
       3. **Pruebas**: comprueba especialmente la regla de seguridad durante la bajada. Presentación.
     evaluation:
-      intro: "Proyecto corto de la misión 6. Necesitas un 80 %."
+      intro: "Proyecto corto de la misión 7. Necesitas un 80 %."
       items:
         - id: c1
           type: code

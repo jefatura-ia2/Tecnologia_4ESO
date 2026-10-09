@@ -32,5 +32,5 @@ http.createServer(async (req, res) => {
   res.writeHead(200, { 'content-type': TYPES[path.extname(file)] || 'application/octet-stream' })
   fs.createReadStream(file).pipe(res)
 }).listen(PORT, () => {
-  console.log(`NeumaLab en http://localhost:${PORT}  (datos en ${process.env.LOCAL_STORE_DIR})`)
+  console.log(`TEC_IVJP_lab27 en http://localhost:${PORT}  (datos en ${process.env.LOCAL_STORE_DIR})`)
 })

@@ -46,6 +46,9 @@
             <tr><td>Seta de EMERGENCIA (contacto NC)</td><td>GP16</td><td>GPIO 16</td><td>Reposo = 0 · pulsada o cable roto = 1</td></tr>
             <tr><td>Finales de carrera A0 · A1</td><td>GP18 · GP19</td><td>GPIO 17 · 18</td><td>A0 = cilindro A dentro · A1 = fuera</td></tr>
             <tr><td>Finales de carrera B0 · B1</td><td>GP20 · GP21</td><td>GPIO 8 · 9</td><td>Contacto NA a GND · pisado = 0</td></tr>
+            <tr><td>PN532 NFC V3 (modo HSU) · SDA/TXD → RX · SCL/RXD → TX</td><td>RX GP5 · TX GP4 (UART1)</td><td>RX GPIO 11 · TX GPIO 10 (UART1)</td><td>Interruptores SEL0 y SEL1 en OFF · VCC a 3V3</td></tr>
+            <tr><td>Cerradura de solenoide 12 V</td><td>GP10 (canal 1 del MOSFET)</td><td>GPIO 4 (canal 1 del MOSFET)</td><td>Con diodo 1N4007 · máx. 3 s abierta</td></tr>
+            <tr><td>Salida PWM para el osciloscopio</td><td>GP22</td><td>GPIO 21</td><td>Punta de la sonda al pin, pinza a GND</td></tr>
             <tr><td>LED de la placa</td><td><code>Pin("LED")</code></td><td>NeoPixel en <code>Pin(48)</code></td><td>Indicador de estado</td></tr>
           </tbody>
         </table>
@@ -73,6 +76,15 @@
           <tr><th>Válvula selectora</th><td>Función O: deja pasar la señal que llega por cualquiera de sus dos entradas.</td></tr>
           <tr><th>Cilindro de simple efecto</th><td>Avanza con aire y vuelve por muelle.</td></tr>
           <tr><th>Cilindro de doble efecto</th><td>Avanza y retrocede con aire (dos tomas).</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Laboratorio de electrónica (misión 3)</h3>
+      <table class="table">
+        <tbody>
+          <tr><th>Osciloscopio PROMAX serie OD-600</th><td>Osciloscopio digital (OD-603, OD-606, OD-610…). Sonda en x10 y el mismo ajuste en el menú del canal; compensa la sonda con su salida de calibración; la pinza de masa solo a GND. Nunca se mide la red de 230 V.</td></tr>
+          <tr><th>PN532 NFC RFID Module V3</th><td>Lector NFC de 13,56 MHz. En el curso se usa por puerto serie (HSU) con el archivo <code>firmware/pn532_uart.py</code>.</td></tr>
+          <tr><th>Cerradura de solenoide 12 V</th><td>Fail-secure: cerrada sin corriente, se abre con 12 V (≈ 0,5-1 A). Siempre con módulo MOSFET y diodo de libre circulación; no dejarla activada más de unos segundos.</td></tr>
         </tbody>
       </table>
     </div>

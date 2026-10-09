@@ -1,10 +1,10 @@
-id: m9
-number: 9
+id: m10
+number: 10
 trimestre: 3
 icon: "🛑"
 title: "Seguridad y modos de marcha"
 subtitle: "Paro de emergencia, interrupciones, mando bimanual y ciclo único/continuo"
-weeks: [25, 26, 27]
+weeks: [28, 29, 30]
 hours: 9
 objectives:
   - Diseñar el paro de emergencia de una máquina con contacto NC (seguridad positiva) y rearme manual.
@@ -18,17 +18,17 @@ criteria:
   - Aplica criterios de seguridad en el diseño y la programación de máquinas automáticas.
   - Analiza los riesgos de un sistema automático y propone medidas de protección.
 schedule:
-  - {week: 25, session: 1, title: "Riesgos de una máquina. La seta de emergencia", section: m9s1}
-  - {week: 25, session: 2, title: "Contacto NC y seguridad positiva. Estado seguro", section: m9s1}
-  - {week: 25, session: 3, title: "Interrupciones con Pin.irq", section: m9s2}
-  - {week: 26, session: 1, title: "Mando bimanual", section: m9s3}
-  - {week: 26, session: 2, title: "Modos de marcha: ciclo único y continuo", section: m9s3}
-  - {week: 26, session: 3, title: "Rearme y señalización", section: m9s3}
-  - {week: 27, session: 1, title: "Proyecto corto: prensa segura (diseño de estados)", section: m9s4}
-  - {week: 27, session: 2, title: "Proyecto corto: programación y montaje", section: m9s4}
-  - {week: 27, session: 3, title: "Proyecto corto: pruebas de seguridad y presentación", section: m9s4}
+  - {week: 28, session: 1, title: "Riesgos de una máquina. La seta de emergencia", section: m10s1}
+  - {week: 28, session: 2, title: "Contacto NC y seguridad positiva. Estado seguro", section: m10s1}
+  - {week: 28, session: 3, title: "Interrupciones con Pin.irq", section: m10s2}
+  - {week: 29, session: 1, title: "Mando bimanual", section: m10s3}
+  - {week: 29, session: 2, title: "Modos de marcha: ciclo único y continuo", section: m10s3}
+  - {week: 29, session: 3, title: "Rearme y señalización", section: m10s3}
+  - {week: 30, session: 1, title: "Proyecto corto: prensa segura (diseño de estados)", section: m10s4}
+  - {week: 30, session: 2, title: "Proyecto corto: programación y montaje", section: m10s4}
+  - {week: 30, session: 3, title: "Proyecto corto: pruebas de seguridad y presentación", section: m10s4}
 sections:
-  - id: m9s1
+  - id: m10s1
     title: "Paro de emergencia y estado seguro"
     hours: 2
     kind: lesson
@@ -115,7 +115,7 @@ sections:
 
       1. Conecta la seta (contacto NC) al GP16 / GPIO 16 y ejecuta el ejemplo.
       2. Desconecta el cable de la seta: ¿qué pasa? ¿Y si la hubieras conectado con el contacto NA?
-      3. Haz un **análisis de riesgos** de tu prensa de la misión 7: ¿qué puede salir mal y cómo lo evitas?
+      3. Haz un **análisis de riesgos** de tu prensa de la misión 8: ¿qué puede salir mal y cómo lo evitas?
     evaluation:
       intro: "Necesitas un 80 %."
       items:
@@ -173,7 +173,7 @@ sections:
               before: ["from machine import Pin as _P", "_S = [_P(n, _P.OUT) for n in (10, 11, 12, 13)]", "_S[1].value(1)", "_S[3].value(1)", "_n = estado_seguro(_S)"]
               check: "_n == 2 and [s.value() for s in _S] == [0, 0, 0, 0]"
 
-  - id: m9s2
+  - id: m10s2
     title: "Interrupciones"
     hours: 1
     kind: lesson
@@ -327,7 +327,7 @@ sections:
           hints:
             wrong_result: "En rearmar(), lee self.pin.value(): solo si es 0 (seta liberada) pones self.activada = False. Devuelve not self.activada."
 
-  - id: m9s3
+  - id: m10s3
     title: "Mando bimanual y modos de marcha"
     hours: 3
     kind: lesson
@@ -464,14 +464,14 @@ sections:
             - {desc: "Continuo con paro → para", call: "continuar('continuo', True)", expected: false}
             - {desc: "Ciclo único → para", call: "continuar('unico', False)", expected: false}
 
-  - id: m9s4
+  - id: m10s4
     title: "Proyecto corto: prensa segura"
     hours: 3
     kind: challenge
     theory: |
       ## El encargo
 
-      La prensa de la misión 7 con todas las medidas de seguridad, programada como **máquina de estados**:
+      La prensa de la misión 8 con todas las medidas de seguridad, programada como **máquina de estados**:
 
       | Estado | Acción | Transiciones (en este orden de prioridad) |
       |---|---|---|
@@ -550,7 +550,7 @@ sections:
       2. **Programación y montaje** con seta, bimanual y finales de carrera.
       3. **Pruebas de seguridad** delante del profesor: seta en cada estado, soltar un pulsador al bajar, cable de seta desconectado, arranque tras corte de corriente.
     evaluation:
-      intro: "Proyecto corto de la misión 9. Necesitas un 80 %."
+      intro: "Proyecto corto de la misión 10. Necesitas un 80 %."
       items:
         - id: c1
           type: code

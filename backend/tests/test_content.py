@@ -9,7 +9,7 @@ CODE_ITEMS = [(s["id"], i) for m in MISSIONS for s in m["sections"] for i in s["
 
 
 def test_structure():
-    assert len(MISSIONS) == 11
+    assert len(MISSIONS) == 12
     ids = set()
     for m in MISSIONS:
         assert m["schedule"], m["id"]
@@ -30,11 +30,11 @@ def test_structure():
                     assert item.get("solution") and item.get("tests"), (s["id"], item["id"])
 
 
-def test_schedule_covers_99_sessions():
+def test_schedule_covers_108_sessions():
     assert not any(m.get("extra") for m in MISSIONS)
     sessions = [(x["week"], x["session"]) for m in MISSIONS for x in m["schedule"]]
-    assert len(sessions) == len(set(sessions)) == 99
-    assert {w for w, _ in sessions} == set(range(1, 34))
+    assert len(sessions) == len(set(sessions)) == 108
+    assert {w for w, _ in sessions} == set(range(1, 37))
     for m in MISSIONS:
         assert m.get("trimestre") in (1, 2, 3), m["id"]
         assert sum(s["hours"] for s in m["sections"]) == m["hours"] == 9, m["id"]

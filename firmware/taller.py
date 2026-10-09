@@ -1,4 +1,4 @@
-# taller.py — Biblioteca del banco neumático de NeumaLab (4º ESO)
+# taller.py — Biblioteca del banco neumático de TEC_IVJP_lab27 (4º ESO)
 # Súbela a la placa con Thonny y úsala con:  from taller import *
 # Funciona igual en Raspberry Pi Pico W y ESP32-S3 (solo cambian los números de pin).
 #

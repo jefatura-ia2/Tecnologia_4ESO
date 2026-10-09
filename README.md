@@ -1,23 +1,24 @@
-# NeumaLab · 4º ESO
+# TEC_IVJP_lab27 · 4º ESO
 
-Plataforma web para un **curso completo de Tecnología de 4º ESO** (33 semanas × 3 h = **99 h**) que combina **programación en MicroPython** (Raspberry Pi Pico W y ESP32-S3-DevKit) con **neumática y electroneumática**: compresor, unidad de acondicionamiento, válvulas selectoras y antirretorno, **electroválvulas de 12 V 2/2 y 3/2** gobernadas con un **módulo MOSFET**, **cilindros de simple y doble efecto** y **finales de carrera**.
+Plataforma web para un **curso completo de Tecnología de 4º ESO** (36 semanas × 3 h = **108 h**) del IES Valle del Jerte (Plasencia). Combina **programación en MicroPython** (Raspberry Pi Pico W y ESP32-S3-DevKit), un **laboratorio de electrónica** (osciloscopio PROMAX serie 600, lector NFC PN532 y cerradura de solenoide de 12 V) y **neumática y electroneumática**: compresor, unidad de acondicionamiento, válvulas selectoras y antirretorno, **electroválvulas de 12 V 2/2 y 3/2** gobernadas con un **módulo MOSFET**, **cilindros de simple y doble efecto** y **finales de carrera**.
 
 | Trim. | | Misión | Semanas |
 |---|---|---|---|
 | 1.º | 🐍 | 1. MicroPython I: fundamentos y entradas/salidas | 1-3 |
 | 1.º | ⏱️ | 2. MicroPython II: tiempo, estados y clases | 4-6 |
-| 1.º | 💨 | 3. Neumática I: aire comprimido y cilindros | 7-9 |
-| 1.º | 🔀 | 4. Neumática II: válvulas y circuitos básicos | 10-12 |
-| 2.º | ⚡ | 5. Electroválvulas con MicroPython | 13-15 |
-| 2.º | ↔️ | 6. Cilindros de doble efecto y enclavamientos | 16-18 |
-| 2.º | 🎯 | 7. Finales de carrera: ciclos por posición | 19-21 |
-| 2.º | 🔁 | 8. Secuencias de varios cilindros | 22-24 |
-| 3.º | 🛑 | 9. Seguridad y modos de marcha | 25-27 |
-| 3.º | 📡 | 10. Control WiFi, registro y mantenimiento | 28-30 |
-| 3.º | 🏭 | 11. Proyecto final: automatiza una máquina | 31-33 |
+| 1.º | 🔐 | 3. Laboratorio: osciloscopio y control de acceso NFC | 7-9 |
+| 1.º | 💨 | 4. Neumática I: aire comprimido y cilindros | 10-12 |
+| 2.º | 🔀 | 5. Neumática II: válvulas y circuitos básicos | 13-15 |
+| 2.º | ⚡ | 6. Electroválvulas con MicroPython | 16-18 |
+| 2.º | ↔️ | 7. Cilindros de doble efecto y enclavamientos | 19-21 |
+| 2.º | 🎯 | 8. Finales de carrera: ciclos por posición | 22-24 |
+| 3.º | 🔁 | 9. Secuencias de varios cilindros | 25-27 |
+| 3.º | 🛑 | 10. Seguridad y modos de marcha | 28-30 |
+| 3.º | 📡 | 11. Control WiFi, registro y mantenimiento | 31-33 |
+| 3.º | 🏭 | 12. Proyecto final: automatiza una máquina | 34-36 |
 
-- **44 secciones** (4 por misión) con teoría, ejemplos para las dos placas, práctica de aula/taller y evaluación obligatoria (test, completar huecos y **65 ejercicios de código** corregidos automáticamente en un simulador de MicroPython).
-- Cada misión acaba con un **proyecto corto** (3 h) en el banco neumático: contador de piezas, semáforo, elevador, puerta desde dos puntos, expulsor, barrera, prensa con retorno automático, estampadora A+ B+ B− A−, prensa segura con bimanual, panel web… y un **proyecto final** con GRAFCET.
+- **48 secciones** (4 por misión) con teoría, ejemplos para las dos placas, práctica de aula/taller y evaluación obligatoria (test, completar huecos y **72 ejercicios de código** corregidos automáticamente en un simulador de MicroPython).
+- Cada misión acaba con un **proyecto corto** (3 h): contador de piezas, semáforo, **control de acceso NFC**, elevador, puerta desde dos puntos, expulsor, barrera, prensa, estampadora A+ B+ B− A−, prensa segura con bimanual, panel web… y un **proyecto final** con GRAFCET.
 - **Desbloqueo progresivo**, **pistas** que no revelan la respuesta, **anti-trampa** (tiempo mínimo, espera tras fallos seguidos, alertas de código copiado).
 - **Panel del profesorado**: progreso, alertas, dificultad por pregunta, soluciones, desbloqueo para toda la clase, notas manuales y exportación CSV.
 - **Calendario** del curso que salta las semanas de vacaciones. Programación sesión a sesión en [`docs/temporalizacion.md`](docs/temporalizacion.md).
@@ -37,7 +38,7 @@ Todo funciona en Netlify, sin servidor propio:
 
 1. Sube esta carpeta a un repositorio de GitHub (ya incluye un commit inicial):
    ```bash
-   git remote add origin https://github.com/TU_USUARIO/neumalab.git
+   git remote add origin https://github.com/TU_USUARIO/Tecnologia_4ESO.git
    git push -u origin main
    ```
 2. En Netlify: **Add new site → Import an existing project → GitHub** y elige el repositorio.
@@ -86,7 +87,7 @@ npx netlify-cli deploy --build --prod
 npm install
 npm run build
 npm run dev          # http://localhost:8888 · usuario profesor / profe123 · datos en .datos-locales/
-npm test             # 139 pruebas: API + todas las soluciones ejecutadas en Pyodide
+npm test             # 153 pruebas: API + todas las soluciones ejecutadas en Pyodide
 ```
 
 ---
@@ -116,7 +117,7 @@ backend/                        servidor alternativo FastAPI (Docker)
 scripts/build.mjs               genera el temario para la función y copia Pyodide y el simulador
 scripts/dev-server.mjs          servidor local que imita Netlify
 tests/                          pruebas Node (API y soluciones en Pyodide)
-firmware/                       taller.py (clases Electrovalvula, CilindroDE, Seta), secretos.py
+firmware/                       taller.py (Electrovalvula, CilindroDE, Seta), pn532_uart.py (lector NFC), secretos.py
 docs/temporalizacion.md         programación sesión a sesión y calificación sugerida
 ```
 
@@ -162,6 +163,12 @@ Tras editar, ejecuta `npm test` (comprueba que todas las soluciones pasan) y haz
 | LED de estado | `Pin("LED")` | NeoPixel en GPIO 48 |
 
 Todas las entradas usan `Pin.PULL_UP` y van a GND (pulsado/pisado = 0). La seta NC da 0 en reposo y 1 si se pulsa **o si se corta el cable**.
+
+## Laboratorio de electrónica (misión 3): material y conexiones
+
+- **Osciloscopio PROMAX serie OD-600** con sonda x1/x10. Práctica con la PWM de la placa (GP22 en la Pico W, GPIO 21 en la ESP32-S3).
+- **PN532 NFC RFID Module V3** en modo **HSU** (interruptores SEL0 y SEL1 en OFF), alimentado a 3V3, con el controlador `firmware/pn532_uart.py`: SDA/TXD → RX (GP5 · GPIO 11) y SCL/RXD → TX (GP4 · GPIO 10), UART1 a 115200 baudios.
+- **Cerradura de solenoide de 12 V** (fail-secure) en el canal 1 del módulo MOSFET (GP10 · GPIO 4), con diodo 1N4007 y como máximo 3 s activada.
 
 **Seguridad en el taller:** gafas siempre que haya aire; 3-4 bar en el aula (2 bar en las primeras pruebas); nunca conectar/desconectar tubos con presión; los 12 V nunca llegan a la placa.
 

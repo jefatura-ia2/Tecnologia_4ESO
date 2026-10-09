@@ -1,4 +1,4 @@
-// API de NeumaLab como una única Netlify Function (rutas /api/*), con datos en Netlify Blobs.
+// API de TEC_IVJP_lab27 como una única Netlify Function (rutas /api/*), con datos en Netlify Blobs.
 import crypto from 'node:crypto'
 import { checkTiming, plagiarismReasons } from './lib/anticheat.mjs'
 import { hashPassword, signToken, verifyPassword, verifyToken } from './lib/auth.mjs'
@@ -464,7 +464,7 @@ route('GET', '/api/teacher/export.csv', async ({ req, db }) => {
     lines.push(line.map(esc).join(';'))
   })
   return new Response('﻿' + lines.join('\r\n') + '\r\n', {
-    headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename=notas_neumalab.csv', 'cache-control': 'no-store' },
+    headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename=notas_tec_ivjp_lab27.csv', 'cache-control': 'no-store' },
   })
 })
 

@@ -1,28 +1,30 @@
-# Temporalización — NeumaLab (4º ESO)
+# Temporalización — TEC_IVJP_lab27 (4º ESO)
 
-Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de tres semanas (9 h cada una), repartidas en tres trimestres. Cada misión termina con un **proyecto corto** (3 h) en el banco neumático.
+Curso completo: **36 semanas × 3 sesiones de 1 h = 108 h** en doce misiones de tres semanas (9 h cada una), repartidas en tres trimestres. Cada misión termina con un **proyecto corto** (3 h).
 
 | Trimestre | Misión | Semanas | Horas | Nota mínima por sección |
 |---|---|---|---|---|
 | 1.º | 🐍 M1. MicroPython I: fundamentos y entradas/salidas | 1-3 | 9 | 70 % |
 | 1.º | ⏱️ M2. MicroPython II: tiempo, estados y clases | 4-6 | 9 | 70 % |
-| 1.º | 💨 M3. Neumática I: aire comprimido y cilindros | 7-9 | 9 | 75 % |
-| 1.º | 🔀 M4. Neumática II: válvulas y circuitos básicos | 10-12 | 9 | 75 % |
-| 2.º | ⚡ M5. Electroválvulas con MicroPython | 13-15 | 9 | 80 % |
-| 2.º | ↔️ M6. Cilindros de doble efecto y enclavamientos | 16-18 | 9 | 80 % |
-| 2.º | 🎯 M7. Finales de carrera: ciclos por posición | 19-21 | 9 | 80 % |
-| 2.º | 🔁 M8. Secuencias de varios cilindros | 22-24 | 9 | 80 % |
-| 3.º | 🛑 M9. Seguridad y modos de marcha | 25-27 | 9 | 80 % |
-| 3.º | 📡 M10. Control WiFi, registro y mantenimiento | 28-30 | 9 | 80 % |
-| 3.º | 🏭 M11. Proyecto final: automatiza una máquina | 31-33 | 9 | 80 % |
+| 1.º | 🔐 M3. Laboratorio: osciloscopio y control de acceso NFC | 7-9 | 9 | 75 % |
+| 1.º | 💨 M4. Neumática I: aire comprimido y cilindros | 10-12 | 9 | 75 % |
+| 2.º | 🔀 M5. Neumática II: válvulas y circuitos básicos | 13-15 | 9 | 75 % |
+| 2.º | ⚡ M6. Electroválvulas con MicroPython | 16-18 | 9 | 80 % |
+| 2.º | ↔️ M7. Cilindros de doble efecto y enclavamientos | 19-21 | 9 | 80 % |
+| 2.º | 🎯 M8. Finales de carrera: ciclos por posición | 22-24 | 9 | 80 % |
+| 3.º | 🔁 M9. Secuencias de varios cilindros | 25-27 | 9 | 80 % |
+| 3.º | 🛑 M10. Seguridad y modos de marcha | 28-30 | 9 | 80 % |
+| 3.º | 📡 M11. Control WiFi, registro y mantenimiento | 31-33 | 9 | 80 % |
+| 3.º | 🏭 M12. Proyecto final: automatiza una máquina | 34-36 | 9 | 80 % |
 
 > En la plataforma, el calendario empieza en `COURSE_START_DATE` y salta las semanas de vacaciones indicadas en `SKIP_WEEKS` (Navidad, Semana Santa…).
 
 ## Bloques de contenido
 
 - **Programación en MicroPython** (M1-M2 y transversal en todo el curso): tipos de datos, listas y diccionarios, funciones, entradas/salidas digitales, antirrebote y flancos, temporización sin bloquear, máquinas de estados, clases y objetos, excepciones (`try/finally`), interrupciones, archivos, WiFi y HTTP.
-- **Neumática básica** (M3-M4): producción y acondicionamiento del aire, presión y fuerza, consumo, válvulas distribuidoras y simbología, antirretorno y selectora, circuitos de mando directo e indirecto.
-- **Electroneumática programada** (M5-M11): etapa de potencia con MOSFET, electroválvulas 2/2 y 3/2 de 12 V, cilindros de simple y doble efecto, finales de carrera, secuencias, seguridad (seta, bimanual), mantenimiento y GRAFCET.
+- **Laboratorio de electrónica** (M3): osciloscopio PROMAX serie 600 (V/div, s/div, disparo, sonda x10, medidas de frecuencia y ciclo de trabajo), lector NFC PN532 por puerto serie y cerradura de solenoide de 12 V con MOSFET: proyecto de control de acceso.
+- **Neumática básica** (M4-M5): producción y acondicionamiento del aire, presión y fuerza, consumo, válvulas distribuidoras y simbología, antirretorno y selectora, circuitos de mando directo e indirecto.
+- **Electroneumática programada** (M6-M12): etapa de potencia con MOSFET, electroválvulas 2/2 y 3/2 de 12 V, cilindros de simple y doble efecto, finales de carrera, secuencias, seguridad (seta, bimanual), mantenimiento y GRAFCET.
 
 ## Sesión a sesión
 
@@ -101,7 +103,46 @@ Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de t
 | m2s3 · Clases y objetos | Lección | 2 | 2 test · 0 completar · 2 código |
 | m2s4 · Proyecto corto: semáforo con pulsador peatonal | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
 
-### 💨 Misión 3: Neumática I: aire comprimido y cilindros
+### 🔐 Misión 3: Laboratorio: osciloscopio y control de acceso NFC
+
+*Medir señales con el osciloscopio PROMAX serie 600 y abrir una cerradura de solenoide de 12 V con tarjetas NFC (PN532)*
+
+**Objetivos**
+
+- Manejar un osciloscopio digital (PROMAX serie 600) para medir tensión, periodo, frecuencia y ciclo de trabajo.
+- Generar señales PWM con la placa y comprobarlas en el osciloscopio.
+- Leer el identificador (UID) de tarjetas NFC con el módulo PN532 NFC RFID V3 por puerto serie.
+- Gobernar una cerradura de solenoide de 12 V con un módulo MOSFET de forma segura.
+- Programar un control de acceso con lista de tarjetas autorizadas y bloqueo tras varios intentos fallidos.
+
+**Criterios de evaluación relacionados**
+
+- Utiliza instrumentos de medida (osciloscopio) para analizar el funcionamiento de circuitos electrónicos.
+- Diseña y programa sistemas de control con sensores de identificación y actuadores electromecánicos.
+- Valora la seguridad y la privacidad en los sistemas de identificación.
+
+**Material:** Osciloscopio PROMAX serie 600 (OD-603, OD-606, OD-610…) con su sonda x1/x10 · Raspberry Pi Pico W o ESP32-S3-DevKit, protoboard y cables · Módulo PN532 NFC RFID Module V3 y tarjetas o llaveros NFC (MIFARE Classic / NTAG) · Cerradura de solenoide de 12 V, módulo MOSFET de nivel lógico, diodo 1N4007 y fuente de 12 V · Archivo pn532_uart.py (carpeta firmware del proyecto)
+
+| Semana | Sesión | Contenido | Sección |
+|---|---|---|---|
+| 7 | 1 | El osciloscopio: pantalla, divisiones, V/div y s/div | `m3s1` |
+| 7 | 2 | Sonda x1/x10, disparo y medidas automáticas: la PWM de la placa | `m3s1` |
+| 7 | 3 | NFC y RFID: tarjetas, UID y el módulo PN532 | `m3s2` |
+| 8 | 1 | Conectar el PN532 por puerto serie y leer tarjetas | `m3s2` |
+| 8 | 2 | La cerradura de solenoide: MOSFET, diodo y fuente de 12 V | `m3s3` |
+| 8 | 3 | Ver la conmutación de la cerradura con el osciloscopio | `m3s3` |
+| 9 | 1 | Proyecto corto: control de acceso NFC (montaje) | `m3s4` |
+| 9 | 2 | Proyecto corto: programación y bloqueo por intentos | `m3s4` |
+| 9 | 3 | Proyecto corto: pruebas y presentación | `m3s4` |
+
+| Sección | Tipo | Horas | Ítems evaluados |
+|---|---|---|---|
+| m3s1 · Introducción al osciloscopio PROMAX serie 600 | Lección | 2 | 3 test · 1 completar · 2 código |
+| m3s2 · NFC: leer tarjetas con el PN532 | Lección | 2 | 2 test · 0 completar · 2 código |
+| m3s3 · La cerradura de solenoide de 12 V | Lección | 2 | 2 test · 0 completar · 2 código |
+| m3s4 · Proyecto corto: control de acceso NFC | Proyecto corto | 3 | 2 test · 0 completar · 1 código |
+
+### 💨 Misión 4: Neumática I: aire comprimido y cilindros
 
 *Compresor, unidad de acondicionamiento, presión, fuerza y consumo de aire*
 
@@ -121,24 +162,26 @@ Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de t
 
 | Semana | Sesión | Contenido | Sección |
 |---|---|---|---|
-| 7 | 1 | ¿Por qué neumática? Normas de seguridad del banco | `m3s1` |
-| 7 | 2 | Compresor, depósito, presostato y purga | `m3s1` |
-| 7 | 3 | Unidad de acondicionamiento y unidades de presión | `m3s1` |
-| 8 | 1 | Presión y fuerza: F = p · A | `m3s2` |
-| 8 | 2 | Cilindros de simple y doble efecto en el banco | `m3s2` |
-| 8 | 3 | Consumo de aire y elección del cilindro | `m3s3` |
-| 9 | 1 | Proyecto corto: elevador neumático (cálculo) | `m3s4` |
-| 9 | 2 | Proyecto corto: montaje con mando eléctrico directo | `m3s4` |
-| 9 | 3 | Proyecto corto: pruebas y ficha técnica | `m3s4` |
+| 10 | 1 | ¿Por qué neumática? Normas de seguridad del banco | `m4s1` |
+| 10 | 2 | Compresor, depósito, presostato y purga | `m4s1` |
+| 10 | 3 | Unidad de acondicionamiento y unidades de presión | `m4s1` |
+| 11 | 1 | Presión y fuerza: F = p · A | `m4s2` |
+| 11 | 2 | Cilindros de simple y doble efecto en el banco | `m4s2` |
+| 11 | 3 | Consumo de aire y elección del cilindro | `m4s3` |
+| 12 | 1 | Proyecto corto: elevador neumático (cálculo) | `m4s4` |
+| 12 | 2 | Proyecto corto: montaje con mando eléctrico directo | `m4s4` |
+| 12 | 3 | Proyecto corto: pruebas y ficha técnica | `m4s4` |
 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
-| m3s1 · El aire comprimido: producción y acondicionamiento | Lección | 3 | 3 test · 1 completar · 2 código |
-| m3s2 · Presión, fuerza y cilindros | Lección | 2 | 2 test · 1 completar · 2 código |
-| m3s3 · Consumo de aire y elección del cilindro | Lección | 1 | 1 test · 0 completar · 2 código |
-| m3s4 · Proyecto corto: elevador neumático con mando directo | Proyecto corto | 3 | 2 test · 0 completar · 1 código |
+| m4s1 · El aire comprimido: producción y acondicionamiento | Lección | 3 | 3 test · 1 completar · 2 código |
+| m4s2 · Presión, fuerza y cilindros | Lección | 2 | 2 test · 1 completar · 2 código |
+| m4s3 · Consumo de aire y elección del cilindro | Lección | 1 | 1 test · 0 completar · 2 código |
+| m4s4 · Proyecto corto: elevador neumático con mando directo | Proyecto corto | 3 | 2 test · 0 completar · 1 código |
 
-### 🔀 Misión 4: Neumática II: válvulas y circuitos básicos
+## 2.º trimestre
+
+### 🔀 Misión 5: Neumática II: válvulas y circuitos básicos
 
 *Vías y posiciones, simbología, antirretorno, selectora y primeros circuitos*
 
@@ -158,26 +201,24 @@ Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de t
 
 | Semana | Sesión | Contenido | Sección |
 |---|---|---|---|
-| 10 | 1 | Válvulas distribuidoras: vías, posiciones y reposo | `m4s1` |
-| 10 | 2 | Simbología y numeración de vías | `m4s1` |
-| 10 | 3 | Antirretorno y selectora (función O) | `m4s2` |
-| 11 | 1 | Circuito 1: simple efecto con 3/2 (mando directo) | `m4s3` |
-| 11 | 2 | Circuito 2: doble efecto con dos 3/2 | `m4s3` |
-| 11 | 3 | Circuito 3: ¿por qué no sirve una 2/2? Errores típicos | `m4s3` |
-| 12 | 1 | Proyecto corto: puerta neumática desde dos puntos (diseño) | `m4s4` |
-| 12 | 2 | Proyecto corto: montaje y pruebas | `m4s4` |
-| 12 | 3 | Proyecto corto: presentación. Repaso del trimestre | `m4s4` |
+| 13 | 1 | Válvulas distribuidoras: vías, posiciones y reposo | `m5s1` |
+| 13 | 2 | Simbología y numeración de vías | `m5s1` |
+| 13 | 3 | Antirretorno y selectora (función O) | `m5s2` |
+| 14 | 1 | Circuito 1: simple efecto con 3/2 (mando directo) | `m5s3` |
+| 14 | 2 | Circuito 2: doble efecto con dos 3/2 | `m5s3` |
+| 14 | 3 | Circuito 3: ¿por qué no sirve una 2/2? Errores típicos | `m5s3` |
+| 15 | 1 | Proyecto corto: puerta neumática desde dos puntos (diseño) | `m5s4` |
+| 15 | 2 | Proyecto corto: montaje y pruebas | `m5s4` |
+| 15 | 3 | Proyecto corto: presentación. Repaso del trimestre | `m5s4` |
 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
-| m4s1 · Válvulas distribuidoras y simbología | Lección | 2 | 2 test · 1 completar · 2 código |
-| m4s2 · Antirretorno y selectora (función O) | Lección | 1 | 2 test · 0 completar · 2 código |
-| m4s3 · Circuitos básicos de mando de cilindros | Lección | 3 | 2 test · 0 completar · 2 código |
-| m4s4 · Proyecto corto: puerta neumática desde dos puntos | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
+| m5s1 · Válvulas distribuidoras y simbología | Lección | 2 | 2 test · 1 completar · 2 código |
+| m5s2 · Antirretorno y selectora (función O) | Lección | 1 | 2 test · 0 completar · 2 código |
+| m5s3 · Circuitos básicos de mando de cilindros | Lección | 3 | 2 test · 0 completar · 2 código |
+| m5s4 · Proyecto corto: puerta neumática desde dos puntos | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
 
-## 2.º trimestre
-
-### ⚡ Misión 5: Electroválvulas con MicroPython
+### ⚡ Misión 6: Electroválvulas con MicroPython
 
 *Etapa de potencia con MOSFET, la clase Electrovalvula y el cilindro de simple efecto automático*
 
@@ -197,24 +238,24 @@ Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de t
 
 | Semana | Sesión | Contenido | Sección |
 |---|---|---|---|
-| 13 | 1 | ¿Por qué no basta un pin? Corriente de la bobina | `m5s1` |
-| 13 | 2 | El MOSFET como interruptor. Diodo y masa común | `m5s1` |
-| 13 | 3 | Montaje y comprobación con polímetro | `m5s1` |
-| 14 | 1 | La clase Electrovalvula | `m5s2` |
-| 14 | 2 | Cilindro de simple efecto automático | `m5s3` |
-| 14 | 3 | Estado seguro con try/finally | `m5s3` |
-| 15 | 1 | Proyecto corto: expulsor de piezas (montaje) | `m5s4` |
-| 15 | 2 | Proyecto corto: programa y soplado con 2/2 | `m5s4` |
-| 15 | 3 | Proyecto corto: pruebas y presentación | `m5s4` |
+| 16 | 1 | ¿Por qué no basta un pin? Corriente de la bobina | `m6s1` |
+| 16 | 2 | El MOSFET como interruptor. Diodo y masa común | `m6s1` |
+| 16 | 3 | Montaje y comprobación con polímetro | `m6s1` |
+| 17 | 1 | La clase Electrovalvula | `m6s2` |
+| 17 | 2 | Cilindro de simple efecto automático | `m6s3` |
+| 17 | 3 | Estado seguro con try/finally | `m6s3` |
+| 18 | 1 | Proyecto corto: expulsor de piezas (montaje) | `m6s4` |
+| 18 | 2 | Proyecto corto: programa y soplado con 2/2 | `m6s4` |
+| 18 | 3 | Proyecto corto: pruebas y presentación | `m6s4` |
 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
-| m5s1 · La etapa de potencia: MOSFET, diodo y 12 V | Lección | 3 | 3 test · 0 completar · 2 código |
-| m5s2 · La clase Electrovalvula | Lección | 1 | 1 test · 0 completar · 1 código |
-| m5s3 · Cilindro de simple efecto automático | Lección | 2 | 1 test · 0 completar · 2 código |
-| m5s4 · Proyecto corto: expulsor de piezas | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
+| m6s1 · La etapa de potencia: MOSFET, diodo y 12 V | Lección | 3 | 3 test · 0 completar · 2 código |
+| m6s2 · La clase Electrovalvula | Lección | 1 | 1 test · 0 completar · 1 código |
+| m6s3 · Cilindro de simple efecto automático | Lección | 2 | 1 test · 0 completar · 2 código |
+| m6s4 · Proyecto corto: expulsor de piezas | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
 
-### ↔️ Misión 6: Cilindros de doble efecto y enclavamientos
+### ↔️ Misión 7: Cilindros de doble efecto y enclavamientos
 
 *Dos electroválvulas 3/2 por cilindro, enclavamiento por software, temporización y velocidad*
 
@@ -234,24 +275,24 @@ Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de t
 
 | Semana | Sesión | Contenido | Sección |
 |---|---|---|---|
-| 16 | 1 | Doble efecto con dos 3/2: montaje | `m6s1` |
-| 16 | 2 | Enclavamiento: nunca las dos a la vez | `m6s1` |
-| 16 | 3 | La clase CilindroDE | `m6s1` |
-| 17 | 1 | Ciclo temporizado avance-espera-retroceso | `m6s2` |
-| 17 | 2 | Ciclos repetidos y contador | `m6s2` |
-| 17 | 3 | Velocidad del cilindro y regulación | `m6s3` |
-| 18 | 1 | Proyecto corto: barrera neumática (diseño) | `m6s4` |
-| 18 | 2 | Proyecto corto: programación y montaje | `m6s4` |
-| 18 | 3 | Proyecto corto: pruebas y presentación | `m6s4` |
+| 19 | 1 | Doble efecto con dos 3/2: montaje | `m7s1` |
+| 19 | 2 | Enclavamiento: nunca las dos a la vez | `m7s1` |
+| 19 | 3 | La clase CilindroDE | `m7s1` |
+| 20 | 1 | Ciclo temporizado avance-espera-retroceso | `m7s2` |
+| 20 | 2 | Ciclos repetidos y contador | `m7s2` |
+| 20 | 3 | Velocidad del cilindro y regulación | `m7s3` |
+| 21 | 1 | Proyecto corto: barrera neumática (diseño) | `m7s4` |
+| 21 | 2 | Proyecto corto: programación y montaje | `m7s4` |
+| 21 | 3 | Proyecto corto: pruebas y presentación | `m7s4` |
 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
-| m6s1 · Doble efecto con dos 3/2: el enclavamiento | Lección | 3 | 2 test · 0 completar · 1 código |
-| m6s2 · Ciclos temporizados | Lección | 2 | 1 test · 0 completar · 1 código |
-| m6s3 · Velocidad del cilindro y regulación | Lección | 1 | 2 test · 0 completar · 1 código |
-| m6s4 · Proyecto corto: barrera neumática | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
+| m7s1 · Doble efecto con dos 3/2: el enclavamiento | Lección | 3 | 2 test · 0 completar · 1 código |
+| m7s2 · Ciclos temporizados | Lección | 2 | 1 test · 0 completar · 1 código |
+| m7s3 · Velocidad del cilindro y regulación | Lección | 1 | 2 test · 0 completar · 1 código |
+| m7s4 · Proyecto corto: barrera neumática | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
 
-### 🎯 Misión 7: Finales de carrera: ciclos por posición
+### 🎯 Misión 8: Finales de carrera: ciclos por posición
 
 *Sensores de posición, espera con tiempo límite y diagnóstico de atascos y fugas*
 
@@ -270,24 +311,26 @@ Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de t
 
 | Semana | Sesión | Contenido | Sección |
 |---|---|---|---|
-| 19 | 1 | Finales de carrera: tipos, contactos y montaje | `m7s1` |
-| 19 | 2 | Conexión a la placa y lectura de la posición | `m7s1` |
-| 19 | 3 | Esperar a un sensor con tiempo límite | `m7s2` |
-| 20 | 1 | Ciclo A+ A- por sensores | `m7s2` |
-| 20 | 2 | Vigilancia de tiempos: atascos y fugas | `m7s3` |
-| 20 | 3 | Estado seguro ante una alarma | `m7s3` |
-| 21 | 1 | Proyecto corto: prensa con retorno automático (montaje) | `m7s4` |
-| 21 | 2 | Proyecto corto: programa con alarmas | `m7s4` |
-| 21 | 3 | Proyecto corto: pruebas de fallo y presentación | `m7s4` |
+| 22 | 1 | Finales de carrera: tipos, contactos y montaje | `m8s1` |
+| 22 | 2 | Conexión a la placa y lectura de la posición | `m8s1` |
+| 22 | 3 | Esperar a un sensor con tiempo límite | `m8s2` |
+| 23 | 1 | Ciclo A+ A- por sensores | `m8s2` |
+| 23 | 2 | Vigilancia de tiempos: atascos y fugas | `m8s3` |
+| 23 | 3 | Estado seguro ante una alarma | `m8s3` |
+| 24 | 1 | Proyecto corto: prensa con retorno automático (montaje) | `m8s4` |
+| 24 | 2 | Proyecto corto: programa con alarmas | `m8s4` |
+| 24 | 3 | Proyecto corto: pruebas de fallo y presentación | `m8s4` |
 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
-| m7s1 · Finales de carrera | Lección | 2 | 2 test · 1 completar · 1 código |
-| m7s2 · Esperar a un sensor con tiempo límite | Lección | 2 | 1 test · 0 completar · 1 código |
-| m7s3 · Vigilancia de tiempos: atascos y fugas | Lección | 2 | 1 test · 0 completar · 1 código |
-| m7s4 · Proyecto corto: prensa con retorno automático | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
+| m8s1 · Finales de carrera | Lección | 2 | 2 test · 1 completar · 1 código |
+| m8s2 · Esperar a un sensor con tiempo límite | Lección | 2 | 1 test · 0 completar · 1 código |
+| m8s3 · Vigilancia de tiempos: atascos y fugas | Lección | 2 | 1 test · 0 completar · 1 código |
+| m8s4 · Proyecto corto: prensa con retorno automático | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
 
-### 🔁 Misión 8: Secuencias de varios cilindros
+## 3.º trimestre
+
+### 🔁 Misión 9: Secuencias de varios cilindros
 
 *Notación de movimientos, diagrama espacio-fase y secuencias por sensores*
 
@@ -307,26 +350,24 @@ Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de t
 
 | Semana | Sesión | Contenido | Sección |
 |---|---|---|---|
-| 22 | 1 | Notación A+ B+ … y diagrama espacio-fase | `m8s1` |
-| 22 | 2 | Secuencias válidas e imposibles | `m8s1` |
-| 22 | 3 | Ejecutar secuencias por tiempo | `m8s2` |
-| 23 | 1 | Dos cilindros con el diccionario de cilindros | `m8s2` |
-| 23 | 2 | Secuencias por sensores: la máquina de pasos | `m8s3` |
-| 23 | 3 | Secuencia por sensores en el banco | `m8s3` |
-| 24 | 1 | Proyecto corto: estampadora A+ B+ B- A- (montaje) | `m8s4` |
-| 24 | 2 | Proyecto corto: programa por sensores | `m8s4` |
-| 24 | 3 | Proyecto corto: tiempo de ciclo, producción y presentación | `m8s4` |
+| 25 | 1 | Notación A+ B+ … y diagrama espacio-fase | `m9s1` |
+| 25 | 2 | Secuencias válidas e imposibles | `m9s1` |
+| 25 | 3 | Ejecutar secuencias por tiempo | `m9s2` |
+| 26 | 1 | Dos cilindros con el diccionario de cilindros | `m9s2` |
+| 26 | 2 | Secuencias por sensores: la máquina de pasos | `m9s3` |
+| 26 | 3 | Secuencia por sensores en el banco | `m9s3` |
+| 27 | 1 | Proyecto corto: estampadora A+ B+ B- A- (montaje) | `m9s4` |
+| 27 | 2 | Proyecto corto: programa por sensores | `m9s4` |
+| 27 | 3 | Proyecto corto: tiempo de ciclo, producción y presentación | `m9s4` |
 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
-| m8s1 · Notación de movimientos y diagrama espacio-fase | Lección | 2 | 2 test · 0 completar · 2 código |
-| m8s2 · Ejecutar secuencias por tiempo | Lección | 2 | 1 test · 0 completar · 1 código |
-| m8s3 · Secuencias por sensores: la máquina de pasos | Lección | 2 | 1 test · 0 completar · 2 código |
-| m8s4 · Proyecto corto: estampadora A+ B+ B- A- | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
+| m9s1 · Notación de movimientos y diagrama espacio-fase | Lección | 2 | 2 test · 0 completar · 2 código |
+| m9s2 · Ejecutar secuencias por tiempo | Lección | 2 | 1 test · 0 completar · 1 código |
+| m9s3 · Secuencias por sensores: la máquina de pasos | Lección | 2 | 1 test · 0 completar · 2 código |
+| m9s4 · Proyecto corto: estampadora A+ B+ B- A- | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
 
-## 3.º trimestre
-
-### 🛑 Misión 9: Seguridad y modos de marcha
+### 🛑 Misión 10: Seguridad y modos de marcha
 
 *Paro de emergencia, interrupciones, mando bimanual y ciclo único/continuo*
 
@@ -346,24 +387,24 @@ Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de t
 
 | Semana | Sesión | Contenido | Sección |
 |---|---|---|---|
-| 25 | 1 | Riesgos de una máquina. La seta de emergencia | `m9s1` |
-| 25 | 2 | Contacto NC y seguridad positiva. Estado seguro | `m9s1` |
-| 25 | 3 | Interrupciones con Pin.irq | `m9s2` |
-| 26 | 1 | Mando bimanual | `m9s3` |
-| 26 | 2 | Modos de marcha: ciclo único y continuo | `m9s3` |
-| 26 | 3 | Rearme y señalización | `m9s3` |
-| 27 | 1 | Proyecto corto: prensa segura (diseño de estados) | `m9s4` |
-| 27 | 2 | Proyecto corto: programación y montaje | `m9s4` |
-| 27 | 3 | Proyecto corto: pruebas de seguridad y presentación | `m9s4` |
+| 28 | 1 | Riesgos de una máquina. La seta de emergencia | `m10s1` |
+| 28 | 2 | Contacto NC y seguridad positiva. Estado seguro | `m10s1` |
+| 28 | 3 | Interrupciones con Pin.irq | `m10s2` |
+| 29 | 1 | Mando bimanual | `m10s3` |
+| 29 | 2 | Modos de marcha: ciclo único y continuo | `m10s3` |
+| 29 | 3 | Rearme y señalización | `m10s3` |
+| 30 | 1 | Proyecto corto: prensa segura (diseño de estados) | `m10s4` |
+| 30 | 2 | Proyecto corto: programación y montaje | `m10s4` |
+| 30 | 3 | Proyecto corto: pruebas de seguridad y presentación | `m10s4` |
 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
-| m9s1 · Paro de emergencia y estado seguro | Lección | 2 | 2 test · 0 completar · 2 código |
-| m9s2 · Interrupciones | Lección | 1 | 1 test · 0 completar · 1 código |
-| m9s3 · Mando bimanual y modos de marcha | Lección | 3 | 2 test · 0 completar · 2 código |
-| m9s4 · Proyecto corto: prensa segura | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
+| m10s1 · Paro de emergencia y estado seguro | Lección | 2 | 2 test · 0 completar · 2 código |
+| m10s2 · Interrupciones | Lección | 1 | 1 test · 0 completar · 1 código |
+| m10s3 · Mando bimanual y modos de marcha | Lección | 3 | 2 test · 0 completar · 2 código |
+| m10s4 · Proyecto corto: prensa segura | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
 
-### 📡 Misión 10: Control WiFi, registro y mantenimiento
+### 📡 Misión 11: Control WiFi, registro y mantenimiento
 
 *Servidor web en la placa, panel de control seguro, registro de ciclos y diagnóstico*
 
@@ -383,24 +424,24 @@ Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de t
 
 | Semana | Sesión | Contenido | Sección |
 |---|---|---|---|
-| 28 | 1 | La placa en la red: WiFi e IP | `m10s1` |
-| 28 | 2 | HTTP: peticiones, rutas y respuestas | `m10s1` |
-| 28 | 3 | Panel de control: rutas /estado, /ciclo y /paro | `m10s2` |
-| 29 | 1 | La seguridad manda: lo remoto nunca anula lo local | `m10s2` |
-| 29 | 2 | Registro de ciclos en un archivo CSV | `m10s3` |
-| 29 | 3 | Mantenimiento: contadores y ciclos lentos | `m10s3` |
-| 30 | 1 | Proyecto corto: panel de la estampadora (servidor) | `m10s4` |
-| 30 | 2 | Proyecto corto: página de estadísticas | `m10s4` |
-| 30 | 3 | Proyecto corto: pruebas y presentación | `m10s4` |
+| 31 | 1 | La placa en la red: WiFi e IP | `m11s1` |
+| 31 | 2 | HTTP: peticiones, rutas y respuestas | `m11s1` |
+| 31 | 3 | Panel de control: rutas /estado, /ciclo y /paro | `m11s2` |
+| 32 | 1 | La seguridad manda: lo remoto nunca anula lo local | `m11s2` |
+| 32 | 2 | Registro de ciclos en un archivo CSV | `m11s3` |
+| 32 | 3 | Mantenimiento: contadores y ciclos lentos | `m11s3` |
+| 33 | 1 | Proyecto corto: panel de la estampadora (servidor) | `m11s4` |
+| 33 | 2 | Proyecto corto: página de estadísticas | `m11s4` |
+| 33 | 3 | Proyecto corto: pruebas y presentación | `m11s4` |
 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
-| m10s1 · WiFi y servidor web en la placa | Lección | 2 | 1 test · 0 completar · 2 código |
-| m10s2 · Panel de control seguro | Lección | 2 | 1 test · 0 completar · 1 código |
-| m10s3 · Registro de ciclos y mantenimiento | Lección | 2 | 1 test · 0 completar · 3 código |
-| m10s4 · Proyecto corto: panel de la estampadora | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
+| m11s1 · WiFi y servidor web en la placa | Lección | 2 | 1 test · 0 completar · 2 código |
+| m11s2 · Panel de control seguro | Lección | 2 | 1 test · 0 completar · 1 código |
+| m11s3 · Registro de ciclos y mantenimiento | Lección | 2 | 1 test · 0 completar · 3 código |
+| m11s4 · Proyecto corto: panel de la estampadora | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
 
-### 🏭 Misión 11: Proyecto final: automatiza una máquina
+### 🏭 Misión 12: Proyecto final: automatiza una máquina
 
 *GRAFCET, asignación de pines, pruebas, documentación y construcción por equipos*
 
@@ -421,22 +462,22 @@ Curso completo: **33 semanas × 3 sesiones de 1 h = 99 h** en once misiones de t
 
 | Semana | Sesión | Contenido | Sección |
 |---|---|---|---|
-| 31 | 1 | GRAFCET: etapas, transiciones y acciones | `m11s1` |
-| 31 | 2 | Del GRAFCET al código | `m11s1` |
-| 31 | 3 | Elegir proyecto y dibujar su GRAFCET | `m11s1` |
-| 32 | 1 | Tabla de conexiones y asignación de pines | `m11s2` |
-| 32 | 2 | Montaje neumático y eléctrico | `m11s2` |
-| 32 | 3 | Plan de pruebas y documentación | `m11s3` |
-| 33 | 1 | Proyecto final: programación y ajuste | `m11s4` |
-| 33 | 2 | Proyecto final: pruebas y mejoras | `m11s4` |
-| 33 | 3 | Proyecto final: presentación y evaluación | `m11s4` |
+| 34 | 1 | GRAFCET: etapas, transiciones y acciones | `m12s1` |
+| 34 | 2 | Del GRAFCET al código | `m12s1` |
+| 34 | 3 | Elegir proyecto y dibujar su GRAFCET | `m12s1` |
+| 35 | 1 | Tabla de conexiones y asignación de pines | `m12s2` |
+| 35 | 2 | Montaje neumático y eléctrico | `m12s2` |
+| 35 | 3 | Plan de pruebas y documentación | `m12s3` |
+| 36 | 1 | Proyecto final: programación y ajuste | `m12s4` |
+| 36 | 2 | Proyecto final: pruebas y mejoras | `m12s4` |
+| 36 | 3 | Proyecto final: presentación y evaluación | `m12s4` |
 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
-| m11s1 · GRAFCET y máquinas de estados | Lección | 3 | 2 test · 0 completar · 1 código |
-| m11s2 · Asignación de pines y montaje | Lección | 2 | 1 test · 0 completar · 1 código |
-| m11s3 · Plan de pruebas y documentación | Lección | 1 | 3 test · 0 completar · 0 código |
-| m11s4 · Proyecto final por equipos | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
+| m12s1 · GRAFCET y máquinas de estados | Lección | 3 | 2 test · 0 completar · 1 código |
+| m12s2 · Asignación de pines y montaje | Lección | 2 | 1 test · 0 completar · 1 código |
+| m12s3 · Plan de pruebas y documentación | Lección | 1 | 3 test · 0 completar · 0 código |
+| m12s4 · Proyecto final por equipos | Proyecto corto | 3 | 1 test · 0 completar · 1 código |
 
 ## Calificación sugerida
 
@@ -446,6 +487,6 @@ Por trimestre:
 - **35 %** proyectos cortos en el banco neumático (nota del profesor en cada misión: funcionamiento, montaje, seguridad).
 - **15 %** prácticas de aula, cuaderno y actitud en el taller (normas de seguridad).
 
-En el 3.er trimestre, el **proyecto final** (M11) puede pesar el 50 % con la rúbrica de la sección m11s4.
+En el 3.er trimestre, el **proyecto final** (M12) puede pesar el 50 % con la rúbrica de la sección m12s4.
 
 Adapta los porcentajes a la programación didáctica del departamento.

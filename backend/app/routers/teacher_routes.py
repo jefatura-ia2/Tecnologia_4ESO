@@ -283,4 +283,4 @@ def export_csv(db: Session = Depends(get_db)):
         w.writerow(line)
     data = "﻿" + buf.getvalue()  # BOM para que Excel abra bien las tildes
     return StreamingResponse(iter([data]), media_type="text/csv; charset=utf-8",
-                             headers={"Content-Disposition": "attachment; filename=notas_neumalab.csv"})
+                             headers={"Content-Disposition": "attachment; filename=notas_tec_ivjp_lab27.csv"})

@@ -13,7 +13,7 @@ export const config = {
   },
   /** Lunes de las semanas sin clase (vacaciones), separados por comas: 2026-12-21,2026-12-28 */
   get SKIP_WEEKS() { return env('SKIP_WEEKS', '').split(',').map((x) => x.trim()).filter((x) => /^\d{4}-\d{2}-\d{2}$/.test(x)) },
-  get WEEKS() { return parseInt(env('COURSE_WEEKS', '33'), 10) },
+  get WEEKS() { return parseInt(env('COURSE_WEEKS', '36'), 10) },
   get HOURS_PER_WEEK() { return parseInt(env('HOURS_PER_WEEK', '3'), 10) },
   get MIN_SECONDS_BEFORE_SUBMIT() { return parseInt(env('MIN_SECONDS_BEFORE_SUBMIT', '120'), 10) },
   get FREE_ATTEMPTS() { return parseInt(env('FREE_ATTEMPTS', '3'), 10) },

@@ -1,0 +1,741 @@
+id: m3
+number: 3
+trimestre: 1
+icon: "🔐"
+title: "Laboratorio: osciloscopio y control de acceso NFC"
+subtitle: "Medir señales con el osciloscopio PROMAX serie 600 y abrir una cerradura de solenoide de 12 V con tarjetas NFC (PN532)"
+weeks: [7, 8, 9]
+hours: 9
+objectives:
+  - Manejar un osciloscopio digital (PROMAX serie 600) para medir tensión, periodo, frecuencia y ciclo de trabajo.
+  - Generar señales PWM con la placa y comprobarlas en el osciloscopio.
+  - Leer el identificador (UID) de tarjetas NFC con el módulo PN532 NFC RFID V3 por puerto serie.
+  - Gobernar una cerradura de solenoide de 12 V con un módulo MOSFET de forma segura.
+  - Programar un control de acceso con lista de tarjetas autorizadas y bloqueo tras varios intentos fallidos.
+materials:
+  - Osciloscopio PROMAX serie 600 (OD-603, OD-606, OD-610…) con su sonda x1/x10
+  - Raspberry Pi Pico W o ESP32-S3-DevKit, protoboard y cables
+  - Módulo PN532 NFC RFID Module V3 y tarjetas o llaveros NFC (MIFARE Classic / NTAG)
+  - Cerradura de solenoide de 12 V, módulo MOSFET de nivel lógico, diodo 1N4007 y fuente de 12 V
+  - Archivo pn532_uart.py (carpeta firmware del proyecto)
+criteria:
+  - Utiliza instrumentos de medida (osciloscopio) para analizar el funcionamiento de circuitos electrónicos.
+  - Diseña y programa sistemas de control con sensores de identificación y actuadores electromecánicos.
+  - Valora la seguridad y la privacidad en los sistemas de identificación.
+schedule:
+  - {week: 7, session: 1, title: "El osciloscopio: pantalla, divisiones, V/div y s/div", section: m3s1}
+  - {week: 7, session: 2, title: "Sonda x1/x10, disparo y medidas automáticas: la PWM de la placa", section: m3s1}
+  - {week: 7, session: 3, title: "NFC y RFID: tarjetas, UID y el módulo PN532", section: m3s2}
+  - {week: 8, session: 1, title: "Conectar el PN532 por puerto serie y leer tarjetas", section: m3s2}
+  - {week: 8, session: 2, title: "La cerradura de solenoide: MOSFET, diodo y fuente de 12 V", section: m3s3}
+  - {week: 8, session: 3, title: "Ver la conmutación de la cerradura con el osciloscopio", section: m3s3}
+  - {week: 9, session: 1, title: "Proyecto corto: control de acceso NFC (montaje)", section: m3s4}
+  - {week: 9, session: 2, title: "Proyecto corto: programación y bloqueo por intentos", section: m3s4}
+  - {week: 9, session: 3, title: "Proyecto corto: pruebas y presentación", section: m3s4}
+sections:
+  - id: m3s1
+    title: "Introducción al osciloscopio PROMAX serie 600"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## ¿Para qué sirve un osciloscopio?
+
+      El polímetro da **un número**; el osciloscopio dibuja **cómo cambia la tensión con el tiempo**.
+      Así vemos señales que cambian miles de veces por segundo: la PWM de la placa, la conmutación de una
+      electroválvula o la comunicación serie con un sensor.
+
+      Los PROMAX de la **serie OD-600** (OD-603, OD-606, OD-610…) son osciloscopios digitales con pantalla
+      en color, 2 o 4 canales, medidas automáticas, cursores y FFT.
+
+      ## La pantalla: una cuadrícula
+
+      - Eje **vertical** = tensión. Mando **VOLTS/DIV** (V/div): cuántos voltios vale cada cuadro.
+      - Eje **horizontal** = tiempo. Mando **SEC/DIV** (s/div): cuánto tiempo vale cada cuadro.
+      - La pantalla tiene normalmente **10 divisiones horizontales** y **8 verticales**.
+
+      ```
+      tensión = divisiones verticales × (V/div)
+      periodo T = divisiones horizontales de un ciclo × (s/div)
+      frecuencia f = 1 / T
+      ciclo de trabajo = t_encendido / T × 100 %
+      ```
+
+      Ejemplo: una onda cuadrada ocupa 3,3 divisiones de alto con 1 V/div → **3,3 V**. Un ciclo ocupa
+      5 divisiones con 0,2 ms/div → T = 1 ms → **f = 1000 Hz**.
+
+      ## Primeros pasos con el PROMAX
+
+      1. Conecta la **sonda** al canal 1 (CH1). Pon el conmutador de la sonda en **x10** y, en el menú
+         del canal (botón **CH1**), indica **Sonda/Probe x10**: si no coinciden, las medidas salen 10 veces mal.
+      2. **Compensa la sonda**: engancha la punta al terminal de calibración del osciloscopio (onda cuadrada
+         de 1 kHz) y la pinza a su masa. Si las esquinas no son rectas, gira el tornillo de ajuste de la sonda.
+      3. Pulsa **AUTOSET** (ajuste automático) para que el osciloscopio elija escalas. Después afina con
+         VOLTS/DIV y SEC/DIV.
+      4. **Disparo (TRIGGER)**: fija la imagen. Elige fuente CH1, flanco de subida y un nivel a media altura
+         de la señal. Si la imagen «corre», el disparo está mal.
+      5. **MEASURE**: añade medidas automáticas de frecuencia, periodo, Vpp, Vmax y ciclo de trabajo
+         (*duty*). Con **CURSOR** mides a mano entre dos líneas.
+
+      ## Seguridad con el osciloscopio
+
+      - La **pinza de masa** de la sonda está unida a la toma de tierra del enchufe: engánchala **solo** a la
+        masa (GND) del circuito, nunca a otro punto.
+      - En el taller medimos como máximo los **12 V** de la fuente. **Nunca** se mide la red de 230 V.
+      - Para 12 V usa la sonda en **x10**.
+    examples:
+      - title: "Generador de señales PWM para medir con el osciloscopio"
+        explanation: "Conecta la punta de la sonda al pin de salida y la pinza a GND. Cambia FRECUENCIA y CICLO y observa la pantalla."
+        pico_w: |
+          from machine import Pin, PWM
+          import time
+
+          FRECUENCIA = 1000      # Hz
+          CICLO = 50             # % del tiempo en alto
+
+          pwm = PWM(Pin(22))     # GP22: punta de la sonda · GND: pinza
+          pwm.freq(FRECUENCIA)
+          pwm.duty_u16(int(CICLO * 65535 / 100))
+          print("Mide en el osciloscopio: f =", FRECUENCIA, "Hz · ciclo =", CICLO, "%")
+
+          # Después prueba un barrido de ciclos de trabajo
+          for c in (25, 50, 75):
+              pwm.duty_u16(int(c * 65535 / 100))
+              print("Ciclo", c, "%")
+              time.sleep(5)
+        esp32_s3: |
+          from machine import Pin, PWM
+          import time
+
+          FRECUENCIA = 1000      # Hz
+          CICLO = 50             # % del tiempo en alto
+
+          pwm = PWM(Pin(21))     # GPIO 21: punta de la sonda · GND: pinza
+          pwm.freq(FRECUENCIA)
+          pwm.duty_u16(int(CICLO * 65535 / 100))
+          print("Mide en el osciloscopio: f =", FRECUENCIA, "Hz · ciclo =", CICLO, "%")
+
+          # Después prueba un barrido de ciclos de trabajo
+          for c in (25, 50, 75):
+              pwm.duty_u16(int(c * 65535 / 100))
+              print("Ciclo", c, "%")
+              time.sleep(5)
+    practice: |
+      ### Práctica de laboratorio (por parejas)
+
+      1. **Compensa la sonda** con la señal de calibración del osciloscopio. Dibuja en el cuaderno la onda
+         antes y después del ajuste.
+      2. Ejecuta el generador PWM (1 kHz, 50 %). Rellena la tabla midiendo **a mano** (contando divisiones)
+         y con **MEASURE**:
+
+         | Ajuste | V/div | s/div | Vmax medida | Periodo | Frecuencia | Ciclo |
+         |---|---|---|---|---|---|---|
+         | 1 kHz · 50 % | | | | | | |
+         | 1 kHz · 25 % | | | | | | |
+         | 5 kHz · 75 % | | | | | | |
+
+      3. Cambia SEC/DIV para ver **2 ciclos** y luego **10 ciclos** en pantalla.
+      4. Quita el disparo (nivel fuera de la señal): ¿qué pasa con la imagen?
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "La sonda está en x10 y el canal del osciloscopio en x1. ¿Qué ocurre?"
+          options:
+            - {id: a, text: "Las tensiones que muestra son 10 veces más pequeñas que las reales."}
+            - {id: b, text: "Nada, el osciloscopio lo corrige solo.", feedback: "Hay que indicar en el menú del canal la misma atenuación que en la sonda."}
+            - {id: c, text: "Las tensiones salen 10 veces mayores.", feedback: "La sonda x10 divide la señal entre 10; si el canal no lo sabe, muestra valores 10 veces menores."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "La imagen de la onda se desplaza sin parar por la pantalla. ¿Qué ajustas?"
+          options:
+            - {id: a, text: "El disparo (TRIGGER): fuente, flanco y nivel dentro de la señal."}
+            - {id: b, text: "El brillo de la pantalla.", feedback: "El problema es de sincronización, no de brillo."}
+            - {id: c, text: "La escala VOLTS/DIV.", feedback: "VOLTS/DIV cambia la altura, no fija la imagen."}
+          answer: a
+        - id: q3
+          type: quiz
+          points: 1
+          question: "¿Dónde se engancha la pinza de masa de la sonda?"
+          options:
+            - {id: a, text: "Solo a la masa (GND) del circuito."}
+            - {id: b, text: "A cualquier punto, da igual.", feedback: "La pinza está unida a la tierra del enchufe: en otro punto provocarías un cortocircuito."}
+            - {id: c, text: "Al positivo de 12 V.", feedback: "¡Nunca! Cortocircuitarías la fuente a través de la tierra."}
+          answer: a
+        - id: f1
+          type: fill_blank
+          points: 1
+          text: "La frecuencia es la inversa del periodo: f = 1 / ___. Si un ciclo ocupa 4 divisiones con 5 ms/div, el periodo es ___ ms."
+          blanks:
+            - {accept: ["T", "periodo"], hint: "La letra del periodo."}
+            - {accept: ["20"], hint: "Divisiones × ms/div."}
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe dos funciones para pasar de divisiones a magnitudes:
+
+            - `tension(div, v_div)` → tensión en voltios, redondeada a 2 decimales.
+            - `frecuencia(div, s_div)` → frecuencia en Hz de una señal cuyo periodo ocupa `div` divisiones
+              con `s_div` segundos por división, redondeada a 1 decimal.
+
+            Ejemplos: `tension(3.3, 1)` → `3.3` · `frecuencia(5, 0.0002)` → `1000.0`
+          starter: |
+            def tension(div, v_div):
+                pass
+
+            def frecuencia(div, s_div):
+                pass
+          solution: |
+            def tension(div, v_div):
+                return round(div * v_div, 2)
+
+            def frecuencia(div, s_div):
+                periodo = div * s_div
+                return round(1 / periodo, 1)
+          tests:
+            - {desc: "3,3 div a 1 V/div", call: "tension(3.3, 1)", expected: 3.3}
+            - {desc: "12 V con 2,4 div a 5 V/div", call: "tension(2.4, 5)", expected: 12.0}
+            - {desc: "1 kHz", call: "frecuencia(5, 0.0002)", expected: 1000.0}
+            - {desc: "50 Hz", call: "frecuencia(4, 0.005)", expected: 50.0}
+          hints:
+            wrong_result: "Primero calcula el periodo (divisiones × s/div) y después f = 1 / periodo."
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe:
+
+            - `ciclo_trabajo(t_on, periodo)` → porcentaje del periodo en alto, redondeado a 1 decimal.
+            - `duty_u16(porcentaje)` → valor entero para `pwm.duty_u16()` (0 = 0 %, 65535 = 100 %).
+
+            Ejemplos: `ciclo_trabajo(0.25, 1)` → `25.0` · `duty_u16(50)` → `32767`
+          starter: |
+            def ciclo_trabajo(t_on, periodo):
+                pass
+
+            def duty_u16(porcentaje):
+                pass
+          solution: |
+            def ciclo_trabajo(t_on, periodo):
+                return round(100 * t_on / periodo, 1)
+
+            def duty_u16(porcentaje):
+                return int(porcentaje * 65535 / 100)
+          tests:
+            - {desc: "25 %", call: "ciclo_trabajo(0.25, 1)", expected: 25.0}
+            - {desc: "0,75 ms en alto de 1 ms", call: "ciclo_trabajo(0.00075, 0.001)", expected: 75.0}
+            - {desc: "duty 50 %", call: "duty_u16(50)", expected: 32767}
+            - {desc: "duty 0 % y 100 %", call: "(duty_u16(0), duty_u16(100))", expected: [0, 65535]}
+
+  - id: m3s2
+    title: "NFC: leer tarjetas con el PN532"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## NFC y RFID
+
+      Las tarjetas **NFC** (13,56 MHz) no llevan pila: el lector crea un campo magnético que las alimenta y
+      ellas responden con su **UID** (identificador único), por ejemplo `04:A2:3B:1C`. Las usamos en
+      transporte, bibliotecas, hoteles o para fichar.
+
+      ## El módulo PN532 NFC RFID V3
+
+      Puede comunicarse de tres formas, que se eligen con los **dos interruptores** de la placa:
+
+      | Modo | SEL0 | SEL1 |
+      |---|---|---|
+      | **HSU (puerto serie)** ← usaremos este | OFF | OFF |
+      | I2C | ON | OFF |
+      | SPI | OFF | ON |
+
+      ⚠️ Cambia los interruptores **sin alimentación**.
+
+      **Conexión en modo HSU** (conector de 4 pines del módulo):
+
+      | PN532 | Pico W | ESP32-S3 |
+      |---|---|---|
+      | VCC | 3V3 | 3V3 |
+      | GND | GND | GND |
+      | SDA/TXD | GP5 (RX de UART1) | GPIO 11 (RX) |
+      | SCL/RXD | GP4 (TX de UART1) | GPIO 10 (TX) |
+
+      Fíjate: el **TX** de uno va al **RX** del otro.
+
+      ## Cómo «habla» el PN532: tramas
+
+      Cada mensaje viaja en una **trama** con comprobación de errores:
+
+      ```
+      00 00 FF | LEN | LCS | D4 CMD datos... | DCS | 00
+      ```
+
+      - `LEN` = número de bytes de datos; `LCS` = (256 − LEN) % 256, para que LEN + LCS acabe en 0.
+      - `DCS` = (256 − suma de los datos) % 256, para que datos + DCS acabe en 0.
+      - `D4` indica «del ordenador al PN532»; las respuestas empiezan por `D5`.
+
+      La librería `pn532_uart.py` hace este trabajo por nosotros, pero entenderla es programar de verdad.
+    examples:
+      - title: "Lector de tarjetas NFC"
+        explanation: "Sube pn532_uart.py a la placa (carpeta firmware). Acerca tarjetas al lector y anota sus UID."
+        pico_w: |
+          from machine import UART, Pin
+          import time
+          from pn532_uart import PN532
+
+          uart = UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5))
+          nfc = PN532(uart)
+          print("Firmware PN532:", nfc.version())
+
+          while True:
+              uid = nfc.leer_uid()
+              if uid:
+                  print("Tarjeta:", ":".join("%02X" % b for b in uid))
+                  time.sleep(1)          # evita leer la misma tarjeta muchas veces
+              time.sleep_ms(100)
+        esp32_s3: |
+          from machine import UART
+          import time
+          from pn532_uart import PN532
+
+          uart = UART(1, baudrate=115200, tx=10, rx=11)
+          nfc = PN532(uart)
+          print("Firmware PN532:", nfc.version())
+
+          while True:
+              uid = nfc.leer_uid()
+              if uid:
+                  print("Tarjeta:", ":".join("%02X" % b for b in uid))
+                  time.sleep(1)          # evita leer la misma tarjeta muchas veces
+              time.sleep_ms(100)
+    practice: |
+      ### Práctica en clase
+
+      1. Pon los interruptores en HSU, conecta el módulo y lee el UID de 3 tarjetas distintas.
+      2. **Con el osciloscopio**: mide la línea SDA/TXD mientras acercas una tarjeta. Verás los bytes de la
+         trama como pulsos de 0 a 3,3 V. Mide la duración de un bit (a 115200 baudios ≈ 8,7 µs).
+      3. ¿Qué distancia máxima de lectura consigues? ¿Funciona a través de un cuaderno? ¿Y de una lámina de
+         aluminio?
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Cómo se alimenta una tarjeta NFC que no tiene pila?"
+          options:
+            - {id: a, text: "Con el campo magnético que crea la antena del lector."}
+            - {id: b, text: "Con una pila de botón escondida.", feedback: "Las tarjetas pasivas no llevan pila."}
+            - {id: c, text: "Con la luz del aula.", feedback: "La energía llega por el campo magnético del lector."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "Para usar el PN532 V3 por puerto serie (HSU), ¿cómo van los interruptores?"
+          options:
+            - {id: a, text: "SEL0 OFF y SEL1 OFF."}
+            - {id: b, text: "SEL0 ON y SEL1 OFF.", feedback: "Esa combinación es I2C."}
+            - {id: c, text: "SEL0 OFF y SEL1 ON.", feedback: "Esa combinación es SPI."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `uid_hex(uid)` que reciba una lista de bytes (números de 0 a 255) y devuelva el texto en
+            hexadecimal con **dos cifras en mayúsculas** separadas por `:`. Lista vacía → `""`.
+
+            Ejemplo: `uid_hex([4, 162, 59, 28])` → `"04:A2:3B:1C"`
+          starter: |
+            def uid_hex(uid):
+                pass
+          solution: |
+            def uid_hex(uid):
+                partes = []
+                for b in uid:
+                    partes.append("%02X" % b)
+                return ":".join(partes)
+          tests:
+            - {desc: "Ejemplo", call: "uid_hex([4, 162, 59, 28])", expected: "04:A2:3B:1C"}
+            - {desc: "UID de 7 bytes", call: "uid_hex([4, 1, 2, 3, 4, 5, 255])", expected: "04:01:02:03:04:05:FF"}
+            - {desc: "Vacía", call: "uid_hex([])", expected: ""}
+          hints:
+            wrong_result: "\"%02X\" % numero escribe el número en hexadecimal con 2 cifras y mayúsculas. Une las partes con \":\".join(lista)."
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Escribe `trama(datos)` que construya la trama del PN532 como **lista de números**:
+
+            `[0x00, 0x00, 0xFF, LEN, LCS] + datos + [DCS, 0x00]`
+
+            con `LEN = len(datos)`, `LCS = (256 - LEN) % 256` y `DCS = (256 - sum(datos) % 256) % 256`.
+
+            Ejemplo: `trama([0xD4, 0x02])` → `[0, 0, 255, 2, 254, 212, 2, 42, 0]`
+          starter: |
+            def trama(datos):
+                pass
+          solution: |
+            def trama(datos):
+                n = len(datos)
+                lcs = (256 - n) % 256
+                dcs = (256 - sum(datos) % 256) % 256
+                return [0x00, 0x00, 0xFF, n, lcs] + list(datos) + [dcs, 0x00]
+          tests:
+            - {desc: "GetFirmwareVersion", call: "trama([0xD4, 0x02])", expected: [0, 0, 255, 2, 254, 212, 2, 42, 0]}
+            - {desc: "Leer tarjeta (InListPassiveTarget)", call: "trama([0xD4, 0x4A, 0x01, 0x00])", expected: [0, 0, 255, 4, 252, 212, 74, 1, 0, 225, 0]}
+            - {desc: "LEN + LCS y datos + DCS acaban en 0", check: "(lambda t: (t[3] + t[4]) % 256 == 0 and (sum(t[5:-2]) + t[-2]) % 256 == 0)(trama([0xD4, 0x14, 0x01, 0x14, 0x01]))"}
+          hints:
+            wrong_result: "Construye la lista por partes: cabecera [0, 0, 255, LEN, LCS], después los datos y al final [DCS, 0]."
+
+  - id: m3s3
+    title: "La cerradura de solenoide de 12 V"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Cómo funciona
+
+      Dentro de la cerradura hay una **bobina** (solenoide) y un pestillo de hierro con muelle:
+
+      - Sin corriente, el muelle mantiene el pestillo **cerrado** (*fail-secure*: si se va la luz, la puerta
+        sigue cerrada).
+      - Con **12 V**, la bobina atrae el pestillo y la puerta **se abre**.
+
+      ## Conexión
+
+      La placa (3,3 V, pocos mA) **no** puede mover la cerradura (12 V, ≈ 0,5-1 A). Usamos el mismo
+      **módulo MOSFET** que con las electroválvulas:
+
+      ```
+      +12 V ──┬────────────┐
+              │          bobina de la cerradura
+            diodo 1N4007   │
+       (banda hacia +12 V) │
+              └────────────┤
+                       MOSFET (drenador)
+      GP10 / GPIO 4 ── señal del módulo        GND común: fuente, módulo y placa
+      ```
+
+      - El **diodo de libre circulación** absorbe el pico de tensión que genera la bobina al cortar la
+        corriente. Sin él, el MOSFET puede romperse.
+      - Estas cerraduras **no** están pensadas para estar activadas mucho tiempo: se calientan. Abriremos
+        como máximo **3 s** cada vez.
+
+      ## Potencia y corriente
+
+      Con la ley de Ohm: `I = V / R` y `P = V · I`. Una cerradura de 12 V con una bobina de 20 Ω consume
+      0,6 A y 7,2 W: la fuente debe dar al menos esa corriente (mejor con margen).
+
+      ## Verlo con el osciloscopio
+
+      Con la sonda en **x10**, mide en el **drenador del MOSFET** (pinza a GND): con la cerradura cerrada verás
+      12 V; al abrir, la tensión cae a casi 0 V. Gracias al diodo, al cerrar no aparece un pico peligroso.
+    examples:
+      - title: "Abrir la cerradura 3 segundos al pulsar"
+        explanation: "Cerradura en el canal 1 del módulo MOSFET. Pulsador MARCHA para probar. try/finally garantiza que la cerradura no se quede activada."
+        pico_w: |
+          from machine import Pin
+          import time
+
+          cerradura = Pin(10, Pin.OUT, value=0)     # canal 1 del módulo MOSFET
+          boton = Pin(14, Pin.IN, Pin.PULL_UP)      # MARCHA
+
+          def abrir(t_ms=3000):
+              try:
+                  cerradura.on()
+                  time.sleep_ms(min(t_ms, 3000))      # nunca más de 3 s
+              finally:
+                  cerradura.off()
+
+          while True:
+              if boton.value() == 0:
+                  print("Abriendo")
+                  abrir()
+                  time.sleep_ms(500)
+              time.sleep_ms(20)
+        esp32_s3: |
+          from machine import Pin
+          import time
+
+          cerradura = Pin(4, Pin.OUT, value=0)      # canal 1 del módulo MOSFET
+          boton = Pin(14, Pin.IN, Pin.PULL_UP)      # MARCHA
+
+          def abrir(t_ms=3000):
+              try:
+                  cerradura.on()
+                  time.sleep_ms(min(t_ms, 3000))      # nunca más de 3 s
+              finally:
+                  cerradura.off()
+
+          while True:
+              if boton.value() == 0:
+                  print("Abriendo")
+                  abrir()
+                  time.sleep_ms(500)
+              time.sleep_ms(20)
+    practice: |
+      ### Práctica de taller
+
+      1. Mide con el polímetro la resistencia de la bobina y calcula corriente y potencia a 12 V.
+      2. Monta la cerradura con el módulo MOSFET y el diodo (revisa el profesor antes de conectar los 12 V).
+      3. **Osciloscopio**: mide a la vez la señal de la placa (CH1, sonda x1 o x10) y el drenador del MOSFET
+         (CH2, sonda x10). Dibuja las dos señales y anota cuánto tarda la cerradura en abrirse desde la orden.
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Para qué sirve el diodo en paralelo con la bobina de la cerradura?"
+          options:
+            - {id: a, text: "Para absorber el pico de tensión al cortar la corriente y proteger el MOSFET."}
+            - {id: b, text: "Para que la cerradura abra más rápido.", feedback: "Su función es proteger el transistor del pico inductivo."}
+            - {id: c, text: "Para encender un piloto.", feedback: "Un 1N4007 no emite luz; protege el circuito."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "Si se va la corriente, ¿cómo queda una cerradura de solenoide *fail-secure*?"
+          options:
+            - {id: a, text: "Cerrada: el muelle mantiene el pestillo fuera."}
+            - {id: b, text: "Abierta.", feedback: "Esa sería una cerradura fail-safe (se usa en salidas de emergencia)."}
+          answer: a
+        - id: c1
+          type: code
+          points: 2
+          prompt: |
+            Escribe `consumo(v, r)` que devuelva una tupla `(corriente, potencia)`: corriente en A redondeada a
+            2 decimales y potencia en W redondeada a 1 decimal.
+
+            Ejemplo: `consumo(12, 20)` → `(0.6, 7.2)`
+          starter: |
+            def consumo(v, r):
+                pass
+          solution: |
+            def consumo(v, r):
+                i = v / r
+                return round(i, 2), round(v * i, 1)
+          tests:
+            - {desc: "Cerradura de 20 Ω", call: "consumo(12, 20)", expected: [0.6, 7.2]}
+            - {desc: "Bobina de 15 Ω", call: "consumo(12, 15)", expected: [0.8, 9.6]}
+        - id: c2
+          type: code
+          points: 5
+          prompt: |
+            Escribe la clase `Cerradura`:
+
+            - `Cerradura(pin, t_max_ms=3000)`: crea `self.pin = Pin(pin, Pin.OUT, value=0)` y `self.aperturas = 0`.
+            - `abrir(t_ms)`: activa el pin, espera `min(t_ms, t_max_ms)` milisegundos con `time.sleep_ms`, lo
+              desactiva **siempre** (usa `try/finally`), suma 1 a `aperturas` y devuelve el tiempo que ha estado abierta.
+          starter: |
+            from machine import Pin
+            import time
+
+            class Cerradura:
+                def __init__(self, pin, t_max_ms=3000):
+                    pass
+
+                def abrir(self, t_ms):
+                    pass
+          solution: |
+            from machine import Pin
+            import time
+
+            class Cerradura:
+                def __init__(self, pin, t_max_ms=3000):
+                    self.pin = Pin(pin, Pin.OUT, value=0)
+                    self.t_max_ms = t_max_ms
+                    self.aperturas = 0
+
+                def abrir(self, t_ms):
+                    t = min(t_ms, self.t_max_ms)
+                    try:
+                        self.pin.on()
+                        time.sleep_ms(t)
+                    finally:
+                        self.pin.off()
+                    self.aperturas += 1
+                    return t
+          required:
+            - {pattern: "finally", message: "Usa try/finally para garantizar que la cerradura se desactiva."}
+          tests:
+            - before: ["_c = Cerradura(10)"]
+              desc: "Arranca cerrada (pin a 0)"
+              check: "_c.pin.value() == 0 and _c.aperturas == 0"
+            - before: ["_log.clear()", "_clock.sleeps.clear()", "_c = Cerradura(10, 3000)", "_r = _c.abrir(5000)"]
+              desc: "Nunca más de t_max: pide 5 s y abre 3 s"
+              check: "_r == 3000 and abs(sum(_clock.sleeps) - 3.0) < 0.01"
+            - before: ["_log.clear()", "_c = Cerradura(10)", "_c.abrir(1000)", "_c.abrir(500)"]
+              desc: "Activa y desactiva el pin y cuenta aperturas"
+              check: "('pin', 10, 'value', 1) in _log and _log[-1] == ('pin', 10, 'value', 0) and _c.aperturas == 2"
+          hints:
+            wrong_result: "Calcula t = min(t_ms, self.t_max_ms); dentro de try activa y espera; en finally desactiva."
+
+  - id: m3s4
+    title: "Proyecto corto: control de acceso NFC"
+    hours: 3
+    kind: challenge
+    theory: |
+      ## El encargo
+
+      Un control de acceso para el armario de herramientas del taller:
+
+      - Lista de tarjetas **autorizadas** (UID en hexadecimal).
+      - Tarjeta autorizada → **ABRIR** la cerradura 3 s y LED verde.
+      - Tarjeta desconocida → **DENEGADO**.
+      - **3 intentos fallidos seguidos** → **BLOQUEO** durante 30 s: mientras dure, cualquier tarjeta
+        (aunque esté autorizada) recibe **BLOQUEADO**.
+      - Un acceso correcto pone a cero los fallos.
+      - Cada intento se registra en la consola (o en un archivo) con la hora.
+
+      El estado se guarda en un diccionario:
+
+      ```python
+      estado = {"fallos": 0, "bloqueo_hasta": 0}
+      ```
+
+      ## Seguridad y privacidad
+
+      El UID de muchas tarjetas se puede **copiar**: sirve para un armario del aula, no para un banco.
+      Los sistemas serios usan tarjetas con **cifrado**. Además, un registro de accesos son **datos
+      personales**: hay que informar a quien se registra y no guardarlos más tiempo del necesario.
+    examples:
+      - title: "Control de acceso completo"
+        explanation: "Sube pn532_uart.py. Pega tus funciones uid_hex() y procesar(), y cambia AUTORIZADAS por los UID de tus tarjetas."
+        pico_w: |
+          from machine import UART, Pin
+          import time
+          from pn532_uart import PN532
+
+          AUTORIZADAS = {"04:A2:3B:1C", "7A:10:9F:33"}
+          nfc = PN532(UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5)))
+          cerradura = Pin(10, Pin.OUT, value=0)
+          led = Pin("LED", Pin.OUT)
+          estado = {"fallos": 0, "bloqueo_hasta": 0}
+
+          # ... pega aquí uid_hex() y procesar() ...
+
+          while True:
+              uid = nfc.leer_uid()
+              if uid:
+                  codigo = uid_hex(uid)
+                  accion = procesar(codigo, estado, AUTORIZADAS, time.ticks_ms())
+                  print(time.ticks_ms() // 1000, "s", codigo, accion)
+                  if accion == "ABRIR":
+                      led.on()
+                      try:
+                          cerradura.on(); time.sleep(3)
+                      finally:
+                          cerradura.off(); led.off()
+                  else:
+                      for _ in range(3):              # parpadeo de rechazo
+                          led.toggle(); time.sleep_ms(150)
+                      led.off()
+                  time.sleep(1)
+              time.sleep_ms(100)
+        esp32_s3: |
+          from machine import UART, Pin
+          import neopixel, time
+          from pn532_uart import PN532
+
+          AUTORIZADAS = {"04:A2:3B:1C", "7A:10:9F:33"}
+          nfc = PN532(UART(1, baudrate=115200, tx=10, rx=11))
+          cerradura = Pin(4, Pin.OUT, value=0)
+          np = neopixel.NeoPixel(Pin(48), 1)
+          estado = {"fallos": 0, "bloqueo_hasta": 0}
+
+          def color(r, g, b):
+              np[0] = (r, g, b); np.write()
+
+          # ... pega aquí uid_hex() y procesar() ...
+
+          while True:
+              uid = nfc.leer_uid()
+              if uid:
+                  codigo = uid_hex(uid)
+                  accion = procesar(codigo, estado, AUTORIZADAS, time.ticks_ms())
+                  print(time.ticks_ms() // 1000, "s", codigo, accion)
+                  if accion == "ABRIR":
+                      color(0, 40, 0)
+                      try:
+                          cerradura.on(); time.sleep(3)
+                      finally:
+                          cerradura.off()
+                  else:
+                      color(40, 0, 0); time.sleep(1)
+                  color(0, 0, 0)
+                  time.sleep(1)
+              time.sleep_ms(100)
+    practice: |
+      ### Proyecto por parejas (3 sesiones)
+
+      1. **Montaje**: PN532 + cerradura con el módulo MOSFET + LED. Revisión del profesor antes de los 12 V.
+      2. **Programación**: completa `procesar()` y pruébala aquí antes de pasarla a la placa.
+      3. **Pruebas y presentación**: demuestra apertura, denegación, bloqueo y desbloqueo. Muestra en el
+         osciloscopio la señal de la cerradura durante una apertura.
+
+      **Ampliación**: guarda el registro en `accesos.csv` (como en la misión 11) o añade un pulsador interior
+      para salir sin tarjeta.
+    evaluation:
+      intro: "Proyecto corto de la misión 3. Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 6
+          prompt: |
+            Escribe `procesar(uid, estado, autorizados, t_ms)` que devuelva la acción y **modifique** `estado`:
+
+            1. Si `t_ms < estado["bloqueo_hasta"]` → `"BLOQUEADO"` (no cambia nada más).
+            2. Si `uid` está en `autorizados` → `estado["fallos"] = 0` y `"ABRIR"`.
+            3. Si no: suma 1 a `estado["fallos"]`. Si llega a 3 → `estado["bloqueo_hasta"] = t_ms + 30000`,
+               `estado["fallos"] = 0` y `"BLOQUEO"`; si no, `"DENEGADO"`.
+          starter: |
+            def procesar(uid, estado, autorizados, t_ms):
+                pass
+          solution: |
+            def procesar(uid, estado, autorizados, t_ms):
+                if t_ms < estado["bloqueo_hasta"]:
+                    return "BLOQUEADO"
+                if uid in autorizados:
+                    estado["fallos"] = 0
+                    return "ABRIR"
+                estado["fallos"] += 1
+                if estado["fallos"] >= 3:
+                    estado["bloqueo_hasta"] = t_ms + 30000
+                    estado["fallos"] = 0
+                    return "BLOQUEO"
+                return "DENEGADO"
+          tests:
+            - before: ["_E = {'fallos': 0, 'bloqueo_hasta': 0}", "_A = {'04:A2:3B:1C'}"]
+              desc: "Tarjeta autorizada → ABRIR"
+              call: "procesar('04:A2:3B:1C', _E, _A, 1000)"
+              expected: "ABRIR"
+            - before: ["_E = {'fallos': 0, 'bloqueo_hasta': 0}", "_A = {'04:A2:3B:1C'}"]
+              desc: "Tres fallos → bloqueo de 30 s, después vuelve a abrir"
+              call: "([procesar('FF:FF', _E, _A, t) for t in (1000, 2000, 3000)], procesar('04:A2:3B:1C', _E, _A, 4000), procesar('04:A2:3B:1C', _E, _A, 34000))"
+              expected: [["DENEGADO", "DENEGADO", "BLOQUEO"], "BLOQUEADO", "ABRIR"]
+            - before: ["_E = {'fallos': 0, 'bloqueo_hasta': 0}", "_A = {'04:A2:3B:1C'}"]
+              desc: "Un acceso correcto pone a cero los fallos"
+              call: "(procesar('AA', _E, _A, 1), procesar('AA', _E, _A, 2), procesar('04:A2:3B:1C', _E, _A, 3), procesar('AA', _E, _A, 4), _E['fallos'])"
+              expected: ["DENEGADO", "DENEGADO", "ABRIR", "DENEGADO", 1]
+          hints:
+            wrong_result: "Respeta el orden: primero el bloqueo, después la lista de autorizados y por último los fallos."
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué este control de acceso con UID no sirve para proteger algo muy valioso?"
+          options:
+            - {id: a, text: "Porque el UID de muchas tarjetas se puede copiar; los sistemas seguros usan cifrado."}
+            - {id: b, text: "Porque las tarjetas NFC se gastan.", feedback: "El problema es la seguridad: el UID se puede clonar."}
+            - {id: c, text: "Porque la cerradura es de 12 V.", feedback: "La tensión no tiene que ver con la seguridad de la identificación."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "El registro de accesos guarda quién entra y a qué hora. ¿Qué hay que tener en cuenta?"
+          options:
+            - {id: a, text: "Son datos personales: hay que informar y no guardarlos más tiempo del necesario."}
+            - {id: b, text: "Nada, son solo números.", feedback: "Asociados a personas, son datos personales."}
+          answer: a

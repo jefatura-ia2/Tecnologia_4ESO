@@ -2,11 +2,11 @@
   <div class="login">
     <div class="hero">
       <div class="emoji">💨⚙️</div>
-      <h1>NeumaLab</h1>
+      <h1>TEC_IVJP_lab27</h1>
       <p class="school">IES Valle del Jerte (Plasencia)</p>
       <p class="author muted small">Autor: José I. Sánchez Castaño</p>
       <p class="muted">Aprende a programar <strong>Raspberry Pi Pico W</strong> y <strong>ESP32-S3</strong> con MicroPython
-        y a automatizar circuitos neumáticos con electroválvulas.</p>
+        a medir con el osciloscopio, a crear un control de acceso NFC y a automatizar circuitos neumáticos con electroválvulas.</p>
     </div>
     <div class="card form">
       <div class="tabs">

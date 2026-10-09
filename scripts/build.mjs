@@ -8,7 +8,7 @@ import yaml from 'js-yaml'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const missionsDir = path.join(root, 'backend/app/content/missions')
-const PASSING = { 1: 0.7, 2: 0.7, 3: 0.75, 4: 0.75 }
+const PASSING = { 1: 0.7, 2: 0.7, 3: 0.75, 4: 0.75, 5: 0.75 }
 
 const missions = fs.readdirSync(missionsDir)
   .filter((f) => f.endsWith('.yml'))

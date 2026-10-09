@@ -1,10 +1,10 @@
-id: m11
-number: 11
+id: m12
+number: 12
 trimestre: 3
 icon: "🏭"
 title: "Proyecto final: automatiza una máquina"
 subtitle: "GRAFCET, asignación de pines, pruebas, documentación y construcción por equipos"
-weeks: [31, 32, 33]
+weeks: [34, 35, 36]
 hours: 9
 objectives:
   - Describir el funcionamiento de una máquina con un GRAFCET y programarlo como máquina de estados.
@@ -20,17 +20,17 @@ criteria:
   - Documenta y comunica el proceso de diseño, las pruebas y los resultados.
   - Trabaja en equipo aplicando las normas de seguridad del taller.
 schedule:
-  - {week: 31, session: 1, title: "GRAFCET: etapas, transiciones y acciones", section: m11s1}
-  - {week: 31, session: 2, title: "Del GRAFCET al código", section: m11s1}
-  - {week: 31, session: 3, title: "Elegir proyecto y dibujar su GRAFCET", section: m11s1}
-  - {week: 32, session: 1, title: "Tabla de conexiones y asignación de pines", section: m11s2}
-  - {week: 32, session: 2, title: "Montaje neumático y eléctrico", section: m11s2}
-  - {week: 32, session: 3, title: "Plan de pruebas y documentación", section: m11s3}
-  - {week: 33, session: 1, title: "Proyecto final: programación y ajuste", section: m11s4}
-  - {week: 33, session: 2, title: "Proyecto final: pruebas y mejoras", section: m11s4}
-  - {week: 33, session: 3, title: "Proyecto final: presentación y evaluación", section: m11s4}
+  - {week: 34, session: 1, title: "GRAFCET: etapas, transiciones y acciones", section: m12s1}
+  - {week: 34, session: 2, title: "Del GRAFCET al código", section: m12s1}
+  - {week: 34, session: 3, title: "Elegir proyecto y dibujar su GRAFCET", section: m12s1}
+  - {week: 35, session: 1, title: "Tabla de conexiones y asignación de pines", section: m12s2}
+  - {week: 35, session: 2, title: "Montaje neumático y eléctrico", section: m12s2}
+  - {week: 35, session: 3, title: "Plan de pruebas y documentación", section: m12s3}
+  - {week: 36, session: 1, title: "Proyecto final: programación y ajuste", section: m12s4}
+  - {week: 36, session: 2, title: "Proyecto final: pruebas y mejoras", section: m12s4}
+  - {week: 36, session: 3, title: "Proyecto final: presentación y evaluación", section: m12s4}
 sections:
-  - id: m11s1
+  - id: m12s1
     title: "GRAFCET y máquinas de estados"
     hours: 3
     kind: lesson
@@ -78,7 +78,7 @@ sections:
         pico_w: |
           from machine import Pin
           import time
-          # ... pega CilindroDE (misión 6) ...
+          # ... pega CilindroDE (misión 7) ...
           A = CilindroDE(10, 11); B = CilindroDE(12, 13)
           ent = {
               "marcha": Pin(14, Pin.IN, Pin.PULL_UP),
@@ -102,7 +102,7 @@ sections:
         esp32_s3: |
           from machine import Pin
           import time
-          # ... pega CilindroDE (misión 6) ...
+          # ... pega CilindroDE (misión 7) ...
           A = CilindroDE(4, 5); B = CilindroDE(6, 7)
           ent = {
               "marcha": Pin(14, Pin.IN, Pin.PULL_UP),
@@ -193,7 +193,7 @@ sections:
           hints:
             wrong_result: "Usa entradas.get(cond, False) para que una condición que falta cuente como no cumplida."
 
-  - id: m11s2
+  - id: m12s2
     title: "Asignación de pines y montaje"
     hours: 2
     kind: lesson
@@ -299,7 +299,7 @@ sections:
           hints:
             wrong_result: "Primero cuenta cuántas veces aparece cada pin; después recorre las señales y marca las que tengan un pin no permitido o usado más de una vez."
 
-  - id: m11s3
+  - id: m12s3
     title: "Plan de pruebas y documentación"
     hours: 1
     kind: lesson
@@ -374,7 +374,7 @@ sections:
             - {id: b, text: "Para que el programa vaya más rápido.", feedback: "Los assert son comprobaciones, no aceleran nada."}
           answer: a
 
-  - id: m11s4
+  - id: m12s4
     title: "Proyecto final por equipos"
     hours: 3
     kind: challenge

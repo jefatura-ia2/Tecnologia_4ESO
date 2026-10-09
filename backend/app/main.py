@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="NeumaLab 4º ESO — MicroPython y neumática", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="TEC_IVJP_lab27 4º ESO — MicroPython, electrónica y neumática", version="1.0.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_methods=["*"], allow_headers=["*"])
 app.include_router(auth_routes.router)
 app.include_router(mission_routes.router)

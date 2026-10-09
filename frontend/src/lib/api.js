@@ -78,7 +78,7 @@ export async function downloadCsv() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'notas_neumalab.csv'
+  a.download = 'notas_tec_ivjp_lab27.csv'
   a.click()
   URL.revokeObjectURL(url)
 }

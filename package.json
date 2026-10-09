@@ -1,9 +1,9 @@
 {
-  "name": "neumalab",
+  "name": "tec-ivjp-lab27",
   "private": true,
   "version": "2.0.0",
   "type": "module",
-  "description": "NeumaLab · 4º ESO — Programación MicroPython (Pico W / ESP32-S3) y neumática con electroválvulas",
+  "description": "TEC_IVJP_lab27 · 4º ESO — Programación MicroPython (Pico W / ESP32-S3), osciloscopio, NFC y neumática con electroválvulas",
   "scripts": {
     "prepare-content": "node scripts/build.mjs",
     "build": "node scripts/build.mjs && vite build frontend",

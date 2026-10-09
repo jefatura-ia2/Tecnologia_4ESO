@@ -1,10 +1,10 @@
-id: m4
-number: 4
-trimestre: 1
+id: m5
+number: 5
+trimestre: 2
 icon: "🔀"
 title: "Neumática II: válvulas y circuitos básicos"
 subtitle: "Vías y posiciones, simbología, antirretorno, selectora y primeros circuitos"
-weeks: [10, 11, 12]
+weeks: [13, 14, 15]
 hours: 9
 objectives:
   - Interpretar la designación (vías/posiciones) y la simbología normalizada de las válvulas.
@@ -19,17 +19,17 @@ criteria:
   - Interpreta y realiza esquemas neumáticos sencillos utilizando simbología normalizada.
   - Monta y comprueba circuitos neumáticos de mando de cilindros.
 schedule:
-  - {week: 10, session: 1, title: "Válvulas distribuidoras: vías, posiciones y reposo", section: m4s1}
-  - {week: 10, session: 2, title: "Simbología y numeración de vías", section: m4s1}
-  - {week: 10, session: 3, title: "Antirretorno y selectora (función O)", section: m4s2}
-  - {week: 11, session: 1, title: "Circuito 1: simple efecto con 3/2 (mando directo)", section: m4s3}
-  - {week: 11, session: 2, title: "Circuito 2: doble efecto con dos 3/2", section: m4s3}
-  - {week: 11, session: 3, title: "Circuito 3: ¿por qué no sirve una 2/2? Errores típicos", section: m4s3}
-  - {week: 12, session: 1, title: "Proyecto corto: puerta neumática desde dos puntos (diseño)", section: m4s4}
-  - {week: 12, session: 2, title: "Proyecto corto: montaje y pruebas", section: m4s4}
-  - {week: 12, session: 3, title: "Proyecto corto: presentación. Repaso del trimestre", section: m4s4}
+  - {week: 13, session: 1, title: "Válvulas distribuidoras: vías, posiciones y reposo", section: m5s1}
+  - {week: 13, session: 2, title: "Simbología y numeración de vías", section: m5s1}
+  - {week: 13, session: 3, title: "Antirretorno y selectora (función O)", section: m5s2}
+  - {week: 14, session: 1, title: "Circuito 1: simple efecto con 3/2 (mando directo)", section: m5s3}
+  - {week: 14, session: 2, title: "Circuito 2: doble efecto con dos 3/2", section: m5s3}
+  - {week: 14, session: 3, title: "Circuito 3: ¿por qué no sirve una 2/2? Errores típicos", section: m5s3}
+  - {week: 15, session: 1, title: "Proyecto corto: puerta neumática desde dos puntos (diseño)", section: m5s4}
+  - {week: 15, session: 2, title: "Proyecto corto: montaje y pruebas", section: m5s4}
+  - {week: 15, session: 3, title: "Proyecto corto: presentación. Repaso del trimestre", section: m5s4}
 sections:
-  - id: m4s1
+  - id: m5s1
     title: "Válvulas distribuidoras y simbología"
     hours: 2
     kind: lesson
@@ -174,7 +174,7 @@ sections:
             - {desc: "Vías 4, 5, 14", call: "[funcion_via(4), funcion_via(5), funcion_via(14)]", expected: ["utilización", "escape", "pilotaje"]}
             - {desc: "Vía 7 → desconocida", call: "funcion_via(7)", expected: "desconocida"}
 
-  - id: m4s2
+  - id: m5s2
     title: "Antirretorno y selectora (función O)"
     hours: 1
     kind: lesson
@@ -295,7 +295,7 @@ sections:
             - {desc: "Salida mayor → bloquea", call: "antirretorno(0, 4)", expected: false}
             - {desc: "Iguales → no hay flujo", call: "antirretorno(3, 3)", expected: false}
 
-  - id: m4s3
+  - id: m5s3
     title: "Circuitos básicos de mando de cilindros"
     hours: 3
     kind: lesson
@@ -435,7 +435,7 @@ sections:
             - {desc: "Activada a 4 bar", call: "salida_32(True, 4)", expected: 4}
             - {desc: "En reposo", call: "salida_32(False, 4)", expected: 0}
 
-  - id: m4s4
+  - id: m5s4
     title: "Proyecto corto: puerta neumática desde dos puntos"
     hours: 3
     kind: challenge
@@ -490,7 +490,7 @@ sections:
       2. **Montaje y pruebas** con la maqueta de la puerta. Comprueba qué pasa si sustituyes la selectora por una T.
       3. **Presentación**: compara la lógica neumática (selectora) con la programada (`or`). Ventajas e inconvenientes de cada una.
     evaluation:
-      intro: "Proyecto corto de la misión 4. Necesitas un 75 %."
+      intro: "Proyecto corto de la misión 5. Necesitas un 75 %."
       items:
         - id: c1
           type: code

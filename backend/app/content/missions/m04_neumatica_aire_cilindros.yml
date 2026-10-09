@@ -1,10 +1,10 @@
-id: m3
-number: 3
+id: m4
+number: 4
 trimestre: 1
 icon: "💨"
 title: "Neumática I: aire comprimido y cilindros"
 subtitle: "Compresor, unidad de acondicionamiento, presión, fuerza y consumo de aire"
-weeks: [7, 8, 9]
+weeks: [10, 11, 12]
 hours: 9
 objectives:
   - Explicar cómo se produce, almacena y acondiciona el aire comprimido.
@@ -20,17 +20,17 @@ criteria:
   - Analiza el funcionamiento de sistemas neumáticos, describiendo sus componentes y calculando magnitudes básicas.
   - Trabaja en el taller de forma segura respetando las normas de uso de los equipos.
 schedule:
-  - {week: 7, session: 1, title: "¿Por qué neumática? Normas de seguridad del banco", section: m3s1}
-  - {week: 7, session: 2, title: "Compresor, depósito, presostato y purga", section: m3s1}
-  - {week: 7, session: 3, title: "Unidad de acondicionamiento y unidades de presión", section: m3s1}
-  - {week: 8, session: 1, title: "Presión y fuerza: F = p · A", section: m3s2}
-  - {week: 8, session: 2, title: "Cilindros de simple y doble efecto en el banco", section: m3s2}
-  - {week: 8, session: 3, title: "Consumo de aire y elección del cilindro", section: m3s3}
-  - {week: 9, session: 1, title: "Proyecto corto: elevador neumático (cálculo)", section: m3s4}
-  - {week: 9, session: 2, title: "Proyecto corto: montaje con mando eléctrico directo", section: m3s4}
-  - {week: 9, session: 3, title: "Proyecto corto: pruebas y ficha técnica", section: m3s4}
+  - {week: 10, session: 1, title: "¿Por qué neumática? Normas de seguridad del banco", section: m4s1}
+  - {week: 10, session: 2, title: "Compresor, depósito, presostato y purga", section: m4s1}
+  - {week: 10, session: 3, title: "Unidad de acondicionamiento y unidades de presión", section: m4s1}
+  - {week: 11, session: 1, title: "Presión y fuerza: F = p · A", section: m4s2}
+  - {week: 11, session: 2, title: "Cilindros de simple y doble efecto en el banco", section: m4s2}
+  - {week: 11, session: 3, title: "Consumo de aire y elección del cilindro", section: m4s3}
+  - {week: 12, session: 1, title: "Proyecto corto: elevador neumático (cálculo)", section: m4s4}
+  - {week: 12, session: 2, title: "Proyecto corto: montaje con mando eléctrico directo", section: m4s4}
+  - {week: 12, session: 3, title: "Proyecto corto: pruebas y ficha técnica", section: m4s4}
 sections:
-  - id: m3s1
+  - id: m4s1
     title: "El aire comprimido: producción y acondicionamiento"
     hours: 3
     kind: lesson
@@ -180,7 +180,7 @@ sections:
             - {desc: "4 bar manométricos", call: "presion_absoluta(4)", expected: 5.013}
             - {desc: "0 bar manométricos = atmosférica", call: "presion_absoluta(0)", expected: 1.013}
 
-  - id: m3s2
+  - id: m4s2
     title: "Presión, fuerza y cilindros"
     hours: 2
     kind: lesson
@@ -315,7 +315,7 @@ sections:
           hints:
             wrong_result: "El área es π·(D² − d²)/4."
 
-  - id: m3s3
+  - id: m4s3
     title: "Consumo de aire y elección del cilindro"
     hours: 1
     kind: lesson
@@ -433,7 +433,7 @@ sections:
             - {desc: "100 N a 4 bar → Ø20", call: "elegir_diametro(100, 4, [10, 16, 20, 25])", expected: 20}
             - {desc: "Ninguno llega → None", call: "elegir_diametro(1000, 3, [10, 16])", expected: null}
 
-  - id: m3s4
+  - id: m4s4
     title: "Proyecto corto: elevador neumático con mando directo"
     hours: 3
     kind: challenge
@@ -493,7 +493,7 @@ sections:
       2. **Montaje (con el profesor)**: circuito neumático + mando eléctrico directo con pulsador, fuente de 12 V y diodo. Comprobad la polaridad del diodo antes de conectar.
       3. **Pruebas y ficha técnica**: masas reales que sube, presión mínima necesaria, esquema neumático y eléctrico.
     evaluation:
-      intro: "Proyecto corto de la misión 3. Necesitas un 75 %."
+      intro: "Proyecto corto de la misión 4. Necesitas un 75 %."
       items:
         - id: c1
           type: code

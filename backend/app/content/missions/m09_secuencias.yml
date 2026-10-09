@@ -1,10 +1,10 @@
-id: m8
-number: 8
-trimestre: 2
+id: m9
+number: 9
+trimestre: 3
 icon: "🔁"
 title: "Secuencias de varios cilindros"
 subtitle: "Notación de movimientos, diagrama espacio-fase y secuencias por sensores"
-weeks: [22, 23, 24]
+weeks: [25, 26, 27]
 hours: 9
 objectives:
   - Describir el funcionamiento de una máquina con la notación de movimientos (A+ B+ B- A-) y el diagrama espacio-fase.
@@ -18,17 +18,17 @@ criteria:
   - Representa y programa secuencias de funcionamiento de sistemas automáticos con varios actuadores.
   - Evalúa el rendimiento de un sistema automático calculando su tiempo de ciclo y su producción.
 schedule:
-  - {week: 22, session: 1, title: "Notación A+ B+ … y diagrama espacio-fase", section: m8s1}
-  - {week: 22, session: 2, title: "Secuencias válidas e imposibles", section: m8s1}
-  - {week: 22, session: 3, title: "Ejecutar secuencias por tiempo", section: m8s2}
-  - {week: 23, session: 1, title: "Dos cilindros con el diccionario de cilindros", section: m8s2}
-  - {week: 23, session: 2, title: "Secuencias por sensores: la máquina de pasos", section: m8s3}
-  - {week: 23, session: 3, title: "Secuencia por sensores en el banco", section: m8s3}
-  - {week: 24, session: 1, title: "Proyecto corto: estampadora A+ B+ B- A- (montaje)", section: m8s4}
-  - {week: 24, session: 2, title: "Proyecto corto: programa por sensores", section: m8s4}
-  - {week: 24, session: 3, title: "Proyecto corto: tiempo de ciclo, producción y presentación", section: m8s4}
+  - {week: 25, session: 1, title: "Notación A+ B+ … y diagrama espacio-fase", section: m9s1}
+  - {week: 25, session: 2, title: "Secuencias válidas e imposibles", section: m9s1}
+  - {week: 25, session: 3, title: "Ejecutar secuencias por tiempo", section: m9s2}
+  - {week: 26, session: 1, title: "Dos cilindros con el diccionario de cilindros", section: m9s2}
+  - {week: 26, session: 2, title: "Secuencias por sensores: la máquina de pasos", section: m9s3}
+  - {week: 26, session: 3, title: "Secuencia por sensores en el banco", section: m9s3}
+  - {week: 27, session: 1, title: "Proyecto corto: estampadora A+ B+ B- A- (montaje)", section: m9s4}
+  - {week: 27, session: 2, title: "Proyecto corto: programa por sensores", section: m9s4}
+  - {week: 27, session: 3, title: "Proyecto corto: tiempo de ciclo, producción y presentación", section: m9s4}
 sections:
-  - id: m8s1
+  - id: m9s1
     title: "Notación de movimientos y diagrama espacio-fase"
     hours: 2
     kind: lesson
@@ -157,7 +157,7 @@ sections:
           hints:
             wrong_result: "Lleva un diccionario con la última posición de cada cilindro (por defecto \"-\", dentro). Si el movimiento coincide con la posición actual, no es válida. Al final, todos deben estar en \"-\"."
 
-  - id: m8s2
+  - id: m9s2
     title: "Ejecutar secuencias por tiempo"
     hours: 2
     kind: lesson
@@ -184,7 +184,7 @@ sections:
       ```
 
       ¡Cambiar el funcionamiento de la máquina es tan fácil como cambiar el texto de la secuencia!
-      Pero, igual que en la misión 6, temporizar es "a ciegas": en la sección siguiente lo haremos por
+      Pero, igual que en la misión 7, temporizar es "a ciegas": en la sección siguiente lo haremos por
       sensores.
 
       > Con 4 electroválvulas tenemos dos cilindros de doble efecto. Si un cilindro es de **simple efecto**,
@@ -282,7 +282,7 @@ sections:
               check: "_h == ['A+', 'B+', 'B-', 'A-']"
             - {desc: "Espera t después de cada movimiento (4 × 0,5 s)", check: "abs(sum(_clock.sleeps) - 2.0) < 0.01"}
 
-  - id: m8s3
+  - id: m9s3
     title: "Secuencias por sensores: la máquina de pasos"
     hours: 2
     kind: lesson
@@ -390,9 +390,9 @@ sections:
     practice: |
       ### Práctica en el taller
 
-      1. Monta los 4 finales de carrera y comprueba cada uno con el monitor de la misión 7.
+      1. Monta los 4 finales de carrera y comprueba cada uno con el monitor de la misión 8.
       2. Ejecuta la estampadora por sensores. Baja la presión a 2 bar: ¿sigue funcionando bien? (Con tiempos fijos, fallaría.)
-      3. Añade un timeout por paso usando lo aprendido en la misión 7.
+      3. Añade un timeout por paso usando lo aprendido en la misión 8.
     evaluation:
       intro: "Necesitas un 80 %."
       items:
@@ -459,7 +459,7 @@ sections:
           hints:
             wrong_result: "Desempaqueta el paso actual, calcula su sensor con sensor_de y usa sensores.get(nombre). Para volver a 0 usa el resto: (paso + 1) % len(pasos)."
 
-  - id: m8s4
+  - id: m9s4
     title: "Proyecto corto: estampadora A+ B+ B- A-"
     hours: 3
     kind: challenge
@@ -543,7 +543,7 @@ sections:
       2. **Programa** por sensores con ciclo único (MARCHA) y continuo (MARCHA mantenido); PARO al final del ciclo.
       3. **Producción**: medid los tiempos a 3 y 4 bar, calculad las piezas/hora y presentad los resultados.
     evaluation:
-      intro: "Proyecto corto de la misión 8. Necesitas un 80 %."
+      intro: "Proyecto corto de la misión 9. Necesitas un 80 %."
       items:
         - id: c1
           type: code

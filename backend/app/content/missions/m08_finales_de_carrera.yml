@@ -1,10 +1,10 @@
-id: m7
-number: 7
+id: m8
+number: 8
 trimestre: 2
 icon: "🎯"
 title: "Finales de carrera: ciclos por posición"
 subtitle: "Sensores de posición, espera con tiempo límite y diagnóstico de atascos y fugas"
-weeks: [19, 20, 21]
+weeks: [22, 23, 24]
 hours: 9
 objectives:
   - Conectar y leer finales de carrera para conocer la posición real de los cilindros.
@@ -17,17 +17,17 @@ criteria:
   - Integra sensores en sistemas automáticos para controlar su funcionamiento en lazo cerrado.
   - Diagnostica fallos de funcionamiento a partir de la información de los sensores.
 schedule:
-  - {week: 19, session: 1, title: "Finales de carrera: tipos, contactos y montaje", section: m7s1}
-  - {week: 19, session: 2, title: "Conexión a la placa y lectura de la posición", section: m7s1}
-  - {week: 19, session: 3, title: "Esperar a un sensor con tiempo límite", section: m7s2}
-  - {week: 20, session: 1, title: "Ciclo A+ A- por sensores", section: m7s2}
-  - {week: 20, session: 2, title: "Vigilancia de tiempos: atascos y fugas", section: m7s3}
-  - {week: 20, session: 3, title: "Estado seguro ante una alarma", section: m7s3}
-  - {week: 21, session: 1, title: "Proyecto corto: prensa con retorno automático (montaje)", section: m7s4}
-  - {week: 21, session: 2, title: "Proyecto corto: programa con alarmas", section: m7s4}
-  - {week: 21, session: 3, title: "Proyecto corto: pruebas de fallo y presentación", section: m7s4}
+  - {week: 22, session: 1, title: "Finales de carrera: tipos, contactos y montaje", section: m8s1}
+  - {week: 22, session: 2, title: "Conexión a la placa y lectura de la posición", section: m8s1}
+  - {week: 22, session: 3, title: "Esperar a un sensor con tiempo límite", section: m8s2}
+  - {week: 23, session: 1, title: "Ciclo A+ A- por sensores", section: m8s2}
+  - {week: 23, session: 2, title: "Vigilancia de tiempos: atascos y fugas", section: m8s3}
+  - {week: 23, session: 3, title: "Estado seguro ante una alarma", section: m8s3}
+  - {week: 24, session: 1, title: "Proyecto corto: prensa con retorno automático (montaje)", section: m8s4}
+  - {week: 24, session: 2, title: "Proyecto corto: programa con alarmas", section: m8s4}
+  - {week: 24, session: 3, title: "Proyecto corto: pruebas de fallo y presentación", section: m8s4}
 sections:
-  - id: m7s1
+  - id: m8s1
     title: "Finales de carrera"
     hours: 2
     kind: lesson
@@ -75,7 +75,7 @@ sections:
       Montaje: el rodillo debe pisarse **antes** del tope mecánico del cilindro y sin forzar la palanca.
     examples:
       - title: "Monitor de posición"
-        explanation: "Muestra la posición del cilindro A cada vez que cambia. Muévelo con el mando manual de la misión 6 o a mano (con el aire cortado)."
+        explanation: "Muestra la posición del cilindro A cada vez que cambia. Muévelo con el mando manual de la misión 7 o a mano (con el aire cortado)."
         pico_w: |
           from machine import Pin
           import time
@@ -175,7 +175,7 @@ sections:
             - {desc: "Ninguno → en movimiento", call: "posicion(1, 1)", expected: "en movimiento"}
             - {desc: "Los dos → error", call: "posicion(0, 0)", expected: "error"}
 
-  - id: m7s2
+  - id: m8s2
     title: "Esperar a un sensor con tiempo límite"
     hours: 2
     kind: lesson
@@ -336,7 +336,7 @@ sections:
           hints:
             wrong_result: "Guarda inicio = time.ticks_ms() y repite mientras time.ticks_diff(time.ticks_ms(), inicio) < timeout_ms. Si el sensor vale 0, return True; si no, time.sleep_ms(paso_ms). Al salir del bucle, return False."
 
-  - id: m7s3
+  - id: m8s3
     title: "Vigilancia de tiempos: atascos y fugas"
     hours: 2
     kind: lesson
@@ -460,7 +460,7 @@ sections:
           hints:
             wrong_result: "Comprueba primero None con «is None»; después compara con t_normal * (1 + margen)."
 
-  - id: m7s4
+  - id: m8s4
     title: "Proyecto corto: prensa con retorno automático"
     hours: 3
     kind: challenge
@@ -533,7 +533,7 @@ sections:
       2. **Programa** con las tres salidas posibles.
       3. **Pruebas de fallo**: provoca cada alarma de forma segura (a 2 bar) y documenta el comportamiento.
     evaluation:
-      intro: "Proyecto corto de la misión 7. Necesitas un 80 %."
+      intro: "Proyecto corto de la misión 8. Necesitas un 80 %."
       items:
         - id: c1
           type: code

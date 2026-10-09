@@ -61,8 +61,8 @@ test('registro y login', async () => {
 
 test('bloqueos y sin fugas de respuestas', async () => {
   const ms = (await call('GET', '/api/missions', { token: ana })).data
-  assert.equal(ms.length, 11)
-  assert.ok(!ms.some((m) => m.extra) && ms[10].trimestre === 3)
+  assert.equal(ms.length, 12)
+  assert.ok(!ms.some((m) => m.extra) && ms[11].trimestre === 3 && ms[2].id === 'm3')
   assert.ok(ms[0].state.unlocked && !ms[1].state.unlocked)
   assert.equal((await call('GET', '/api/sections/m1s2', { token: ana })).status, 403)
   const r = await call('GET', '/api/sections/m1s1', { token: ana })
@@ -131,27 +131,27 @@ test('profesor: panel, alertas de similitud, notas y CSV', async () => {
   const anaRow = ov.students.find((s) => s.username === 'ana')
   assert.ok(anaRow.missions[0].completed)
 
-  assert.ok((await call('POST', '/api/teacher/students/ana/unlock', { token: profe, body: { mission_id: 'm7' } })).data.ok)
-  assert.ok((await call('GET', '/api/missions', { token: ana })).data[6].state.unlocked)
-  assert.ok((await call('PUT', '/api/teacher/students/ana/grade', { token: profe, body: { mission_id: 'm7', grade: 9.5, notes: 'Prensa con finales de carrera excelente' } })).data.ok)
+  assert.ok((await call('POST', '/api/teacher/students/ana/unlock', { token: profe, body: { mission_id: 'm3' } })).data.ok)
+  assert.ok((await call('GET', '/api/missions', { token: ana })).data[2].state.unlocked)
+  assert.ok((await call('PUT', '/api/teacher/students/ana/grade', { token: profe, body: { mission_id: 'm3', grade: 9.5, notes: 'Control de acceso NFC excelente' } })).data.ok)
 
   const detail = (await call('GET', '/api/teacher/students/ana', { token: profe })).data
   assert.ok(detail.submissions.length >= 4)
-  assert.equal(detail.missions[6].grade, 9.5)
+  assert.equal(detail.missions[2].grade, 9.5)
 
   const csv = await call('GET', '/api/teacher/export.csv', { token: profe })
   assert.equal(csv.status, 200)
   assert.ok(csv.text.includes('ana') && csv.text.includes('9,5'))
 
   const stats = (await call('GET', '/api/teacher/stats', { token: profe })).data
-  assert.equal(stats.length, 44)
+  assert.equal(stats.length, 48)
   assert.ok(stats[0].items[0].n >= 1)
 
-  const sol = (await call('GET', '/api/teacher/sections/m7s1/solutions', { token: profe })).data
+  const sol = (await call('GET', '/api/teacher/sections/m3s1/solutions', { token: profe })).data
   assert.ok(sol.section.evaluation.items.some((i) => i.solution))
 
   // vista previa del profesor: no se guarda
-  const pv = await call('POST', '/api/sections/m7s4/submit', { token: profe, body: await correctPayload('m7s4') })
+  const pv = await call('POST', '/api/sections/m3s4/submit', { token: profe, body: await correctPayload('m3s4') })
   assert.ok(pv.data.preview && pv.data.passed)
 
   const dismiss = await call('POST', `/api/teacher/flags/${flags[0].id}/dismiss`, { token: profe })
@@ -160,9 +160,9 @@ test('profesor: panel, alertas de similitud, notas y CSV', async () => {
   assert.equal((await call('GET', '/api/teacher/overview', { token: profe })).data.totals.students, 1)
 })
 
-test('calendario de 33 semanas', async () => {
+test('calendario de 36 semanas', async () => {
   const cal = (await call('GET', '/api/calendar', { token: ana })).data
-  assert.equal(cal.weeks.length, 33)
+  assert.equal(cal.weeks.length, 36)
   assert.ok(cal.weeks.every((w) => w.sessions.length === 3))
   assert.ok(cal.weeks.every((w) => !w.extra))
 })

@@ -2,7 +2,7 @@
   <header v-if="session.token" class="topbar">
     <div class="container row">
       <router-link :to="isTeacher ? '/profesor' : '/'" class="brand">
-        <span class="brand-main">💨 NeumaLab <span class="lvl">4º ESO</span></span>
+        <span class="brand-main">⚙️ TEC_IVJP_lab27 <span class="lvl">4º ESO</span></span>
         <span class="school">IES Valle del Jerte (Plasencia) <span class="author">Autor: José I. Sánchez Castaño</span></span>
       </router-link>
       <nav class="nav">
@@ -26,7 +26,7 @@
     <router-view />
   </main>
   <footer class="container footer muted small">
-    IES Valle del Jerte (Plasencia) · Autor: José I. Sánchez Castaño · NeumaLab · Programación MicroPython y neumática con electroválvulas
+    IES Valle del Jerte (Plasencia) · Autor: José I. Sánchez Castaño · TEC_IVJP_lab27 · Programación MicroPython, electrónica y neumática
   </footer>
 </template>
 

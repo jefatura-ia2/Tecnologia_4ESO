@@ -74,7 +74,7 @@ def test_register_and_login(client):
 def test_missions_locked_and_no_answers_leak(client):
     tok = client.post("/api/auth/login", json={"username": "ana", "password": "secreto1"}).json()["token"]
     ms = client.get("/api/missions", headers=auth(tok)).json()
-    assert len(ms) == 11
+    assert len(ms) == 12
     assert ms[0]["state"]["unlocked"] and not ms[1]["state"]["unlocked"]
     assert ms[0]["sections"][0]["state"]["unlocked"] and not ms[0]["sections"][1]["state"]["unlocked"]
     assert client.get("/api/sections/m1s2", headers=auth(tok)).status_code == 403
@@ -175,5 +175,5 @@ def test_teacher_dashboard(client):
 def test_calendar(client):
     tok = client.post("/api/auth/login", json={"username": "ana", "password": "secreto1"}).json()["token"]
     cal = client.get("/api/calendar", headers=auth(tok)).json()
-    assert len(cal["weeks"]) == 33
+    assert len(cal["weeks"]) == 36
     assert all(len(w["sessions"]) == 3 for w in cal["weeks"])

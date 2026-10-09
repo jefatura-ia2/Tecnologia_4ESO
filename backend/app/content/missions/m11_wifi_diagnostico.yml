@@ -1,10 +1,10 @@
-id: m10
-number: 10
+id: m11
+number: 11
 trimestre: 3
 icon: "📡"
 title: "Control WiFi, registro y mantenimiento"
 subtitle: "Servidor web en la placa, panel de control seguro, registro de ciclos y diagnóstico"
-weeks: [28, 29, 30]
+weeks: [31, 32, 33]
 hours: 9
 objectives:
   - Conectar la placa a la WiFi y servir una página web y datos JSON.
@@ -19,17 +19,17 @@ criteria:
   - Integra comunicaciones en sistemas automáticos para su supervisión y control remoto de forma segura.
   - Analiza datos de funcionamiento para el mantenimiento de máquinas.
 schedule:
-  - {week: 28, session: 1, title: "La placa en la red: WiFi e IP", section: m10s1}
-  - {week: 28, session: 2, title: "HTTP: peticiones, rutas y respuestas", section: m10s1}
-  - {week: 28, session: 3, title: "Panel de control: rutas /estado, /ciclo y /paro", section: m10s2}
-  - {week: 29, session: 1, title: "La seguridad manda: lo remoto nunca anula lo local", section: m10s2}
-  - {week: 29, session: 2, title: "Registro de ciclos en un archivo CSV", section: m10s3}
-  - {week: 29, session: 3, title: "Mantenimiento: contadores y ciclos lentos", section: m10s3}
-  - {week: 30, session: 1, title: "Proyecto corto: panel de la estampadora (servidor)", section: m10s4}
-  - {week: 30, session: 2, title: "Proyecto corto: página de estadísticas", section: m10s4}
-  - {week: 30, session: 3, title: "Proyecto corto: pruebas y presentación", section: m10s4}
+  - {week: 31, session: 1, title: "La placa en la red: WiFi e IP", section: m11s1}
+  - {week: 31, session: 2, title: "HTTP: peticiones, rutas y respuestas", section: m11s1}
+  - {week: 31, session: 3, title: "Panel de control: rutas /estado, /ciclo y /paro", section: m11s2}
+  - {week: 32, session: 1, title: "La seguridad manda: lo remoto nunca anula lo local", section: m11s2}
+  - {week: 32, session: 2, title: "Registro de ciclos en un archivo CSV", section: m11s3}
+  - {week: 32, session: 3, title: "Mantenimiento: contadores y ciclos lentos", section: m11s3}
+  - {week: 33, session: 1, title: "Proyecto corto: panel de la estampadora (servidor)", section: m11s4}
+  - {week: 33, session: 2, title: "Proyecto corto: página de estadísticas", section: m11s4}
+  - {week: 33, session: 3, title: "Proyecto corto: pruebas y presentación", section: m11s4}
 sections:
-  - id: m10s1
+  - id: m11s1
     title: "WiFi y servidor web en la placa"
     hours: 2
     kind: lesson
@@ -83,7 +83,7 @@ sections:
               cli, _ = s.accept()
               pet = cli.recv(1024).decode()
               ruta = pet.split()[1] if len(pet.split()) > 1 else "/"
-              cuerpo = json.dumps(estado) if ruta == "/estado" else "NeumaLab"
+              cuerpo = json.dumps(estado) if ruta == "/estado" else "TEC_IVJP_lab27"
               tipo = "application/json" if ruta == "/estado" else "text/plain"
               cli.send("HTTP/1.1 200 OK\r\nContent-Type: " + tipo + "\r\n\r\n" + cuerpo)
               cli.close()
@@ -104,7 +104,7 @@ sections:
               cli, _ = s.accept()
               pet = cli.recv(1024).decode()
               ruta = pet.split()[1] if len(pet.split()) > 1 else "/"
-              cuerpo = json.dumps(estado) if ruta == "/estado" else "NeumaLab"
+              cuerpo = json.dumps(estado) if ruta == "/estado" else "TEC_IVJP_lab27"
               tipo = "application/json" if ruta == "/estado" else "text/plain"
               cli.send("HTTP/1.1 200 OK\r\nContent-Type: " + tipo + "\r\n\r\n" + cuerpo)
               cli.close()
@@ -159,7 +159,7 @@ sections:
             - {desc: "GET /estado", call: "extraer_ruta('GET /estado HTTP/1.1\\r\\nHost: x\\r\\n\\r\\n')", expected: "/estado"}
             - {desc: "Vacía → /", call: "extraer_ruta('')", expected: "/"}
 
-  - id: m10s2
+  - id: m11s2
     title: "Panel de control seguro"
     hours: 2
     kind: lesson
@@ -193,7 +193,7 @@ sections:
           import socket, json
           # ... conexión WiFi como en la sección anterior ...
           HTML = """<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'></head>
-          <body style='font-family:sans-serif'><h1>Panel NeumaLab</h1><pre id='e'></pre>
+          <body style='font-family:sans-serif'><h1>Panel TEC_IVJP_lab27</h1><pre id='e'></pre>
           <button onclick="fetch('/ciclo')">CICLO</button> <button onclick="fetch('/paro')">PARO</button>
           <script>setInterval(async()=>{e.textContent=await (await fetch('/estado')).text()},1000)</script>
           </body></html>"""
@@ -218,7 +218,7 @@ sections:
           import socket, json
           # ... conexión WiFi como en la sección anterior ...
           HTML = """<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'></head>
-          <body style='font-family:sans-serif'><h1>Panel NeumaLab</h1><pre id='e'></pre>
+          <body style='font-family:sans-serif'><h1>Panel TEC_IVJP_lab27</h1><pre id='e'></pre>
           <button onclick="fetch('/ciclo')">CICLO</button> <button onclick="fetch('/paro')">PARO</button>
           <script>setInterval(async()=>{e.textContent=await (await fetch('/estado')).text()},1000)</script>
           </body></html>"""
@@ -287,7 +287,7 @@ sections:
             - {desc: "Paro siempre", call: "atender('/paro', {'fase': 'BAJANDO', 'emergencia': True})", expected: "PARO"}
             - {desc: "Estado y ruta desconocida", call: "(atender('/estado', {'fase': 'REPOSO', 'emergencia': False}), atender('/abrir', {'fase': 'REPOSO', 'emergencia': False}))", expected: ["ESTADO", "NO_EXISTE"]}
 
-  - id: m10s3
+  - id: m11s3
     title: "Registro de ciclos y mantenimiento"
     hours: 2
     kind: lesson
@@ -430,14 +430,14 @@ sections:
             - {desc: "12300 ciclos, revisión cada 5000", call: "faltan_para_revision(12300, 5000)", expected: 2700}
             - {desc: "Justo tras una revisión", call: "faltan_para_revision(10000, 5000)", expected: 5000}
 
-  - id: m10s4
+  - id: m11s4
     title: "Proyecto corto: panel de la estampadora"
     hours: 3
     kind: challenge
     theory: |
       ## El encargo
 
-      Añadir a la estampadora (misión 8) un **panel web** que muestre en el móvil:
+      Añadir a la estampadora (misión 9) un **panel web** que muestre en el móvil:
 
       - Estado (fase, emergencia) y botones CICLO / PARO (con las reglas de seguridad).
       - **Estadísticas** de los tiempos de ciclo registrados: número de ciclos, media, máximo y número
@@ -491,7 +491,7 @@ sections:
       2. **Página**: botones, estado y estadísticas con refresco automático.
       3. **Pruebas y presentación**: demostración desde el móvil, incluida la denegación con emergencia.
     evaluation:
-      intro: "Proyecto corto de la misión 10. Necesitas un 80 %."
+      intro: "Proyecto corto de la misión 11. Necesitas un 80 %."
       items:
         - id: c1
           type: code
