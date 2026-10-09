@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400" role="img" aria-label="Diagrama de tiempos del mando bimanual con ventana de 0,5 s"><title>Diagrama de tiempos del mando bimanual con ventana de 0,5 s</title><rect width="100%" height="100%" fill="#ffffff"/><text x="295" y="34" font-size="14" fill="#16a34a" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Caso correcto</text>
+<text x="670" y="34" font-size="14" fill="#dc2626" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Caso incorrecto</text>
+<line x1="450" y1="50" x2="450" y2="340" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="5,5" />
+<text x="130" y="104" font-size="13" fill="#2563eb" text-anchor="end" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >P1</text>
+<path d="M150.0,110.0 L210.0,110.0 L210.0,80.0 L414.0,80.0 L414.0,110.0 L440.0,110.0" stroke="#2563eb" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<text x="130" y="174" font-size="13" fill="#2563eb" text-anchor="end" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >P2</text>
+<path d="M150.0,180.0 L246.0,180.0 L246.0,150.0 L414.0,150.0 L414.0,180.0 L440.0,180.0" stroke="#2563eb" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<text x="130" y="254" font-size="13" fill="#16a34a" text-anchor="end" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Prensa baja</text>
+<path d="M150.0,260.0 L246.0,260.0 L246.0,230.0 L414.0,230.0 L414.0,260.0 L440.0,260.0" stroke="#16a34a" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<line x1="210.0" y1="196" x2="246.0" y2="196" stroke="#ea580c" stroke-width="2" stroke-linecap="round"  />
+<path d="M246.0,196.0 L237.0,200.3 L237.0,191.7 Z" fill="#ea580c" stroke="#ea580c" stroke-width="1"/>
+<path d="M210.0,196.0 L219.0,191.7 L219.0,200.3 Z" fill="#ea580c" stroke="#ea580c" stroke-width="1"/>
+<text x="228.0" y="214" font-size="12" fill="#ea580c" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >0,3 s ✓</text>
+<path d="M480.0,110.0 L508.0,110.0 L508.0,80.0 L795.0,80.0 L795.0,110.0 L860.0,110.0" stroke="#2563eb" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<path d="M480.0,180.0 L592.0,180.0 L592.0,150.0 L795.0,150.0 L795.0,180.0 L860.0,180.0" stroke="#2563eb" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<path d="M480.0,260.0 L860.0,260.0" stroke="#dc2626" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<line x1="508.0" y1="196" x2="592.0" y2="196" stroke="#dc2626" stroke-width="2" stroke-linecap="round"  />
+<path d="M592.0,196.0 L583.0,200.3 L583.0,191.7 Z" fill="#dc2626" stroke="#dc2626" stroke-width="1"/>
+<path d="M508.0,196.0 L517.0,191.7 L517.0,200.3 Z" fill="#dc2626" stroke="#dc2626" stroke-width="1"/>
+<text x="550.0" y="214" font-size="12" fill="#dc2626" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >1,2 s ✗</text>
+<text x="680" y="252" font-size="12" fill="#dc2626" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >no baja: fuera de la ventana</text>
+<text x="450.0" y="380" font-size="13" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >La prensa solo baja si los dos pulsadores se pulsan con menos de 0,5 s de diferencia y se mantienen pulsados.</text></svg>

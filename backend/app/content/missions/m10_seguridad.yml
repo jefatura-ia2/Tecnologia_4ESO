@@ -51,6 +51,9 @@ sections:
       Si se rompe un cable, la máquina **se para**: falla hacia el lado seguro. Con un contacto NA, un
       cable roto haría que la seta **no funcionara** sin que nadie lo notara.
 
+      ![Seta de emergencia con contacto NC en reposo, pulsada y con el cable cortado](/img/seta_nc.svg)
+      *Seguridad positiva: pulsar la seta o cortar el cable dan la misma lectura (1).*
+
       Pin del curso: **GP16** (Pico W) / **GPIO 16** (ESP32-S3).
 
       ## ¿Qué es el "estado seguro"?
@@ -342,6 +345,9 @@ sections:
       3. Para empezar un nuevo ciclo hay que **soltar los dos** primero (no vale dejar uno pulsado con cinta).
 
       Pines: P1 = GP14/GPIO 14 y P2 = GP15/GPIO 15.
+
+      ![Diagrama de tiempos del mando bimanual](/img/bimanual.svg)
+      *Ventana de 0,5 s: a la izquierda la prensa baja; a la derecha no.*
 
       ## Modos de marcha
 

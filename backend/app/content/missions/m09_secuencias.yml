@@ -48,13 +48,8 @@ sections:
 
       Una fila por cilindro; en horizontal, las **fases** (pasos); en vertical, la posición (0 dentro, 1 fuera):
 
-      ```
-            fase: 1    2    3    4    1
-      A   1      ____________
-          0  ___/            \_______
-      B   1           ____
-          0  ________/    \__________
-      ```
+      ![Diagrama espacio-fase de A+ B+ B- A-](/img/espacio_fase.svg)
+      *Diagrama espacio-fase de la estampadora A+ B+ B− A−.*
 
       ## ¿Es válida la secuencia?
 
@@ -468,6 +463,9 @@ sections:
 
       Montar y programar la estampadora por sensores (A sujeta, B marca la pieza) y calcular su
       **producción**.
+
+      ![Estampadora con el cilindro A sujetando la pieza y el cilindro B marcándola](/img/estampadora.svg)
+      *La estampadora en la fase 2: A sujeta y B marca.*
 
       ## Tiempo de ciclo y producción
 

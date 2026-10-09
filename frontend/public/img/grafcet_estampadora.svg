@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" width="900" height="620" role="img" aria-label="GRAFCET de la estampadora A+ B+ B- A-"><title>GRAFCET de la estampadora A+ B+ B- A-</title><rect width="100%" height="100%" fill="#ffffff"/><rect x="300" y="40" width="56" height="56" rx="0" fill="white" stroke="#1f2937" stroke-width="2.5" />
+<rect x="306" y="46" width="44" height="44" rx="0" fill="none" stroke="#1f2937" stroke-width="2" />
+<text x="328.0" y="75.0" font-size="20" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >0</text>
+<text x="376" y="74.0" font-size="13" fill="#6b7280" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >reposo</text>
+<line x1="328.0" y1="96" x2="328.0" y2="140" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<line x1="314.0" y1="118.0" x2="342.0" y2="118.0" stroke="#1f2937" stroke-width="3.5" stroke-linecap="round"  />
+<text x="304.0" y="123.0" font-size="14" fill="#0f766e" text-anchor="end" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >MARCHA · a0 · b0</text>
+<rect x="300" y="140" width="56" height="56" rx="0" fill="white" stroke="#1f2937" stroke-width="2.5" />
+<text x="328.0" y="175.0" font-size="20" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >1</text>
+<line x1="356" y1="168.0" x2="396" y2="168.0" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<rect x="396" y="148.0" width="150" height="40" rx="0" fill="#fff7ed" stroke="#ea580c" stroke-width="2" />
+<text x="471" y="174.0" font-size="15" fill="#ea580c" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >A+  (EV1)</text>
+<line x1="328.0" y1="196" x2="328.0" y2="240" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<line x1="314.0" y1="218.0" x2="342.0" y2="218.0" stroke="#1f2937" stroke-width="3.5" stroke-linecap="round"  />
+<text x="304.0" y="223.0" font-size="14" fill="#0f766e" text-anchor="end" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >a1</text>
+<rect x="300" y="240" width="56" height="56" rx="0" fill="white" stroke="#1f2937" stroke-width="2.5" />
+<text x="328.0" y="275.0" font-size="20" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >2</text>
+<line x1="356" y1="268.0" x2="396" y2="268.0" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<rect x="396" y="248.0" width="150" height="40" rx="0" fill="#fff7ed" stroke="#ea580c" stroke-width="2" />
+<text x="471" y="274.0" font-size="15" fill="#ea580c" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >B+  (EV3)</text>
+<line x1="328.0" y1="296" x2="328.0" y2="340" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<line x1="314.0" y1="318.0" x2="342.0" y2="318.0" stroke="#1f2937" stroke-width="3.5" stroke-linecap="round"  />
+<text x="304.0" y="323.0" font-size="14" fill="#0f766e" text-anchor="end" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >b1</text>
+<rect x="300" y="340" width="56" height="56" rx="0" fill="white" stroke="#1f2937" stroke-width="2.5" />
+<text x="328.0" y="375.0" font-size="20" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >3</text>
+<line x1="356" y1="368.0" x2="396" y2="368.0" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<rect x="396" y="348.0" width="150" height="40" rx="0" fill="#fff7ed" stroke="#ea580c" stroke-width="2" />
+<text x="471" y="374.0" font-size="15" fill="#ea580c" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >B−  (EV4)</text>
+<line x1="328.0" y1="396" x2="328.0" y2="440" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<line x1="314.0" y1="418.0" x2="342.0" y2="418.0" stroke="#1f2937" stroke-width="3.5" stroke-linecap="round"  />
+<text x="304.0" y="423.0" font-size="14" fill="#0f766e" text-anchor="end" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >b0</text>
+<rect x="300" y="440" width="56" height="56" rx="0" fill="white" stroke="#1f2937" stroke-width="2.5" />
+<text x="328.0" y="475.0" font-size="20" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >4</text>
+<line x1="356" y1="468.0" x2="396" y2="468.0" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<rect x="396" y="448.0" width="150" height="40" rx="0" fill="#fff7ed" stroke="#ea580c" stroke-width="2" />
+<text x="471" y="474.0" font-size="15" fill="#ea580c" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >A−  (EV2)</text>
+<line x1="328.0" y1="496" x2="328.0" y2="528.0" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<line x1="314.0" y1="518.0" x2="342.0" y2="518.0" stroke="#1f2937" stroke-width="3.5" stroke-linecap="round"  />
+<text x="304.0" y="523.0" font-size="14" fill="#0f766e" text-anchor="end" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >a0</text>
+<path d="M328.0,528.0 L328.0,540.0 L210.0,540.0 L210.0,26.0 L328.0,26.0 L328.0,40.0" stroke="#1f2937" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<path d="M210,276.0 l-7,14 h14 z" stroke="#1f2937" stroke-width="1" fill="#1f2937" stroke-linejoin="round" stroke-linecap="round"  />
+<rect x="600" y="60" width="260" height="168" rx="8" fill="#f8fafc" stroke="#0f766e" stroke-width="1.5" />
+<text x="612" y="82" font-size="14" fill="#0f766e" text-anchor="start" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Cómo se lee</text>
+<text x="612" y="104" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Etapa = situación estable</text>
+<text x="612" y="123" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Doble cuadrado = etapa inicial</text>
+<text x="612" y="142" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Rectángulo = acción (salida)</text>
+<text x="612" y="161" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Rayita = transición (condición)</text>
+<text x="612" y="180" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Se pasa de etapa cuando la</text>
+<text x="612" y="199" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >condición se cumple</text>
+<text x="450.0" y="600" font-size="13" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Etapa 0 → (MARCHA con A y B dentro) → 1 A+ → (a1) → 2 B+ → (b1) → 3 B− → (b0) → 4 A− → (a0) → vuelta a 0.</text></svg>

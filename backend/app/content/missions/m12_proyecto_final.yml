@@ -44,21 +44,8 @@ sections:
       - **Transiciones** (rayita horizontal entre etapas): la **condición** para pasar a la siguiente
         (`MARCHA`, `a1`, `b0`…).
 
-      ```
-      ╔═══╗
-      ║ 0 ║  (reposo)
-      ╚═══╝
-        ┼  MARCHA · a0 · b0
-      ┌───┐
-      │ 1 │──[ A+ ]
-      └───┘
-        ┼  a1
-      ┌───┐
-      │ 2 │──[ B+ ]
-      └───┘
-        ┼  b1
-      …
-      ```
+      ![GRAFCET de la estampadora con etapas 0 a 4](/img/grafcet_estampadora.svg)
+      *GRAFCET completo de la estampadora A+ B+ B− A−.*
 
       ## Del GRAFCET al código
 

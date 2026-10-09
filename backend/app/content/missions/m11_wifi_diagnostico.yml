@@ -182,6 +182,9 @@ sections:
       - Quien manda a distancia **no ve** si hay alguien junto a la máquina: en una máquina real, el mando
         remoto solo se permite con resguardos cerrados o en zonas sin personas.
 
+      ![Móvil, WiFi, placa y máquina: la seta local manda siempre](/img/panel_wifi.svg)
+      *El panel remoto pide; la placa decide según la seguridad local.*
+
       ## Seguridad informática básica
 
       Cualquiera conectado a la misma red puede abrir esas rutas. En el aula basta con una red controlada;

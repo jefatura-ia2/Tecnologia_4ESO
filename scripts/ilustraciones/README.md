@@ -10,3 +10,11 @@ python3 fig_neuma.py      # simple efecto, doble efecto con dos 3/2, finales de 
 ```
 
 En las lecciones (YAML) se insertan con Markdown: `![texto alternativo](/img/nombre.svg)` y debajo una línea `*pie de figura*`.
+
+Misiones 9-12 (espacio-fase, estampadora, seta NC, bimanual, panel WiFi y GRAFCET):
+
+```bash
+python3 fig_avanzado.py
+```
+
+`lib.py` y `neuma_simbolos.py` contienen las piezas reutilizables (pantalla de osciloscopio, Pico W, módulo MOSFET, válvulas 3/2, cilindros…).

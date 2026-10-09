@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="Panel de control por WiFi: el móvil manda, la seguridad local decide"><title>Panel de control por WiFi: el móvil manda, la seguridad local decide</title><rect width="100%" height="100%" fill="#ffffff"/><rect x="50" y="90" width="110" height="190" rx="18" fill="#111827" stroke="#000" stroke-width="2" />
+<rect x="62" y="112" width="86" height="140" rx="4" fill="#f8fafc" stroke="none" stroke-width="0" />
+<text x="105" y="132" font-size="11" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Panel</text>
+<rect x="72" y="142" width="66" height="24" rx="5" fill="#16a34a" stroke="none" stroke-width="0" />
+<text x="105" y="158" font-size="11" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >CICLO</text>
+<rect x="72" y="176" width="66" height="24" rx="5" fill="#dc2626" stroke="none" stroke-width="0" />
+<text x="105" y="192" font-size="11" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >PARO</text>
+<rect x="72" y="210" width="66" height="24" rx="5" fill="#2563eb" stroke="none" stroke-width="0" />
+<text x="105" y="226" font-size="11" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >ESTADO</text>
+<text x="105" y="305" font-size="13" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Móvil</text>
+<path d="M234,166.8 A16,16 0 0 1 266,166.8" stroke="#2563eb" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<path d="M222,164.4 A28,28 0 0 1 278,164.4" stroke="#2563eb" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<path d="M210,162.0 A40,40 0 0 1 290,162.0" stroke="#2563eb" stroke-width="2.5" fill="none" stroke-linejoin="round" stroke-linecap="round"  />
+<circle cx="250" cy="172" r="4" fill="#2563eb" stroke="#2563eb" stroke-width="2"/>
+<text x="250" y="210" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >WiFi 2,4 GHz</text>
+<line x1="170" y1="185" x2="330" y2="185" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<path d="M330.0,185.0 L321.0,189.3 L321.0,180.7 Z" fill="#1f2937" stroke="#1f2937" stroke-width="1"/>
+<text x="250" y="232" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >GET /ciclo</text>
+<rect x="340" y="120" width="200" height="130" rx="10" fill="#1d6b3a" stroke="#0f3d22" stroke-width="2" />
+<text x="440" y="146" font-size="12" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Placa (servidor web)</text>
+<text x="440" y="172" font-size="12" fill="#fde68a" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >atender(ruta, estado)</text>
+<rect x="360" y="186" width="160" height="50" rx="6" fill="#0b3b20" stroke="#86efac" stroke-width="1" />
+<text x="440" y="206" font-size="11" fill="#fecaca" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >¿emergencia? → DENEGADO</text>
+<text x="440" y="224" font-size="11" fill="#bbf7d0" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >¿REPOSO? → CICLO</text>
+<line x1="545" y1="185" x2="650" y2="185" stroke="#1f2937" stroke-width="2" stroke-linecap="round"  />
+<path d="M650.0,185.0 L641.0,189.3 L641.0,180.7 Z" fill="#1f2937" stroke="#1f2937" stroke-width="1"/>
+<rect x="660" y="120" width="200" height="130" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" />
+<text x="760" y="146" font-size="13" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Máquina</text>
+<text x="760" y="172" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >electroválvulas</text>
+<circle cx="720" cy="214" r="18" fill="#facc15" stroke="#1f2937" stroke-width="2"/>
+<circle cx="720" cy="214" r="11" fill="#dc2626" stroke="#7f1d1d" stroke-width="1.5"/>
+<text x="746" y="210" font-size="12" fill="#dc2626" text-anchor="start" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >seta local</text>
+<text x="746" y="226" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >manda siempre</text>
+<line x1="700" y1="254" x2="470" y2="254" stroke="#dc2626" stroke-width="2" stroke-linecap="round"  />
+<path d="M470.0,254.0 L479.0,249.7 L479.0,258.3 Z" fill="#dc2626" stroke="#dc2626" stroke-width="1"/>
+<text x="450.0" y="320" font-size="13" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >El panel remoto nunca anula la seguridad local: con la seta pulsada, /ciclo se deniega.</text></svg>
