@@ -12,6 +12,7 @@
       <div class="card kpi"><div class="v">{{ Math.round(ov.totals.avg_progress * 100) }}%</div><div class="muted small">Progreso medio</div></div>
       <div class="card kpi"><div class="v">{{ ov.totals.submissions }}</div><div class="muted small">Entregas</div></div>
       <div class="card kpi" :class="{ warnk: ov.totals.flags }"><div class="v">{{ ov.totals.flags }}</div><div class="muted small">Alertas por revisar</div></div>
+      <div class="card kpi" :class="{ warnk: ov.totals.photos_pending }" style="cursor:pointer" @click="tab = 'fotos'"><div class="v">{{ ov.totals.photos_pending || 0 }}</div><div class="muted small">Fotos por revisar</div></div>
     </div>
 
     <div class="tabs mt">
@@ -31,7 +32,7 @@
             <tr>
               <th>Alumno/a</th><th>Grupo</th>
               <th v-for="m in ov.missions" :key="m.mission_id" class="c" :title="m.title">{{ m.icon }} M{{ m.number }}</th>
-              <th class="c">Media</th><th class="c">Intentos</th><th class="c">⚠️</th><th>Última actividad</th>
+              <th class="c">Media</th><th class="c" title="Fotos de montajes subidas / pedidas">📷</th><th class="c">Intentos</th><th class="c">⚠️</th><th>Última actividad</th>
             </tr>
           </thead>
           <tbody>
@@ -43,16 +44,20 @@
                 <span class="cell" :class="cellClass(pm)" :title="`Nota auto: ${(pm.avg_score * 10).toFixed(1)}`">{{ pm.passed }}/{{ pm.total }}</span>
               </td>
               <td class="c"><strong>{{ (s.avg_score * 10).toFixed(1) }}</strong></td>
+              <td class="c small" :title="`${s.photos?.pending || 0} pendientes · ${s.photos?.rejected || 0} rechazadas`">{{ s.photos?.uploaded || 0 }}/{{ s.photos?.required || 0 }}<span v-if="s.photos?.pending" class="badge"> {{ s.photos.pending }}⏳</span></td>
               <td class="c">{{ s.attempts }}</td>
               <td class="c"><span v-if="s.flags" class="badge bad">{{ s.flags }}</span></td>
               <td class="small muted">{{ ago(s.last_activity) }}</td>
             </tr>
-            <tr v-if="!students.length"><td :colspan="7 + ov.missions.length" class="muted">Todavía no hay alumnos registrados. Compárteles el código de clase.</td></tr>
+            <tr v-if="!students.length"><td :colspan="8 + ov.missions.length" class="muted">Todavía no hay alumnos registrados. Compárteles el código de clase.</td></tr>
           </tbody>
         </table>
       </div>
       <p class="small muted">Celdas: secciones superadas por misión. Verde = completada · amarillo = en curso · gris = sin empezar o bloqueada. La «Media» es la nota automática (0-10) de todas las secciones.</p>
     </section>
+
+    <!-- FOTOS DE LOS MONTAJES -->
+    <TeacherPhotos v-if="tab === 'fotos'" @cambio="loadAll" />
 
     <!-- ALERTAS -->
     <section v-if="tab === 'alertas'">
@@ -159,11 +164,13 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import CodeBlock from '../components/CodeBlock.vue'
+import TeacherPhotos from '../components/TeacherPhotos.vue'
 import { api, downloadCsv, parseDate } from '../lib/api.js'
 import { md } from '../lib/markdown.js'
 
 const tabs = [
   { id: 'alumnos', label: '👥 Alumnado' },
+  { id: 'fotos', label: '📷 Fotos' },
   { id: 'alertas', label: '⚠️ Alertas' },
   { id: 'dificultad', label: '📊 Dificultad' },
   { id: 'soluciones', label: '🔑 Soluciones' },

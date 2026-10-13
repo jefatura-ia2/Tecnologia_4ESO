@@ -5,12 +5,13 @@ from collections import defaultdict
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 
 from ..auth import hash_password, teacher_required
 from ..content import get_section, load_missions
 from ..db import get_db
-from ..models import MissionOverride, SectionProgress, Submission, TeacherGrade, User
+from ..models import MissionOverride, SectionPhoto, SectionProgress, Submission, TeacherGrade, User, now
+from ..photos import PHOTO_STATES, needs_photo, photo_map, photo_meta
 from ..progress import unlock_state
 
 router = APIRouter(prefix="/api/teacher", tags=["profesor"], dependencies=[Depends(teacher_required)])
@@ -32,6 +33,34 @@ class GradeIn(BaseModel):
 
 class PasswordIn(BaseModel):
     password: str = Field(min_length=6)
+
+
+class PhotoReviewIn(BaseModel):
+    status: str
+    comment: str = ""
+
+
+def _photo_counts(db: Session, u: User, missions: list[dict]) -> dict:
+    phmap = photo_map(db, u)
+    out = {"required": 0, "uploaded": 0, "pending": 0, "accepted": 0, "rejected": 0}
+    for m in missions:
+        for s in m["sections"]:
+            if not needs_photo(s):
+                continue
+            out["required"] += 1
+            ph = phmap.get(s["id"])
+            if ph is None:
+                continue
+            out["uploaded"] += 1
+            out[{"pendiente": "pending", "aceptada": "accepted", "rechazada": "rejected"}[ph.status]] += 1
+    return out
+
+
+def _student_ref(db: Session, ref: str) -> User:
+    u = db.get(User, int(ref)) if ref.isdigit() else db.query(User).filter_by(username=ref).first()
+    if not u or u.role != "student":
+        raise HTTPException(404, "Alumno no encontrado")
+    return u
 
 
 def _student(db: Session, student_id: int) -> User:
@@ -64,6 +93,7 @@ def _student_row(db: Session, u: User, missions: list[dict], flags_by_user: dict
         "missions": per_mission, "passed_sections": passed_sections, "total_sections": total_sections,
         "avg_score": round(score_sum / total_sections, 3) if total_sections else 0.0,
         "attempts": sum(p.attempts for p in u.progress), "flags": flags_by_user.get(u.id, 0),
+        "photos": _photo_counts(db, u, missions),
         "last_activity": last.isoformat() if last else None,
     }
 
@@ -97,6 +127,7 @@ def overview(db: Session = Depends(get_db)):
             "avg_progress": round(sum(r["passed_sections"] / r["total_sections"] for r in rows) / len(rows), 3) if rows else 0,
             "flags": sum(flags.values()),
             "submissions": db.query(Submission).count(),
+            "photos_pending": sum(r["photos"]["pending"] for r in rows),
         },
     }
 
@@ -212,9 +243,53 @@ def delete_student(student_id: int, db: Session = Depends(get_db)):
     db.query(Submission).filter_by(user_id=u.id).delete()
     db.query(MissionOverride).filter_by(user_id=u.id).delete()
     db.query(TeacherGrade).filter_by(user_id=u.id).delete()
+    db.query(SectionPhoto).filter_by(user_id=u.id).delete()
     db.delete(u)
     db.commit()
     return {"ok": True}
+
+
+@router.get("/photos")
+def list_photos(status: str = "", db: Session = Depends(get_db)):
+    sections = {s["id"]: (m, s) for m in load_missions() for s in m["sections"]}
+    q = (db.query(SectionPhoto, User).join(User, User.id == SectionPhoto.user_id)
+         .options(load_only(SectionPhoto.section_id, SectionPhoto.status, SectionPhoto.comment, SectionPhoto.bytes,
+                            SectionPhoto.note, SectionPhoto.uploaded_at, SectionPhoto.reviewed_at, SectionPhoto.user_id)))
+    if status:
+        q = q.filter(SectionPhoto.status == status)
+    out = []
+    for ph, u in q.order_by(SectionPhoto.uploaded_at.desc()):
+        if ph.section_id not in sections:
+            continue
+        m, s = sections[ph.section_id]
+        p = db.query(SectionProgress).filter_by(user_id=u.id, section_id=s["id"]).first()
+        out.append({"username": u.username, "student": u.full_name, "group_name": u.group_name, "mission_id": m["id"],
+                    "mission_number": m["number"], "section_id": s["id"], "section_title": s["title"],
+                    "indicaciones": (s.get("foto") or {}).get("indicaciones", ""), "score_passed": bool(p and p.passed),
+                    **photo_meta(ph)})
+    return out
+
+
+@router.get("/photos/{student}/{section_id}")
+def get_photo(student: str, section_id: str, db: Session = Depends(get_db)):
+    u = _student_ref(db, student)
+    ph = db.query(SectionPhoto).filter_by(user_id=u.id, section_id=section_id).first()
+    if ph is None:
+        raise HTTPException(404, "Foto no encontrada")
+    return {"image": ph.image, "uploaded_at": ph.uploaded_at.isoformat()}
+
+
+@router.put("/photos/{student}/{section_id}")
+def review_photo(student: str, section_id: str, data: PhotoReviewIn, db: Session = Depends(get_db)):
+    if data.status not in PHOTO_STATES:
+        raise HTTPException(400, "Estado no válido")
+    u = _student_ref(db, student)
+    ph = db.query(SectionPhoto).filter_by(user_id=u.id, section_id=section_id).first()
+    if ph is None:
+        raise HTTPException(404, "Foto no encontrada")
+    ph.status, ph.comment, ph.reviewed_at = data.status, data.comment[:500], now()
+    db.commit()
+    return {"ok": True, "photo": photo_meta(ph)}
 
 
 @router.get("/stats")
@@ -267,7 +342,7 @@ def export_csv(db: Session = Depends(get_db)):
     header = ["usuario", "nombre", "grupo", "placa"]
     for m in missions:
         header += [f"M{m['number']} secciones", f"M{m['number']} nota auto (0-10)", f"M{m['number']} nota profesor"]
-    header += ["media auto (0-10)", "intentos", "alertas"]
+    header += ["media auto (0-10)", "intentos", "alertas", "fotos subidas", "fotos aceptadas", "fotos rechazadas"]
     w.writerow(header)
     flags = defaultdict(int)
     for sub in db.query(Submission).filter(Submission.flagged.is_(True)):
@@ -279,7 +354,9 @@ def export_csv(db: Session = Depends(get_db)):
             g = grades.get((u.id, m["id"]))
             line += [f"{pm['passed']}/{pm['total']}", f"{pm['avg_score'] * 10:.1f}".replace(".", ","),
                      "" if not g or g.grade is None else f"{g.grade:.1f}".replace(".", ",")]
-        line += [f"{row['avg_score'] * 10:.1f}".replace(".", ","), row["attempts"], row["flags"]]
+        ph = row["photos"]
+        line += [f"{row['avg_score'] * 10:.1f}".replace(".", ","), row["attempts"], row["flags"],
+                 f"{ph['uploaded']}/{ph['required']}", ph["accepted"], ph["rejected"]]
         w.writerow(line)
     data = "﻿" + buf.getvalue()  # BOM para que Excel abra bien las tildes
     return StreamingResponse(iter([data]), media_type="text/csv; charset=utf-8",

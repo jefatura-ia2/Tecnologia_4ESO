@@ -519,6 +519,8 @@ sections:
     title: "Proyecto corto: semáforo con pulsador peatonal"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto del semáforo montado: los LEDs del semáforo, el pulsador peatonal y la placa, con el cableado visible."
     theory: |
       ## El encargo
 

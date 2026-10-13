@@ -44,6 +44,10 @@ async function correctPayload(id) {
 
 let ana, profe
 
+// Foto de prueba (la API solo comprueba formato y tamaño)
+const FOTO = 'data:image/jpeg;base64,' + Buffer.alloc(6000, 7).toString('base64')
+const subirFoto = (token, sid, image = FOTO) => call('POST', `/api/sections/${sid}/photo`, { token, body: { image, note: 'montaje' } })
+
 before(async () => {
   const r = await call('POST', '/api/auth/register', { body: { username: 'ana', full_name: 'Ana López', password: 'secreto1', class_code: '4eso-neuma', board: 'esp32_s3', group_name: '4ºA' } })
   assert.equal(r.status, 200, JSON.stringify(r.data))
@@ -99,6 +103,19 @@ test('espera tras fallos seguidos', async () => {
   assert.match(r.data.detail, /intentos fallidos/)
 })
 
+test('fotos de los montajes: validación y bloqueo', async () => {
+  // m1s2 pide foto: con la evaluación aprobada pero sin foto, m1s3 sigue bloqueada
+  const st = (await call('GET', '/api/missions', { token: ana })).data[0].sections
+  assert.ok(st.find((s) => s.id === 'm1s2').foto && !st.find((s) => s.id === 'm1s1').foto)
+  assert.equal((await subirFoto(ana, 'm1s1')).status, 400)                       // esa sección no pide foto
+  assert.equal((await subirFoto(ana, 'm1s2', 'data:text/plain;base64,QUJD')).status, 400)
+  assert.equal((await subirFoto(ana, 'm1s2', 'data:image/jpeg;base64,QUJD')).status, 400)   // demasiado pequeña
+  const grande = 'data:image/jpeg;base64,' + Buffer.alloc(2_600_000, 1).toString('base64')
+  assert.equal((await subirFoto(ana, 'm1s2', grande)).status, 400)
+  assert.equal((await subirFoto(ana, 'm5s2')).status, 403)                       // sección bloqueada
+  assert.equal((await call('GET', '/api/sections/m1s2/photo', { token: ana })).status, 404)
+})
+
 test('profesor: panel, alertas de similitud, notas y CSV', async () => {
   const login = await call('POST', '/api/auth/login', { body: { username: 'profesor', password: 'profe123' } })
   assert.equal(login.status, 200)
@@ -111,7 +128,14 @@ test('profesor: panel, alertas de similitud, notas y CSV', async () => {
     await call('GET', `/api/sections/${sid}`, { token: ana })
     const r = await call('POST', `/api/sections/${sid}/submit`, { token: ana, body: await correctPayload(sid) })
     assert.ok(r.data.passed, sid)
-    if (sid === 'm1s4') assert.ok(r.data.mission_completed)
+    // Aprobada la evaluación, falta la foto del montaje: no se desbloquea la siguiente
+    assert.ok(r.data.photo_pending, sid)
+    assert.equal(r.data.next_unlocked, null)
+    assert.ok(!r.data.mission_completed)
+    const f = await subirFoto(ana, sid)
+    assert.equal(f.status, 200, JSON.stringify(f.data))
+    assert.equal(f.data.photo.status, 'pendiente')
+    if (sid === 'm1s4') assert.ok(f.data.mission_completed)
   }
   assert.ok((await call('GET', '/api/missions', { token: ana })).data[1].state.unlocked)
 
@@ -122,6 +146,7 @@ test('profesor: panel, alertas de similitud, notas y CSV', async () => {
     const p = await correctPayload(sid)
     if (sid === 'm1s4') p.answers.c1 = p.answers.c1.replaceAll('lecturas', 'datos').replaceAll('salida', 'res') + '\n# mío\n'
     await call('POST', `/api/sections/${sid}/submit`, { token: beto, body: p })
+    if (section(sid).foto) await subirFoto(beto, sid)
   }
   const flags = (await call('GET', '/api/teacher/flags', { token: profe })).data
   assert.ok(flags.some((f) => /Similitud/.test(f.reason) && f.username === 'beto'), JSON.stringify(flags))
@@ -130,6 +155,28 @@ test('profesor: panel, alertas de similitud, notas y CSV', async () => {
   assert.equal(ov.totals.students, 2)
   const anaRow = ov.students.find((s) => s.username === 'ana')
   assert.ok(anaRow.missions[0].completed)
+  assert.equal(anaRow.photos.uploaded, 3)
+  assert.ok(ov.totals.photos_pending >= 3)
+
+  // Revisión de fotos: rechazar una quita la sección de «superadas» pero no bloquea lo siguiente
+  const pend = (await call('GET', '/api/teacher/photos?status=pendiente', { token: profe })).data
+  assert.ok(pend.some((f) => f.username === 'ana' && f.section_id === 'm1s3'))
+  assert.equal((await call('GET', '/api/teacher/photos?status=pendiente', { token: ana })).status, 403)
+  const img = await call('GET', '/api/teacher/photos/ana/m1s3', { token: profe })
+  assert.equal(img.data.image, FOTO)
+  const rej = await call('PUT', '/api/teacher/photos/ana/m1s3', { token: profe, body: { status: 'rechazada', comment: 'No se ve el cableado' } })
+  assert.equal(rej.data.photo.status, 'rechazada')
+  assert.equal((await call('PUT', '/api/teacher/photos/ana/m1s3', { token: profe, body: { status: 'otra' } })).status, 400)
+  let m1 = (await call('GET', '/api/missions', { token: ana })).data[0]
+  const s3 = m1.sections.find((s) => s.id === 'm1s3')
+  assert.ok(!s3.state.passed && s3.state.score_passed && s3.state.photo.comment === 'No se ve el cableado')
+  assert.ok(!m1.state.completed && m1.sections.find((s) => s.id === 'm1s4').state.unlocked)
+  // el alumno vuelve a subirla y el profesor la acepta
+  assert.equal((await subirFoto(ana, 'm1s3')).data.photo.status, 'pendiente')
+  assert.ok((await call('PUT', '/api/teacher/photos/ana/m1s3', { token: profe, body: { status: 'aceptada' } })).data.ok)
+  m1 = (await call('GET', '/api/missions', { token: ana })).data[0]
+  assert.ok(m1.state.completed)
+  assert.equal((await call('GET', '/api/sections/m1s3/photo', { token: ana })).data.image, FOTO)
 
   assert.ok((await call('POST', '/api/teacher/students/ana/unlock', { token: profe, body: { mission_id: 'm3' } })).data.ok)
   assert.ok((await call('GET', '/api/missions', { token: ana })).data[2].state.unlocked)
@@ -142,6 +189,7 @@ test('profesor: panel, alertas de similitud, notas y CSV', async () => {
   const csv = await call('GET', '/api/teacher/export.csv', { token: profe })
   assert.equal(csv.status, 200)
   assert.ok(csv.text.includes('ana') && csv.text.includes('9,5'))
+  assert.ok(csv.text.includes('fotos subidas') && csv.text.includes('3/35'))
 
   const stats = (await call('GET', '/api/teacher/stats', { token: profe })).data
   assert.equal(stats.length, 48)

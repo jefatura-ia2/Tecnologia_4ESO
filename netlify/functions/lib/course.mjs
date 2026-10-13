@@ -40,7 +40,7 @@ export function missionSummary(m) {
     id: m.id, number: m.number, title: m.title, subtitle: m.subtitle || '', icon: m.icon || '',
     weeks: m.weeks || [], hours: m.hours || 0, objectives: m.objectives || [], materials: m.materials || [],
     criteria: m.criteria || [], passing_score: m.passing_score, extra: !!m.extra, trimestre: m.trimestre || null,
-    sections: m.sections.map((s) => ({ id: s.id, title: s.title, hours: s.hours || 0, kind: s.kind || 'lesson' })),
+    sections: m.sections.map((s) => ({ id: s.id, title: s.title, hours: s.hours || 0, kind: s.kind || 'lesson', foto: !!s.foto })),
   }
 }
 

@@ -33,6 +33,8 @@ sections:
     title: "La etapa de potencia: MOSFET, diodo y 12 V"
     hours: 3
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## ¿Por qué no conectamos la electroválvula al pin?
 
@@ -315,6 +317,8 @@ sections:
     title: "Cilindro de simple efecto automático"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Un golpe de cilindro
 
@@ -482,6 +486,8 @@ sections:
     title: "Proyecto corto: expulsor de piezas"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto del expulsor de piezas: placa, módulo MOSFET, electroválvula 3/2 y cilindro de simple efecto."
     theory: |
       ## El encargo
 

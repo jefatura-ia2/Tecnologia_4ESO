@@ -184,6 +184,8 @@ sections:
     title: "Asignación de pines y montaje"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Tabla de conexiones
 
@@ -365,6 +367,8 @@ sections:
     title: "Proyecto final por equipos"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto de la máquina del proyecto final completa, con todo el cableado y el circuito neumático a la vista."
     theory: |
       ## Elige un proyecto
 

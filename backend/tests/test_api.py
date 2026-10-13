@@ -115,6 +115,27 @@ def test_cooldown_after_failures(client):
     assert r.status_code == 429 and "intentos fallidos" in r.json()["detail"]
 
 
+FOTO = "data:image/jpeg;base64," + __import__("base64").b64encode(b"\x07" * 6000).decode()
+
+
+def subir_foto(client, tok, sid, image=FOTO):
+    return client.post(f"/api/sections/{sid}/photo", json={"image": image, "note": "montaje"}, headers=auth(tok))
+
+
+def test_photo_validation(client):
+    tok = client.post("/api/auth/login", json={"username": "ana", "password": "secreto1"}).json()["token"]
+    ms = client.get("/api/missions", headers=auth(tok)).json()
+    secs = {s["id"]: s for s in ms[0]["sections"]}
+    assert secs["m1s2"]["foto"] and not secs["m1s1"]["foto"]
+    assert subir_foto(client, tok, "m1s1").status_code == 400
+    assert subir_foto(client, tok, "m1s2", "data:text/plain;base64,QUJD").status_code == 400
+    assert subir_foto(client, tok, "m1s2", "data:image/jpeg;base64,QUJD").status_code == 400
+    big = "data:image/jpeg;base64," + __import__("base64").b64encode(b"\x01" * 2_600_000).decode()
+    assert subir_foto(client, tok, "m1s2", big).status_code == 400
+    assert subir_foto(client, tok, "m5s2").status_code == 403
+    assert client.get("/api/sections/m1s2/photo", headers=auth(tok)).status_code == 404
+
+
 def test_mission_unlock_and_plagiarism(client):
     tok = client.post("/api/auth/login", json={"username": "ana", "password": "secreto1"}).json()["token"]
     for sid in ["m1s2", "m1s3", "m1s4"]:
@@ -122,7 +143,12 @@ def test_mission_unlock_and_plagiarism(client):
         backdate("ana", sid, 3600)
         r = client.post(f"/api/sections/{sid}/submit", json={"answers": correct_answers(sid)}, headers=auth(tok))
         assert r.json()["passed"], r.json()
-    assert r.json()["mission_completed"]
+        # aprobada, pero falta la foto del montaje: la siguiente sigue bloqueada
+        assert r.json()["photo_pending"] and r.json()["next_unlocked"] is None and not r.json()["mission_completed"]
+        f = subir_foto(client, tok, sid)
+        assert f.status_code == 200, f.json()
+        assert f.json()["photo"]["status"] == "pendiente"
+    assert f.json()["mission_completed"]
     ms = client.get("/api/missions", headers=auth(tok)).json()
     assert ms[1]["state"]["unlocked"] and ms[0]["state"]["completed"]
 
@@ -136,6 +162,7 @@ def test_mission_unlock_and_plagiarism(client):
         client.get(f"/api/sections/{sid}", headers=auth(tok2))
         backdate("beto", sid)
         client.post(f"/api/sections/{sid}/submit", json={"answers": correct_answers(sid)}, headers=auth(tok2))
+        subir_foto(client, tok2, sid)
     client.get("/api/sections/m1s4", headers=auth(tok2))
     backdate("beto", "m1s4")
     ans = correct_answers("m1s4")
@@ -152,8 +179,26 @@ def test_teacher_dashboard(client):
     assert ov["totals"]["students"] == 2
     ana = next(s for s in ov["students"] if s["username"] == "ana")
     assert ana["missions"][0]["completed"] and ana["passed_sections"] == 4
+    assert ana["photos"]["uploaded"] == 3 and ov["totals"]["photos_pending"] >= 3
     flags = client.get("/api/teacher/flags", headers=auth(tok)).json()
     assert any("Similitud" in f["reason"] for f in flags), flags
+    # revisión de fotos: rechazar quita la sección de superadas sin bloquear la siguiente
+    pend = client.get("/api/teacher/photos?status=pendiente", headers=auth(tok)).json()
+    assert any(f["username"] == "ana" and f["section_id"] == "m1s3" for f in pend)
+    assert client.get("/api/teacher/photos", headers=auth(stu)).status_code == 403
+    assert client.get("/api/teacher/photos/ana/m1s3", headers=auth(tok)).json()["image"] == FOTO
+    assert client.get(f"/api/teacher/photos/{ana['id']}/m1s3", headers=auth(tok)).json()["image"] == FOTO
+    r = client.put("/api/teacher/photos/ana/m1s3", json={"status": "rechazada", "comment": "No se ve el cableado"}, headers=auth(tok))
+    assert r.json()["photo"]["status"] == "rechazada"
+    assert client.put("/api/teacher/photos/ana/m1s3", json={"status": "otra"}, headers=auth(tok)).status_code == 400
+    m1 = client.get("/api/missions", headers=auth(stu)).json()[0]
+    s3 = next(s for s in m1["sections"] if s["id"] == "m1s3")
+    assert not s3["state"]["passed"] and s3["state"]["score_passed"] and s3["state"]["photo"]["comment"] == "No se ve el cableado"
+    assert not m1["state"]["completed"] and next(s for s in m1["sections"] if s["id"] == "m1s4")["state"]["unlocked"]
+    assert subir_foto(client, stu, "m1s3").json()["photo"]["status"] == "pendiente"
+    assert client.put("/api/teacher/photos/ana/m1s3", json={"status": "aceptada"}, headers=auth(tok)).json()["ok"]
+    assert client.get("/api/missions", headers=auth(stu)).json()[0]["state"]["completed"]
+    assert client.get("/api/sections/m1s3/photo", headers=auth(stu)).json()["image"] == FOTO
     detail = client.get(f"/api/teacher/students/{ana['id']}", headers=auth(tok)).json()
     assert detail["submissions"]
     assert client.post(f"/api/teacher/students/{ana['id']}/unlock", json={"mission_id": "m4"}, headers=auth(tok)).json()["ok"]
@@ -163,6 +208,7 @@ def test_teacher_dashboard(client):
                       headers=auth(tok)).json()["ok"]
     csv = client.get("/api/teacher/export.csv", headers=auth(tok))
     assert csv.status_code == 200 and "ana" in csv.text and "8,5" in csv.text
+    assert "fotos subidas" in csv.text and "3/35" in csv.text
     stats = client.get("/api/teacher/stats", headers=auth(tok)).json()
     assert len(stats) == sum(len(m["sections"]) for m in load_missions())
     sol = client.get("/api/teacher/sections/m1s1/solutions", headers=auth(tok)).json()

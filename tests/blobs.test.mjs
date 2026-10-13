@@ -40,3 +40,13 @@ test('registro, sección y panel con Netlify Blobs', async () => {
   const det = await call('GET', '/api/teacher/students/ana', null, t.data.token)
   assert.ok(det.data.missions[0].sections[0].started_at)
 })
+
+test('las fotos de los montajes (~2 MB) caben en Netlify Blobs', async () => {
+  const { getDb } = await import('../netlify/functions/lib/store.mjs')
+  const db = await getDb()
+  const image = 'data:image/jpeg;base64,' + Buffer.alloc(1_800_000, 3).toString('base64')
+  await db.set('photos/ana/m1s2', { image, uploaded_at: new Date().toISOString() })
+  const back = await db.get('photos/ana/m1s2')
+  assert.equal(back.image.length, image.length)
+  assert.deepEqual(await db.list('photos/ana/'), ['photos/ana/m1s2'])
+})

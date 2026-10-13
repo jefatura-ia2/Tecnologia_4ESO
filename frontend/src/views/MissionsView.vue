@@ -50,6 +50,7 @@
               <span class="status">{{ s.state.passed ? '✅' : (s.kind === 'challenge' ? '🏆' : '▶️') }}</span>
               <span class="stitle">{{ s.title }}</span>
               <span class="spacer"></span>
+              <span v-if="s.foto" class="foto-st" :title="fotoTitulo(s.state)">{{ fotoIcono(s.state) }}</span>
               <span v-if="s.state.attempts" class="small muted">{{ Math.round(s.state.best_score * 100) }}%</span>
               <span class="small muted">{{ s.hours }} h</span>
             </router-link>
@@ -74,6 +75,9 @@ const missions = ref([])
 const loading = ref(true)
 const error = ref('')
 
+const fotoIcono = (st) => (!st.photo ? '📷' : { pendiente: '📷⏳', aceptada: '📷✅', rechazada: '📷❌' }[st.photo.status])
+const fotoTitulo = (st) => (!st.photo ? 'Pide foto del montaje' : { pendiente: 'Foto subida, pendiente de revisión', aceptada: 'Foto aceptada', rechazada: 'Foto rechazada: vuelve a subirla' }[st.photo.status])
+
 const overall = computed(() => {
   const total = missions.value.reduce((a, m) => a + m.state.total_sections, 0)
   const done = missions.value.reduce((a, m) => a + m.state.passed_sections, 0)
@@ -92,6 +96,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.foto-st { font-size: .85rem; opacity: .85; }
 .recursos-aviso { display: block; margin-bottom: 16px; padding: 12px 16px; text-decoration: none; color: inherit; border-left: 4px solid #0f766e; }
 .recursos-aviso:hover { background: #f0fdfa; }
 .overall { padding: 10px 16px; min-width: 170px; }

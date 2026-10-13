@@ -31,6 +31,8 @@ sections:
     title: "Finales de carrera"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Saber dónde está el cilindro
 
@@ -182,6 +184,8 @@ sections:
     title: "Esperar a un sensor con tiempo límite"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Esperar… pero no para siempre
 
@@ -343,6 +347,8 @@ sections:
     title: "Vigilancia de tiempos: atascos y fugas"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## El tiempo de cada movimiento dice mucho
 
@@ -467,6 +473,8 @@ sections:
     title: "Proyecto corto: prensa con retorno automático"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto de la prensa con retorno automático: cilindro con los finales de carrera, electroválvulas y placa."
     theory: |
       ## El encargo
 

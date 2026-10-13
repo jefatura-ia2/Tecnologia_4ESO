@@ -9,6 +9,7 @@
       <h1>{{ sec.kind === 'challenge' ? '🏆 ' : '' }}{{ sec.title }}</h1>
       <div class="spacer"></div>
       <span v-if="data.state.passed" class="badge ok">Superada · mejor nota {{ pct(data.state.best_score) }}</span>
+      <span v-else-if="data.state.score_passed && sec.foto" class="badge warn">📷 Aprobada · falta la foto del montaje</span>
       <span v-else-if="data.state.attempts" class="badge warn">{{ data.state.attempts }} intento(s) · mejor {{ pct(data.state.best_score) }}</span>
       <span class="badge">{{ sec.hours }} h de clase</span>
     </div>
@@ -34,7 +35,10 @@
       </article>
     </section>
 
-    <section v-show="tab === 'practica'" class="card prose" v-html="md(sec.practice)"></section>
+    <section v-show="tab === 'practica'">
+      <div class="card prose" v-html="md(sec.practice)"></div>
+      <PhotoUpload v-if="sec.foto" :section-id="sec.id" :indicaciones="sec.foto.indicaciones" :photo="data.state.photo" @subida="fotoSubida" />
+    </section>
 
     <section v-show="tab === 'evaluacion'">
       <div class="alert info">{{ sec.evaluation.intro || 'Responde a todas las preguntas.' }}
@@ -51,9 +55,11 @@
             <div class="small muted">{{ result.earned }} de {{ result.total }} puntos{{ result.preview ? ' · Vista previa del profesor (no se guarda)' : '' }}</div>
           </div>
           <div class="spacer"></div>
-          <router-link v-if="result.passed && data.nav.next" :to="`/seccion/${data.nav.next}`" class="btn">Siguiente sección →</router-link>
+          <span v-if="result.passed && needPhoto" class="badge warn">📷 Falta la foto del montaje</span>
+          <router-link v-else-if="result.passed && data.nav.next" :to="`/seccion/${data.nav.next}`" class="btn">Siguiente sección →</router-link>
           <router-link v-else-if="result.passed" to="/" class="btn">{{ result.mission_completed ? '🎉 ¡Misión completada! Ver misiones' : 'Volver a las misiones' }}</router-link>
         </div>
+        <PhotoUpload v-if="sec.foto && (needPhoto || data.state.photo)" :section-id="sec.id" :indicaciones="sec.foto.indicaciones" :photo="data.state.photo" @subida="fotoSubida" />
         <div class="row">
           <button class="btn" :disabled="busy">{{ busyLabel || 'Entregar y corregir' }}</button>
           <span class="small muted">Puedes reintentarlo; se guarda tu mejor nota. Tras varios fallos seguidos tendrás que esperar un poco.</span>
@@ -74,6 +80,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import CodeBlock from '../components/CodeBlock.vue'
 import EvalItem from '../components/EvalItem.vue'
+import PhotoUpload from '../components/PhotoUpload.vue'
 import { api, session } from '../lib/api.js'
 import { md, mdInline } from '../lib/markdown.js'
 import { preloadPython, pyStatus, runPython } from '../lib/pyrunner.js'
@@ -103,6 +110,13 @@ const nextTabLabel = computed(() => {
   const i = tabs.findIndex((t) => t.id === tab.value)
   return tabs[i + 1]?.label.slice(3) || ''
 })
+// Falta la foto: aprobada la evaluación pero sin foto (o rechazada)
+const needPhoto = computed(() => !!sec.value?.foto && session.user?.role !== 'teacher'
+  && (data.value.state.score_passed || result.value?.passed) && (!data.value.state.photo || data.value.state.photo.status === 'rechazada'))
+function fotoSubida(r) {
+  data.value.state = { ...data.value.state, ...r.state }
+  if (result.value && r.state.passed) result.value = { ...result.value, mission_completed: r.mission_completed }
+}
 const pct = (x) => Math.round((x || 0) * 100) + '%'
 const draftKey = () => `neumalab-draft-${session.user?.username}-${props.id}`
 
@@ -162,7 +176,10 @@ async function submit() {
     if (!r.preview) {
       data.value.state.attempts = r.attempts
       data.value.state.best_score = Math.max(data.value.state.best_score, r.score)
-      if (r.passed) data.value.state.passed = true
+      if (r.passed) {
+        data.value.state.score_passed = true
+        data.value.state.passed = !r.photo_pending && (!sec.value.foto || !!data.value.state.photo)
+      }
     }
   } catch (e) {
     error.value = e.message

@@ -89,3 +89,21 @@ class TeacherGrade(Base):
     grade: Mapped[float | None] = mapped_column(Float, nullable=True)  # 0-10
     notes: Mapped[str] = mapped_column(Text, default="")
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=now, onupdate=now)
+
+
+class SectionPhoto(Base):
+    """Foto del montaje práctico de una sección (una por alumno y sección; la nueva sustituye a la anterior)."""
+
+    __tablename__ = "section_photos"
+    __table_args__ = (UniqueConstraint("user_id", "section_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    section_id: Mapped[str] = mapped_column(String(32), index=True)
+    image: Mapped[str] = mapped_column(Text)  # data URL (JPEG/PNG/WEBP en base64)
+    bytes: Mapped[int] = mapped_column(Integer, default=0)
+    note: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(16), default="pendiente")  # pendiente | aceptada | rechazada
+    comment: Mapped[str] = mapped_column(Text, default="")
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=now)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

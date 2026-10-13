@@ -9,7 +9,8 @@ from ..content import calendar, get_section, load_missions, mission_summary, pub
 from ..db import get_db
 from ..evaluator import grade_section
 from ..feedback import summary_message
-from ..models import SectionProgress, Submission, User, now
+from ..models import SectionPhoto, SectionProgress, Submission, User, now
+from ..photos import needs_photo, photo_meta, validate_photo
 from ..progress import unlock_state
 
 router = APIRouter(prefix="/api", tags=["misiones"])
@@ -40,6 +41,11 @@ HARDWARE = [
 
 class SubmitIn(BaseModel):
     answers: dict
+
+
+class PhotoIn(BaseModel):
+    image: str
+    note: str = ""
 
 
 def _get_progress(db: Session, user: User, mission_id: str, section_id: str) -> SectionProgress:
@@ -157,7 +163,50 @@ def submit(section_id: str, data: SubmitIn, user: User = Depends(current_user), 
     result["attempts"] = p.attempts
     result["mission_completed"] = new_state["missions"][mission["id"]]["completed"]
     result["next_unlocked"] = None
+    sec_state = new_state["sections"][section_id]
+    photo_pending = passed and needs_photo(section) and sec_state["photo"] is None
+    result["photo_pending"] = photo_pending
+    if photo_pending:
+        result["message"] += " 📷 Para completar la sección, sube la foto de tu montaje."
     idx = [s["id"] for s in mission["sections"]].index(section_id)
-    if passed and idx + 1 < len(mission["sections"]):
+    if passed and not photo_pending and idx + 1 < len(mission["sections"]):
         result["next_unlocked"] = mission["sections"][idx + 1]["id"]
     return result
+
+
+@router.post("/sections/{section_id}/photo")
+def upload_photo(section_id: str, data: PhotoIn, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    if user.role != "student":
+        raise HTTPException(400, "Solo el alumnado sube fotos de sus montajes.")
+    mission, section = get_section(section_id)
+    if section is None:
+        raise HTTPException(404, "Sección no encontrada")
+    if not needs_photo(section):
+        raise HTTPException(400, "Esta sección no pide foto.")
+    if not unlock_state(db, user)["sections"][section_id]["unlocked"]:
+        raise HTTPException(403, "Sección bloqueada.")
+    ok, msg, size = validate_photo(data.image)
+    if not ok:
+        raise HTTPException(400, msg)
+    ph = db.query(SectionPhoto).filter_by(user_id=user.id, section_id=section_id).first()
+    if ph is None:
+        ph = SectionPhoto(user_id=user.id, section_id=section_id, image="")
+        db.add(ph)
+    ph.image, ph.bytes, ph.note = data.image, size, data.note[:300]
+    ph.status, ph.comment, ph.uploaded_at, ph.reviewed_at = "pendiente", "", now(), None
+    db.commit()
+    state = unlock_state(db, user)
+    idx = [s["id"] for s in mission["sections"]].index(section_id)
+    sec_state = state["sections"][section_id]
+    return {"ok": True, "photo": photo_meta(ph), "state": sec_state,
+            "mission_completed": state["missions"][mission["id"]]["completed"],
+            "next_unlocked": mission["sections"][idx + 1]["id"]
+            if sec_state["passed"] and idx + 1 < len(mission["sections"]) else None}
+
+
+@router.get("/sections/{section_id}/photo")
+def my_photo(section_id: str, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    ph = db.query(SectionPhoto).filter_by(user_id=user.id, section_id=section_id).first()
+    if ph is None:
+        raise HTTPException(404, "Todavía no has subido foto.")
+    return {"image": ph.image, "uploaded_at": ph.uploaded_at.isoformat()}

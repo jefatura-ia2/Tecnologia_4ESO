@@ -178,6 +178,8 @@ sections:
     title: "Antirretorno y selectora (función O)"
     hours: 1
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Válvula antirretorno
 
@@ -299,6 +301,8 @@ sections:
     title: "Circuitos básicos de mando de cilindros"
     hours: 3
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Circuito 1 · Simple efecto con una 3/2 NC
 
@@ -439,6 +443,8 @@ sections:
     title: "Proyecto corto: puerta neumática desde dos puntos"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto de la puerta neumática desde dos puntos: las dos válvulas de mando, la selectora, el cilindro y los tubos."
     theory: |
       ## El encargo
 

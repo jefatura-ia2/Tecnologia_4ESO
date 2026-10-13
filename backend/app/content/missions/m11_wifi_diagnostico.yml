@@ -294,6 +294,8 @@ sections:
     title: "Registro de ciclos y mantenimiento"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Guardar lo que pasa
 
@@ -437,6 +439,8 @@ sections:
     title: "Proyecto corto: panel de la estampadora"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto (o captura) del panel web funcionando en el móvil junto a la máquina."
     theory: |
       ## El encargo
 

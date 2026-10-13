@@ -156,6 +156,8 @@ sections:
     title: "Ejecutar secuencias por tiempo"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Un diccionario de cilindros
 
@@ -281,6 +283,8 @@ sections:
     title: "Secuencias por sensores: la máquina de pasos"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Cada paso termina cuando su sensor lo confirma
 
@@ -458,6 +462,8 @@ sections:
     title: "Proyecto corto: estampadora A+ B+ B- A-"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto de la estampadora A+ B+ B− A−: los dos cilindros, los cuatro finales de carrera, electroválvulas y placa."
     theory: |
       ## El encargo
 

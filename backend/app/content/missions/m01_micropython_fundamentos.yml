@@ -203,6 +203,8 @@ sections:
     title: "Salidas digitales: los LEDs que serán electroválvulas"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Una salida digital = una orden de encendido
 
@@ -353,6 +355,8 @@ sections:
     title: "Entradas: pulsadores, flancos y antirrebote"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Leer un pulsador
 
@@ -529,6 +533,8 @@ sections:
     title: "Proyecto corto: contador de piezas"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto del contador de piezas montado: placa, pulsador o sensor de piezas y LEDs, con el cableado visible."
     theory: |
       ## El encargo
 

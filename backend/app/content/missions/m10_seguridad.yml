@@ -32,6 +32,8 @@ sections:
     title: "Paro de emergencia y estado seguro"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## La seta de emergencia
 
@@ -180,6 +182,8 @@ sections:
     title: "Interrupciones"
     hours: 1
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Reaccionar al instante
 
@@ -334,6 +338,8 @@ sections:
     title: "Mando bimanual y modos de marcha"
     hours: 3
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## El mando bimanual
 
@@ -474,6 +480,8 @@ sections:
     title: "Proyecto corto: prensa segura"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto de la prensa segura: seta de emergencia, los dos pulsadores del bimanual, cilindro y placa."
     theory: |
       ## El encargo
 

@@ -9,6 +9,7 @@
     </div>
     <div v-if="msg" class="alert ok">{{ msg }}</div>
     <div v-if="error" class="alert bad">{{ error }}</div>
+    <div v-if="foto" class="modal-foto" @click="foto = null"><img :src="foto" alt="Foto del montaje" /></div>
 
     <div class="grid">
       <article v-for="m in d.missions" :key="m.id" class="card">
@@ -21,18 +22,26 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Sección</th><th>Estado</th><th>Mejor</th><th>Intentos</th><th></th></tr></thead>
+            <thead><tr><th>Sección</th><th>Estado</th><th>Mejor</th><th>Intentos</th><th>Foto</th><th></th></tr></thead>
             <tbody>
               <tr v-for="s in m.sections" :key="s.id">
                 <td>{{ s.title }}</td>
                 <td>
                   <span v-if="s.passed" class="badge ok">Superada</span>
+                  <span v-else-if="s.score_passed && s.photo_required" class="badge warn">Falta foto</span>
                   <span v-else-if="s.attempts" class="badge warn">En curso</span>
                   <span v-else-if="s.unlocked" class="badge">Disponible</span>
                   <span v-else class="badge">Bloqueada</span>
                 </td>
                 <td>{{ s.attempts ? Math.round(s.best_score * 100) + '%' : '—' }}</td>
                 <td>{{ s.attempts }}<span v-if="s.failed_streak" class="small muted"> ({{ s.failed_streak }} fallos seguidos)</span></td>
+                <td>
+                  <template v-if="s.photo_required">
+                    <button v-if="s.photo" class="btn sm ghost" @click="verFoto(s.id)">📷 {{ s.photo.status }}</button>
+                    <span v-else class="small muted">sin foto</span>
+                  </template>
+                  <span v-else class="small muted">—</span>
+                </td>
                 <td><button v-if="s.failed_streak" class="btn sm ghost" @click="resetAttempts(s.id)">Quitar espera</button></td>
               </tr>
             </tbody>
@@ -90,6 +99,10 @@ import CodeBlock from '../components/CodeBlock.vue'
 import { api, parseDate } from '../lib/api.js'
 
 const props = defineProps({ id: { type: String, required: true } })
+const foto = ref(null)
+async function verFoto(sid) {
+  foto.value = (await api(`/teacher/photos/${encodeURIComponent(props.id)}/${sid}`)).image
+}
 const router = useRouter()
 const d = ref(null)
 const error = ref('')
@@ -135,6 +148,8 @@ onMounted(load)
 </script>
 
 <style scoped>
+.modal-foto { position: fixed; inset: 0; background: rgba(0,0,0,.8); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; cursor: zoom-out; }
+.modal-foto img { max-width: 100%; max-height: 100%; border-radius: 8px; }
 h1 { margin: 6px 0; }
 .grade { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); }
 .sub { margin-bottom: 8px; padding: 12px 16px; }

@@ -37,6 +37,8 @@ sections:
     title: "Introducción al osciloscopio PROMAX serie 600"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## ¿Para qué sirve un osciloscopio?
 
@@ -248,6 +250,8 @@ sections:
     title: "NFC: leer tarjetas con el PN532"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## NFC y RFID
 
@@ -410,6 +414,8 @@ sections:
     title: "La cerradura de solenoide de 12 V"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Cómo funciona
 
@@ -589,6 +595,8 @@ sections:
     title: "Proyecto corto: control de acceso NFC"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto del control de acceso: lector PN532, cerradura de 12 V, módulo MOSFET, diodo y placa. Si podéis, con una tarjeta junto al lector."
     theory: |
       ## El encargo
 

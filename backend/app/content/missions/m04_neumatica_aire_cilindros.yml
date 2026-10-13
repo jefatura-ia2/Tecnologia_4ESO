@@ -184,6 +184,8 @@ sections:
     title: "Presión, fuerza y cilindros"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Los cilindros: el "músculo" neumático
 
@@ -437,6 +439,8 @@ sections:
     title: "Proyecto corto: elevador neumático con mando directo"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto del elevador neumático montado: compresor/unidad de acondicionamiento, válvula de mando, cilindro y tubos."
     theory: |
       ## El encargo
 

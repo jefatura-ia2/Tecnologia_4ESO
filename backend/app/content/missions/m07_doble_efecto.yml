@@ -32,6 +32,8 @@ sections:
     title: "Doble efecto con dos 3/2: el enclavamiento"
     hours: 3
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## Montaje
 
@@ -235,6 +237,8 @@ sections:
     title: "Ciclos temporizados"
     hours: 2
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## El ciclo básico de una máquina
 
@@ -356,6 +360,8 @@ sections:
     title: "Velocidad del cilindro y regulación"
     hours: 1
     kind: lesson
+    foto:
+      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
     theory: |
       ## ¿A qué velocidad va el cilindro?
 
@@ -459,6 +465,8 @@ sections:
     title: "Proyecto corto: barrera neumática"
     hours: 3
     kind: challenge
+    foto:
+      indicaciones: "Foto de la barrera neumática: placa, módulo MOSFET, las dos electroválvulas y el cilindro de doble efecto."
     theory: |
       ## El encargo
 

@@ -78,7 +78,8 @@ def mission_summary(m: dict) -> dict:
         "extra": bool(m.get("extra")),
         "trimestre": m.get("trimestre"),
         "sections": [
-            {"id": s["id"], "title": s["title"], "hours": s.get("hours", 0), "kind": s.get("kind", "lesson")}
+            {"id": s["id"], "title": s["title"], "hours": s.get("hours", 0), "kind": s.get("kind", "lesson"),
+             "foto": bool(s.get("foto"))}
             for s in m["sections"]
         ],
     }

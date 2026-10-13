@@ -19,6 +19,7 @@ Plataforma web para un **curso completo de Tecnología de 4º ESO** (36 semanas 
 
 - **48 secciones** (4 por misión) con teoría, ejemplos para las dos placas, práctica de aula/taller y evaluación obligatoria (test, completar huecos y **72 ejercicios de código** corregidos automáticamente en un simulador de MicroPython).
 - Cada misión acaba con un **proyecto corto** (3 h): contador de piezas, semáforo, **control de acceso NFC**, elevador, puerta desde dos puntos, expulsor, barrera, prensa, estampadora A+ B+ B− A−, prensa segura con bimanual, panel web… y un **proyecto final** con GRAFCET.
+- **Fotos obligatorias de los montajes**: en 35 secciones (los 12 proyectos cortos y las prácticas de taller o laboratorio) el alumno debe subir una foto de su montaje (desde el móvil, se reduce sola a ~1600 px). La sección no cuenta como superada hasta que hay foto; el profesor las revisa en **Panel → 📷 Fotos** (aceptar / rechazar con comentario). Una foto rechazada vuelve a pedirse, pero no bloquea lo que el alumno ya tenía desbloqueado. Qué secciones piden foto se indica en el YAML con `foto: { indicaciones: "…" }`.
 - **Desbloqueo progresivo**, **pistas** que no revelan la respuesta, **anti-trampa** (tiempo mínimo, espera tras fallos seguidos, alertas de código copiado).
 - **Panel del profesorado**: progreso, alertas, dificultad por pregunta, soluciones, desbloqueo para toda la clase, notas manuales y exportación CSV.
 - **Ilustraciones** de los montajes de prácticas, del osciloscopio y de los circuitos neumáticos dentro de las lecciones.

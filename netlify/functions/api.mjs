@@ -7,6 +7,7 @@ import { calendar, getMission, getSection, missionSummary, missions, publicSecti
 import { gradeSection, summaryMessage } from './lib/grading.mjs'
 import { HARDWARE } from './lib/hardware.mjs'
 import { getDb } from './lib/store.mjs'
+import { needsPhoto, PHOTO_STATES, photoOk, photoUploaded, validatePhoto } from './lib/photos.mjs'
 
 class HttpError extends Error {
   constructor(status, detail) { super(detail); this.status = status }
@@ -36,7 +37,7 @@ function unlockState(user, prog) {
   let prevDone = true
   for (const m of missions) {
     const unlocked = user.role === 'teacher' || prevDone || prog.overrides.includes(m.id)
-    const passedCount = m.sections.filter((s) => prog.sections[s.id]?.passed).length
+    const passedCount = m.sections.filter((s) => prog.sections[s.id]?.passed && photoOk(s, prog.sections[s.id])).length
     const done = passedCount === m.sections.length
     state.missions[m.id] = { unlocked, completed: done, passed_sections: passedCount, total_sections: m.sections.length }
     let prevOk = true
@@ -44,9 +45,10 @@ function unlockState(user, prog) {
       const p = prog.sections[s.id]
       state.sections[s.id] = {
         unlocked: unlocked && (prevOk || user.role === 'teacher'),
-        passed: !!p?.passed, best_score: p?.best_score || 0, attempts: p?.attempts || 0,
+        passed: !!p?.passed && photoOk(s, p), score_passed: !!p?.passed, best_score: p?.best_score || 0, attempts: p?.attempts || 0,
+        photo_required: needsPhoto(s), photo: needsPhoto(s) ? (p?.photo || null) : null,
       }
-      prevOk = !!p?.passed
+      prevOk = !!p?.passed && photoUploaded(s, p)
     }
     prevDone = done
   }
@@ -226,8 +228,41 @@ route('POST', '/api/sections/:id/submit', async ({ req, db, params }) => {
 
   const newState = unlockState(user, prog)
   const idx = mission.sections.findIndex((s) => s.id === section.id)
-  return json({ ...result, attempts: p.attempts, mission_completed: newState.missions[mission.id].completed,
-    next_unlocked: passed && mission.sections[idx + 1] ? mission.sections[idx + 1].id : null })
+  const photoPending = passed && !photoUploaded(section, p)
+  if (photoPending) result.message += ' 📷 Para completar la sección, sube la foto de tu montaje.'
+  return json({ ...result, attempts: p.attempts, mission_completed: newState.missions[mission.id].completed, photo_pending: photoPending,
+    next_unlocked: passed && !photoPending && mission.sections[idx + 1] ? mission.sections[idx + 1].id : null })
+})
+
+// ------------------------------------------------------------------ fotos de los montajes
+route('POST', '/api/sections/:id/photo', async ({ req, db, params }) => {
+  const user = await currentUser(req, db)
+  if (user.role !== 'student') throw new HttpError(400, 'Solo el alumnado sube fotos de sus montajes.')
+  const { mission, section } = getSection(params.id)
+  if (!section) throw new HttpError(404, 'Sección no encontrada')
+  if (!needsPhoto(section)) throw new HttpError(400, 'Esta sección no pide foto.')
+  const prog = await getProgress(db, user.username)
+  if (!unlockState(user, prog).sections[section.id].unlocked) throw new HttpError(403, 'Sección bloqueada.')
+  const d = await body(req)
+  const v = validatePhoto(d.image)
+  if (!v.ok) throw new HttpError(400, v.msg)
+  const now = nowIso()
+  await db.set(`photos/${user.username}/${section.id}`, { image: d.image, uploaded_at: now })
+  const p = prog.sections[section.id] || { mission_id: mission.id }
+  p.photo = { uploaded_at: now, status: 'pendiente', comment: '', bytes: v.bytes, note: String(d.note || '').slice(0, 300) }
+  prog.sections[section.id] = p
+  await db.set(`progress/${user.username}`, prog)
+  const state = unlockState(user, prog)
+  const idx = mission.sections.findIndex((s) => s.id === section.id)
+  return json({ ok: true, photo: p.photo, state: state.sections[section.id], mission_completed: state.missions[mission.id].completed,
+    next_unlocked: state.sections[section.id].passed && mission.sections[idx + 1] ? mission.sections[idx + 1].id : null })
+})
+
+route('GET', '/api/sections/:id/photo', async ({ req, db, params }) => {
+  const user = await currentUser(req, db)
+  const ph = await db.get(`photos/${user.username}/${params.id}`)
+  if (!ph) throw new HttpError(404, 'Todavía no has subido foto.')
+  return json(ph)
 })
 
 // ------------------------------------------------------------------ profesorado
@@ -257,7 +292,20 @@ function studentRow(u, prog, counts) {
   const core = missions.filter((m) => !m.extra)
   const coreSections = core.flatMap((m) => m.sections)
   const coreAvg = coreSections.reduce((a, s) => a + (prog.sections[s.id]?.best_score || 0), 0) / (coreSections.length || 1)
-  return { ...userOut(u), id: u.username, missions: perMission, passed_sections: passedN, total_sections: total,
+  const photos = { required: 0, uploaded: 0, pending: 0, accepted: 0, rejected: 0 }
+  for (const m of missions) {
+    for (const s of m.sections) {
+      if (!needsPhoto(s)) continue
+      photos.required++
+      const ph = prog.sections[s.id]?.photo
+      if (!ph) continue
+      photos.uploaded++
+      if (ph.status === 'pendiente') photos.pending++
+      else if (ph.status === 'aceptada') photos.accepted++
+      else if (ph.status === 'rechazada') photos.rejected++
+    }
+  }
+  return { ...userOut(u), id: u.username, missions: perMission, passed_sections: passedN, total_sections: total, photos,
     avg_score: Math.round(coreAvg * 1000) / 1000, attempts, flags: counts[u.username] || 0, last_activity: last }
 }
 
@@ -284,6 +332,7 @@ route('GET', '/api/teacher/overview', async ({ req, db }) => {
       avg_progress: rows.length ? Math.round((rows.reduce((a, r) => a + r.passed_sections / r.total_sections, 0) / rows.length) * 1000) / 1000 : 0,
       flags: Object.values(counts).reduce((a, b) => a + b, 0),
       submissions: subs,
+      photos_pending: rows.reduce((a, r) => a + r.photos.pending, 0),
     },
   })
 })
@@ -400,7 +449,7 @@ route('DELETE', '/api/teacher/students/:id', async ({ req, db, params }) => {
   await teacher(req, db)
   const u = await student(db, params.id)
   const keys = [
-    ...(await db.list(`subs/${u.username}/`)), ...(await db.list(`last/${u.username}/`)),
+    ...(await db.list(`subs/${u.username}/`)), ...(await db.list(`last/${u.username}/`)), ...(await db.list(`photos/${u.username}/`)),
     ...(await db.list('code/')).filter((k) => k.endsWith(`/${u.username}`)),
   ]
   const { flags } = await flagCounts(db)
@@ -409,6 +458,44 @@ route('DELETE', '/api/teacher/students/:id', async ({ req, db, params }) => {
   await db.delete(`progress/${u.username}`)
   await db.delete(`users/${u.username}`)
   return json({ ok: true })
+})
+
+route('GET', '/api/teacher/photos', async ({ req, db }) => {
+  await teacher(req, db)
+  const status = new URL(req.url).searchParams.get('status') || ''
+  const out = []
+  for (const u of await listStudents(db)) {
+    const prog = await getProgress(db, u.username)
+    for (const m of missions) {
+      for (const s of m.sections) {
+        const ph = prog.sections[s.id]?.photo
+        if (!ph || (status && ph.status !== status)) continue
+        out.push({ username: u.username, student: u.full_name, group_name: u.group_name || '', mission_id: m.id, mission_number: m.number,
+          section_id: s.id, section_title: s.title, indicaciones: s.foto?.indicaciones || '', score_passed: !!prog.sections[s.id]?.passed, ...ph })
+      }
+    }
+  }
+  return json(out.sort((a, b) => b.uploaded_at.localeCompare(a.uploaded_at)))
+})
+
+route('GET', '/api/teacher/photos/:user/:section', async ({ req, db, params }) => {
+  await teacher(req, db)
+  const ph = await db.get(`photos/${params.user}/${params.section}`)
+  if (!ph) throw new HttpError(404, 'Foto no encontrada')
+  return json(ph)
+})
+
+route('PUT', '/api/teacher/photos/:user/:section', async ({ req, db, params }) => {
+  await teacher(req, db)
+  const u = await student(db, params.user)
+  const d = await body(req)
+  if (!PHOTO_STATES.has(d.status)) throw new HttpError(400, 'Estado no válido')
+  const prog = await getProgress(db, u.username)
+  const p = prog.sections[params.section]
+  if (!p?.photo) throw new HttpError(404, 'Foto no encontrada')
+  p.photo = { ...p.photo, status: d.status, comment: String(d.comment || '').slice(0, 500), reviewed_at: nowIso() }
+  await db.set(`progress/${u.username}`, prog)
+  return json({ ok: true, photo: p.photo })
 })
 
 route('GET', '/api/teacher/stats', async ({ req, db }) => {
@@ -451,7 +538,7 @@ route('GET', '/api/teacher/export.csv', async ({ req, db }) => {
   const esc = (v) => (/[;"\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v))
   const header = ['usuario', 'nombre', 'grupo', 'placa']
   for (const m of missions) header.push(`M${m.number} secciones`, `M${m.number} nota auto (0-10)`, `M${m.number} nota profesor`)
-  header.push('media auto curso (0-10)', 'intentos', 'alertas')
+  header.push('media auto curso (0-10)', 'intentos', 'alertas', 'fotos subidas', 'fotos aceptadas', 'fotos rechazadas')
   const lines = [header.map(esc).join(';')]
   students.forEach((u, i) => {
     const row = studentRow(u, progs[i], counts)
@@ -460,7 +547,7 @@ route('GET', '/api/teacher/export.csv', async ({ req, db }) => {
       const g = progs[i].grades[missions[j].id]?.grade
       line.push(`${pm.passed}/${pm.total}`, dec(pm.avg_score * 10), g == null ? '' : dec(g))
     })
-    line.push(dec(row.avg_score * 10), row.attempts, row.flags)
+    line.push(dec(row.avg_score * 10), row.attempts, row.flags, `${row.photos.uploaded}/${row.photos.required}`, row.photos.accepted, row.photos.rejected)
     lines.push(line.map(esc).join(';'))
   })
   return new Response('﻿' + lines.join('\r\n') + '\r\n', {
