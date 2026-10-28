@@ -40,6 +40,13 @@ for (const f of ['pyodide.mjs', 'pyodide.asm.mjs', 'pyodide.asm.wasm', 'python_s
   else console.warn('Aviso: falta', f, 'en el paquete pyodide')
 }
 
+// 3. Copia los programas de firmware/ a frontend/public/descargas/ para que el alumnado los descargue
+const desc = path.join(pub, 'descargas')
+fs.mkdirSync(desc, { recursive: true })
+for (const f of fs.readdirSync(path.join(root, 'firmware'))) {
+  if (f.endsWith('.py') && f !== 'secretos.py') fs.copyFileSync(path.join(root, 'firmware', f), path.join(desc, f))
+}
+
 const sections = missions.reduce((a, m) => a + m.sections.length, 0)
 console.log(`Temario: ${missions.length} misiones, ${sections} secciones → ${path.relative(root, out)}`)
 console.log('Simulador y Pyodide copiados a frontend/public/')

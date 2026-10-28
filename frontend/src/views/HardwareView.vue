@@ -46,7 +46,8 @@
             <tr><td>Seta de EMERGENCIA (contacto NC)</td><td>GP16</td><td>GPIO 16</td><td>Reposo = 0 · pulsada o cable roto = 1</td></tr>
             <tr><td>Finales de carrera A0 · A1</td><td>GP18 · GP19</td><td>GPIO 17 · 18</td><td>A0 = cilindro A dentro · A1 = fuera</td></tr>
             <tr><td>Finales de carrera B0 · B1</td><td>GP20 · GP21</td><td>GPIO 8 · 9</td><td>Contacto NA a GND · pisado = 0</td></tr>
-            <tr><td>PN532 NFC V3 (modo HSU) · SDA/TXD → RX · SCL/RXD → TX</td><td>RX GP5 · TX GP4 (UART1)</td><td>RX GPIO 11 · TX GPIO 10 (UART1)</td><td>Interruptores SEL0 y SEL1 en OFF · VCC a 3V3</td></tr>
+            <tr><td>PN532 NFC V3 por I2C (SDA · SCL)</td><td>GP6 · GP7 (I2C1, pines 9 y 10)</td><td>GPIO 10 · GPIO 11</td><td>Interruptores 1 = ON, 2 = OFF · VCC a 3V3 · dirección 0x24</td></tr>
+            <tr><td>Tira WS2812 de 8 LED (DIN)</td><td>GP22 · 5V a VBUS</td><td>GPIO 21 · 5V</td><td>ESP32-C3 SuperMini: IO3 · brillo ≤ 0,25 con USB</td></tr>
             <tr><td>Cerradura de solenoide 12 V</td><td>GP10 (canal 1 del MOSFET)</td><td>GPIO 4 (canal 1 del MOSFET)</td><td>Con diodo 1N4007 · máx. 3 s abierta</td></tr>
             <tr><td>Salida PWM para el osciloscopio</td><td>GP22</td><td>GPIO 21</td><td>Punta de la sonda al pin, pinza a GND</td></tr>
             <tr><td>LED de la placa</td><td><code>Pin("LED")</code></td><td>NeoPixel en <code>Pin(48)</code></td><td>Indicador de estado</td></tr>
@@ -83,7 +84,9 @@
       <table class="table">
         <tbody>
           <tr><th>Osciloscopio PROMAX serie OD-600</th><td>Osciloscopio digital (OD-603, OD-606, OD-610…). Sonda en x10 y el mismo ajuste en el menú del canal; compensa la sonda con su salida de calibración; la pinza de masa solo a GND. Nunca se mide la red de 230 V.</td></tr>
-          <tr><th>PN532 NFC RFID Module V3</th><td>Lector NFC de 13,56 MHz. En el curso se usa por puerto serie (HSU) con el archivo <code>firmware/pn532_uart.py</code>.</td></tr>
+          <tr><th>PN532 NFC RFID Module V3</th><td>Lector NFC de 13,56 MHz. En el curso se usa por I2C con la librería <a href="/descargas/pn532_i2c.py">pn532_i2c.py</a> y el programa de prueba <a href="/descargas/pn532_i2c_main.py">pn532_i2c_main.py</a> (guárdalo como main.py). <a href="/simuladores/pn532_i2c_pico_w_3d.html" target="_blank" rel="noopener">Montaje en 3D ↗</a></td></tr>
+          <tr><th>Tira WS2812 (NeoPixel) de 8 LED</th><td>LED RGB direccionables con un solo cable de datos (DIN). Hasta 60 mA por LED en blanco: con alimentación USB usa brillo ≤ 0,25. Programa de prueba: <a href="/descargas/tira_colores.py">tira_colores.py</a>. <a href="/simuladores/ws2812_esp32c3_3d.html" target="_blank" rel="noopener">Montaje en 3D con ESP32-C3 ↗</a></td></tr>
+          <tr><th>ESP32-C3 SuperMini</th><td>Placa pequeña (22,5 × 18 mm) con WiFi/BLE y USB-C, programable con MicroPython. En la misión 3 se usa para la tira WS2812 (DIN en IO3).</td></tr>
           <tr><th>Cerradura de solenoide 12 V</th><td>Fail-secure: cerrada sin corriente, se abre con 12 V (≈ 0,5-1 A). Siempre con módulo MOSFET y diodo de libre circulación; no dejarla activada más de unos segundos.</td></tr>
         </tbody>
       </table>

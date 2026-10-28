@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" width="900" height="470" role="img" aria-label="Tira WS2812 de 8 LED: pads DIN y DOUT y conexión a la placa"><title>Tira WS2812 de 8 LED: pads DIN y DOUT y conexión a la placa</title><rect width="100%" height="100%" fill="#ffffff"/><rect x="150" y="90" width="600" height="120" rx="10" fill="#15171a" stroke="#000" stroke-width="2" />
+<rect x="201" y="124" width="48" height="48" rx="4" fill="#f5f5f4" stroke="#a8a29e" stroke-width="1.5" />
+<circle cx="225" cy="148" r="15" fill="#22c55e" stroke="#e7e5e4" stroke-width="2"/>
+<rect x="217" y="182" width="16" height="9" rx="0" fill="#78716c" stroke="none" stroke-width="0" />
+<rect x="265" y="124" width="48" height="48" rx="4" fill="#f5f5f4" stroke="#a8a29e" stroke-width="1.5" />
+<circle cx="289" cy="148" r="15" fill="#ef4444" stroke="#e7e5e4" stroke-width="2"/>
+<rect x="281" y="182" width="16" height="9" rx="0" fill="#78716c" stroke="none" stroke-width="0" />
+<rect x="329" y="124" width="48" height="48" rx="4" fill="#f5f5f4" stroke="#a8a29e" stroke-width="1.5" />
+<circle cx="353" cy="148" r="15" fill="#f97316" stroke="#e7e5e4" stroke-width="2"/>
+<rect x="345" y="182" width="16" height="9" rx="0" fill="#78716c" stroke="none" stroke-width="0" />
+<rect x="393" y="124" width="48" height="48" rx="4" fill="#f5f5f4" stroke="#a8a29e" stroke-width="1.5" />
+<circle cx="417" cy="148" r="15" fill="#3b82f6" stroke="#e7e5e4" stroke-width="2"/>
+<rect x="409" y="182" width="16" height="9" rx="0" fill="#78716c" stroke="none" stroke-width="0" />
+<rect x="457" y="124" width="48" height="48" rx="4" fill="#f5f5f4" stroke="#a8a29e" stroke-width="1.5" />
+<circle cx="481" cy="148" r="15" fill="#22c55e" stroke="#e7e5e4" stroke-width="2"/>
+<rect x="473" y="182" width="16" height="9" rx="0" fill="#78716c" stroke="none" stroke-width="0" />
+<rect x="521" y="124" width="48" height="48" rx="4" fill="#f5f5f4" stroke="#a8a29e" stroke-width="1.5" />
+<circle cx="545" cy="148" r="15" fill="#ef4444" stroke="#e7e5e4" stroke-width="2"/>
+<rect x="537" y="182" width="16" height="9" rx="0" fill="#78716c" stroke="none" stroke-width="0" />
+<rect x="585" y="124" width="48" height="48" rx="4" fill="#f5f5f4" stroke="#a8a29e" stroke-width="1.5" />
+<circle cx="609" cy="148" r="15" fill="#f97316" stroke="#e7e5e4" stroke-width="2"/>
+<rect x="601" y="182" width="16" height="9" rx="0" fill="#78716c" stroke="none" stroke-width="0" />
+<rect x="649" y="124" width="48" height="48" rx="4" fill="#f5f5f4" stroke="#a8a29e" stroke-width="1.5" />
+<circle cx="673" cy="148" r="15" fill="#3b82f6" stroke="#e7e5e4" stroke-width="2"/>
+<rect x="665" y="182" width="16" height="9" rx="0" fill="#78716c" stroke="none" stroke-width="0" />
+<circle cx="355" cy="108" r="7" fill="#f5f5f4" stroke="#a8a29e" stroke-width="1.5"/>
+<circle cx="545" cy="108" r="7" fill="#f5f5f4" stroke="#a8a29e" stroke-width="1.5"/>
+<rect x="156" y="105" width="22" height="14" rx="2" fill="#d4a017" stroke="#7c5e0b" stroke-width="1" />
+<rect x="722" y="105" width="22" height="14" rx="2" fill="#d4a017" stroke="#7c5e0b" stroke-width="1" />
+<rect x="80" y="102" width="58" height="20" rx="5" fill="#2563eb" stroke="none" stroke-width="0" />
+<text x="109" y="117" font-size="12" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >GND</text>
+<rect x="762" y="102" width="62" height="20" rx="5" fill="#2563eb" stroke="none" stroke-width="0" />
+<text x="793" y="117" font-size="12" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >GND</text>
+<rect x="156" y="130" width="22" height="14" rx="2" fill="#d4a017" stroke="#7c5e0b" stroke-width="1" />
+<rect x="722" y="130" width="22" height="14" rx="2" fill="#d4a017" stroke="#7c5e0b" stroke-width="1" />
+<rect x="80" y="127" width="58" height="20" rx="5" fill="#16a34a" stroke="none" stroke-width="0" />
+<text x="109" y="142" font-size="12" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >DIN</text>
+<rect x="762" y="127" width="62" height="20" rx="5" fill="#16a34a" stroke="none" stroke-width="0" />
+<text x="793" y="142" font-size="12" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >DOUT</text>
+<rect x="156" y="155" width="22" height="14" rx="2" fill="#d4a017" stroke="#7c5e0b" stroke-width="1" />
+<rect x="722" y="155" width="22" height="14" rx="2" fill="#d4a017" stroke="#7c5e0b" stroke-width="1" />
+<rect x="80" y="152" width="58" height="20" rx="5" fill="#dc2626" stroke="none" stroke-width="0" />
+<text x="109" y="167" font-size="12" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >5V</text>
+<rect x="762" y="152" width="62" height="20" rx="5" fill="#dc2626" stroke="none" stroke-width="0" />
+<text x="793" y="167" font-size="12" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >5V</text>
+<rect x="156" y="180" width="22" height="14" rx="2" fill="#d4a017" stroke="#7c5e0b" stroke-width="1" />
+<rect x="722" y="180" width="22" height="14" rx="2" fill="#d4a017" stroke="#7c5e0b" stroke-width="1" />
+<rect x="80" y="177" width="58" height="20" rx="5" fill="#2563eb" stroke="none" stroke-width="0" />
+<text x="109" y="192" font-size="12" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >GND</text>
+<rect x="762" y="177" width="62" height="20" rx="5" fill="#2563eb" stroke="none" stroke-width="0" />
+<text x="793" y="192" font-size="12" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >GND</text>
+<line x1="400" y1="232" x2="500" y2="232" stroke="#0f766e" stroke-width="2.5" stroke-linecap="round"  />
+<path d="M500.0,232.0 L490.1,236.8 L490.1,227.2 Z" fill="#0f766e" stroke="#0f766e" stroke-width="1"/>
+<text x="450" y="254" font-size="12" fill="#0f766e" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >sentido de los datos</text>
+<text x="109" y="74" font-size="12" fill="#16a34a" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >ENTRADA</text>
+<text x="793" y="74" font-size="12" fill="#16a34a" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >SALIDA</text>
+<text x="450.0" y="74" font-size="15" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Tira WS2812 · 8 LED 5050</text>
+<rect x="40" y="300" width="260" height="130" rx="8" fill="#f8fafc" stroke="#2563eb" stroke-width="1.5" />
+<text x="52" y="322" font-size="14" fill="#2563eb" text-anchor="start" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Raspberry Pi Pico W</text>
+<text x="52" y="344" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >DIN → GP22</text>
+<text x="52" y="363" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >5V → VBUS (pin 40)</text>
+<text x="52" y="382" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >GND → GND</text>
+<text x="52" y="401" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >NeoPixel(Pin(22), 8)</text>
+<rect x="320" y="300" width="260" height="130" rx="8" fill="#f8fafc" stroke="#0f766e" stroke-width="1.5" />
+<text x="332" y="322" font-size="14" fill="#0f766e" text-anchor="start" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >ESP32-S3-DevKit</text>
+<text x="332" y="344" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >DIN → GPIO 21</text>
+<text x="332" y="363" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >5V → 5V</text>
+<text x="332" y="382" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >GND → GND</text>
+<text x="332" y="401" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >NeoPixel(Pin(21), 8)</text>
+<rect x="600" y="300" width="260" height="130" rx="8" fill="#f8fafc" stroke="#ea580c" stroke-width="1.5" />
+<text x="612" y="322" font-size="14" fill="#ea580c" text-anchor="start" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >ESP32-C3 SuperMini</text>
+<text x="612" y="344" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >DIN → IO3</text>
+<text x="612" y="363" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >5V → 5V</text>
+<text x="612" y="382" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >GND → GND</text>
+<text x="612" y="401" font-size="13" fill="#1f2937" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >NeoPixel(Pin(3), 8)</text>
+<text x="450.0" y="455" font-size="13" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Conecta siempre el extremo DIN. DOUT solo sirve para encadenar otra tira. Brillo ≤ 0,25 con alimentación USB.</text></svg>

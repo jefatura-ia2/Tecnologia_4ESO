@@ -22,7 +22,7 @@ Curso completo: **36 semanas × 3 sesiones de 1 h = 108 h** en doce misiones de 
 ## Bloques de contenido
 
 - **Programación en MicroPython** (M1-M2 y transversal en todo el curso): tipos de datos, listas y diccionarios, funciones, entradas/salidas digitales, antirrebote y flancos, temporización sin bloquear, máquinas de estados, clases y objetos, excepciones (`try/finally`), interrupciones, archivos, WiFi y HTTP.
-- **Laboratorio de electrónica** (M3): osciloscopio PROMAX serie 600 (V/div, s/div, disparo, sonda x10, medidas de frecuencia y ciclo de trabajo), lector NFC PN532 por puerto serie y cerradura de solenoide de 12 V con MOSFET: proyecto de control de acceso.
+- **Laboratorio de electrónica** (M3): osciloscopio PROMAX serie 600 (V/div, s/div, disparo, sonda x10, medidas de frecuencia y ciclo de trabajo), lector NFC PN532 por I2C, tira de LED WS2812 y cerradura de solenoide de 12 V con MOSFET: proyecto de control de acceso.
 - **Neumática básica** (M4-M5): producción y acondicionamiento del aire, presión y fuerza, consumo, válvulas distribuidoras y simbología, antirretorno y selectora, circuitos de mando directo e indirecto.
 - **Electroneumática programada** (M6-M12): etapa de potencia con MOSFET, electroválvulas 2/2 y 3/2 de 12 V, cilindros de simple y doble efecto, finales de carrera, secuencias, seguridad (seta, bimanual), mantenimiento y GRAFCET.
 
@@ -105,13 +105,14 @@ Curso completo: **36 semanas × 3 sesiones de 1 h = 108 h** en doce misiones de 
 
 ### 🔐 Misión 3: Laboratorio: osciloscopio y control de acceso NFC
 
-*Medir señales con el osciloscopio PROMAX serie 600 y abrir una cerradura de solenoide de 12 V con tarjetas NFC (PN532)*
+*Medir señales con el osciloscopio PROMAX serie 600 y abrir una cerradura de 12 V con tarjetas NFC (PN532 por I2C), con una tira WS2812 como semáforo*
 
 **Objetivos**
 
 - Manejar un osciloscopio digital (PROMAX serie 600) para medir tensión, periodo, frecuencia y ciclo de trabajo.
 - Generar señales PWM con la placa y comprobarlas en el osciloscopio.
-- Leer el identificador (UID) de tarjetas NFC con el módulo PN532 NFC RFID V3 por puerto serie.
+- Leer el identificador (UID) de tarjetas NFC con el módulo PN532 NFC RFID V3 por el bus I2C.
+- Controlar una tira de LED WS2812 (NeoPixel) como indicador de estado.
 - Gobernar una cerradura de solenoide de 12 V con un módulo MOSFET de forma segura.
 - Programar un control de acceso con lista de tarjetas autorizadas y bloqueo tras varios intentos fallidos.
 
@@ -121,16 +122,16 @@ Curso completo: **36 semanas × 3 sesiones de 1 h = 108 h** en doce misiones de 
 - Diseña y programa sistemas de control con sensores de identificación y actuadores electromecánicos.
 - Valora la seguridad y la privacidad en los sistemas de identificación.
 
-**Material:** Osciloscopio PROMAX serie 600 (OD-603, OD-606, OD-610…) con su sonda x1/x10 · Raspberry Pi Pico W o ESP32-S3-DevKit, protoboard y cables · Módulo PN532 NFC RFID Module V3 y tarjetas o llaveros NFC (MIFARE Classic / NTAG) · Cerradura de solenoide de 12 V, módulo MOSFET de nivel lógico, diodo 1N4007 y fuente de 12 V · Archivo pn532_uart.py (carpeta firmware del proyecto)
+**Material:** Osciloscopio PROMAX serie 600 (OD-603, OD-606, OD-610…) con su sonda x1/x10 · Raspberry Pi Pico W o ESP32-S3-DevKit, protoboard y cables · Módulo PN532 NFC RFID Module V3 y tarjetas o llaveros NFC (MIFARE Classic / NTAG) · Cerradura de solenoide de 12 V, módulo MOSFET de nivel lógico, diodo 1N4007 y fuente de 12 V · Tira de 8 LED WS2812 (5050) y, opcionalmente, una ESP32-C3 SuperMini · Archivos pn532_i2c.py, pn532_i2c_main.py y tira_colores.py (enlaces de descarga dentro de las lecciones)
 
 | Semana | Sesión | Contenido | Sección |
 |---|---|---|---|
 | 7 | 1 | El osciloscopio: pantalla, divisiones, V/div y s/div | `m3s1` |
 | 7 | 2 | Sonda x1/x10, disparo y medidas automáticas: la PWM de la placa | `m3s1` |
 | 7 | 3 | NFC y RFID: tarjetas, UID y el módulo PN532 | `m3s2` |
-| 8 | 1 | Conectar el PN532 por puerto serie y leer tarjetas | `m3s2` |
+| 8 | 1 | Conectar el PN532 por I2C y leer tarjetas | `m3s2` |
 | 8 | 2 | La cerradura de solenoide: MOSFET, diodo y fuente de 12 V | `m3s3` |
-| 8 | 3 | Ver la conmutación de la cerradura con el osciloscopio | `m3s3` |
+| 8 | 3 | Tira WS2812 de estado y la cerradura vista con el osciloscopio | `m3s3` |
 | 9 | 1 | Proyecto corto: control de acceso NFC (montaje) | `m3s4` |
 | 9 | 2 | Proyecto corto: programación y bloqueo por intentos | `m3s4` |
 | 9 | 3 | Proyecto corto: pruebas y presentación | `m3s4` |
@@ -138,9 +139,9 @@ Curso completo: **36 semanas × 3 sesiones de 1 h = 108 h** en doce misiones de 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
 | m3s1 · Introducción al osciloscopio PROMAX serie 600 | Lección | 2 | 3 test · 1 completar · 2 código |
-| m3s2 · NFC: leer tarjetas con el PN532 | Lección | 2 | 2 test · 0 completar · 2 código |
-| m3s3 · La cerradura de solenoide de 12 V | Lección | 2 | 2 test · 0 completar · 2 código |
-| m3s4 · Proyecto corto: control de acceso NFC | Proyecto corto | 3 | 2 test · 0 completar · 1 código |
+| m3s2 · NFC: leer tarjetas con el PN532 por I2C | Lección | 2 | 3 test · 0 completar · 2 código |
+| m3s3 · Actuadores: cerradura de 12 V y tira de LED WS2812 | Lección | 2 | 2 test · 0 completar · 3 código |
+| m3s4 · Proyecto corto: control de acceso NFC | Proyecto corto | 3 | 2 test · 0 completar · 2 código |
 
 ### 💨 Misión 4: Neumática I: aire comprimido y cilindros
 

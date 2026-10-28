@@ -32,8 +32,8 @@ caption(s, "La pinza de masa va SIEMPRE a GND. La placa se alimenta por el USB d
 s.save("montaje_pwm.svg")
 
 
-# 2 ─ PN532 por puerto serie ---------------------------------------------------
-s = SVG(900, 520, "Conexión del módulo PN532 NFC V3 a la Pico W en modo HSU")
+# 2 ─ PN532 por I2C -----------------------------------------------------------
+s = SVG(900, 520, "Conexión del módulo PN532 NFC V3 a la Pico W por I2C")
 X, Y = 40, 110
 s.rect(X, Y, 270, 210, fill=C["pn532"], stroke="#7f1d1d", sw=2, rx=10)
 for i in range(4):
@@ -44,30 +44,31 @@ s.text(X + 222, Y + 32, "ON ↑", 9, "white", "middle")
 for i in range(2):
     sx = X + 202 + i * 24
     s.rect(sx, Y + 38, 14, 28, fill="#e5e7eb", stroke="#111", sw=1)
-    s.rect(sx + 2, Y + 52, 10, 12, fill="#111", stroke="none", sw=0)
-    s.text(sx + 7, Y + 88, ("SEL0", "SEL1")[i], 9, "white", "middle")
-s.text(X + 222, Y + 104, "OFF · OFF = HSU", 10, "white", "middle", "bold")
+    up = i == 0                                            # 1 = ON (arriba), 2 = OFF (abajo)
+    s.rect(sx + 2, Y + (40 if up else 52), 10, 12, fill="#111", stroke="none", sw=0)
+    s.text(sx + 7, Y + 88, str(i + 1), 10, "white", "middle", "bold")
+s.text(X + 222, Y + 104, "1 ON · 2 OFF = I2C", 10, "white", "middle", "bold")
 s.text(X + 120, Y + 200, "PN532 NFC RFID Module V3", 12, "white", "middle", "bold")
 hdr = {}
-for i, n in enumerate(("GND", "VCC", "SDA/TXD", "SCL/RXD")):
+for i, n in enumerate(("GND", "VCC", "SDA", "SCL")):
     hy = Y + 122 + i * 18
     s.circle(X + 262, hy, 5, fill="#d4a017", stroke="#7c5e0b", sw=1)
     s.text(X + 252, hy + 4, n, 10, "white", "end", "bold")
     hdr[n] = (X + 262, hy)
-p = pico(s, 600, 80, highlight=("GP4", "GP5", "GND", "3V3"))
+p = pico(s, 600, 80, highlight=("GP6", "GP7", "GND", "3V3"))
 def route(a, b, color, via_x):
     s.wire([a, (via_x, a[1]), (via_x, b[1]), b], color, 3)
     s.dot(*a, color); s.dot(*b, color)
 route(hdr["GND"], p["L7"], C["black"], 430)
-route(hdr["SDA/TXD"], p["GP5"], C["blue"], 470)
-route(hdr["SCL/RXD"], p["GP4"], C["green"], 510)
+route(hdr["SDA"], p["GP6"], C["blue"], 470)
+route(hdr["SCL"], p["GP7"], C["yellow"], 510)
 v = p["3V3"]
 s.wire([hdr["VCC"], (400, hdr["VCC"][1]), (400, 40), (790, 40), (790, v[1]), v], C["red"], 3)
 s.dot(*hdr["VCC"], C["red"]); s.dot(*v, C["red"])
-s.text(600, 32, "VCC → 3V3", 12, C["red"], "middle", "bold")
-s.label_box(40, 350, 260, 132, "Pico W (UART1)", ["SDA/TXD → GP5 (RX)", "SCL/RXD → GP4 (TX)", "VCC → 3V3 · GND → GND", "UART(1, 115200, tx=4, rx=5)"], C["blue"])
-s.label_box(320, 350, 260, 132, "ESP32-S3 (UART1)", ["SDA/TXD → GPIO 11 (RX)", "SCL/RXD → GPIO 10 (TX)", "VCC → 3V3 · GND → GND", "UART(1, 115200, tx=10, rx=11)"], C["accent"])
-caption(s, "El TX de uno va al RX del otro. Cambia los interruptores SEL0/SEL1 sin alimentación.")
+s.text(600, 32, "VCC → 3V3 (pin 36)", 12, C["red"], "middle", "bold")
+s.label_box(40, 350, 260, 132, "Pico W (bus I2C1)", ["SDA → GP6 (pin 9)", "SCL → GP7 (pin 10)", "VCC → 3V3 (36) · GND → GND (8)", "I2C(1, sda=Pin(6), scl=Pin(7))"], C["blue"])
+s.label_box(320, 350, 260, 132, "ESP32-S3", ["SDA → GPIO 10", "SCL → GPIO 11", "VCC → 3V3 · GND → GND", "I2C(0, sda=Pin(10), scl=Pin(11))"], C["accent"])
+caption(s, "Dirección I2C del PN532: 0x24. Cambia los interruptores sin alimentación.")
 s.save("montaje_pn532.svg")
 
 

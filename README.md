@@ -171,7 +171,8 @@ Todas las entradas usan `Pin.PULL_UP` y van a GND (pulsado/pisado = 0). La seta 
 ## Laboratorio de electrónica (misión 3): material y conexiones
 
 - **Osciloscopio PROMAX serie OD-600** con sonda x1/x10. Práctica con la PWM de la placa (GP22 en la Pico W, GPIO 21 en la ESP32-S3).
-- **PN532 NFC RFID Module V3** en modo **HSU** (interruptores SEL0 y SEL1 en OFF), alimentado a 3V3, con el controlador `firmware/pn532_uart.py`: SDA/TXD → RX (GP5 · GPIO 11) y SCL/RXD → TX (GP4 · GPIO 10), UART1 a 115200 baudios.
+- **PN532 NFC RFID Module V3** por **I2C** (interruptores 1 = ON, 2 = OFF, dirección 0x24) con la librería `firmware/pn532_i2c.py` y el programa de prueba `firmware/pn532_i2c_main.py`: SDA → GP6 y SCL → GP7 en la Pico W (GPIO 10 y 11 en la ESP32-S3). Simulador 3D del montaje en `frontend/public/simuladores/`.
+- **Tira WS2812 de 8 LED** como semáforo del control de acceso (DIN en GP22 · GPIO 21 · IO3 en la ESP32-C3 SuperMini), con `firmware/tira_colores.py` y su simulador 3D.
 - **Cerradura de solenoide de 12 V** (fail-secure) en el canal 1 del módulo MOSFET (GP10 · GPIO 4), con diodo 1N4007 y como máximo 3 s activada.
 
 **Seguridad en el taller:** gafas siempre que haya aire; 3-4 bar en el aula (2 bar en las primeras pruebas); nunca conectar/desconectar tubos con presión; los 12 V nunca llegan a la placa.

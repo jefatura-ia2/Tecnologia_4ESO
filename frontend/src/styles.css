@@ -161,3 +161,6 @@ label { display: block; font-weight: 600; font-size: .9rem; margin: 10px 0 4px; 
 /* Ilustraciones de las lecciones */
 .prose img { display: block; max-width: 100%; height: auto; margin: 1.1rem auto 0.4rem; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
 .prose p:has(> img) { text-align: center; font-size: 0.9em; color: #64748b; margin-bottom: 1.2rem; }
+
+/* Simuladores 3D dentro de las lecciones */
+.prose iframe.sim3d { display: block; width: 100%; height: min(70vh, 480px); border: 1px solid var(--border); border-radius: 12px; background: #12161a; margin: 10px 0 18px; }

@@ -3,13 +3,14 @@ number: 3
 trimestre: 1
 icon: "🔐"
 title: "Laboratorio: osciloscopio y control de acceso NFC"
-subtitle: "Medir señales con el osciloscopio PROMAX serie 600 y abrir una cerradura de solenoide de 12 V con tarjetas NFC (PN532)"
+subtitle: "Medir señales con el osciloscopio PROMAX serie 600 y abrir una cerradura de 12 V con tarjetas NFC (PN532 por I2C), con una tira WS2812 como semáforo"
 weeks: [7, 8, 9]
 hours: 9
 objectives:
   - Manejar un osciloscopio digital (PROMAX serie 600) para medir tensión, periodo, frecuencia y ciclo de trabajo.
   - Generar señales PWM con la placa y comprobarlas en el osciloscopio.
-  - Leer el identificador (UID) de tarjetas NFC con el módulo PN532 NFC RFID V3 por puerto serie.
+  - Leer el identificador (UID) de tarjetas NFC con el módulo PN532 NFC RFID V3 por el bus I2C.
+  - Controlar una tira de LED WS2812 (NeoPixel) como indicador de estado.
   - Gobernar una cerradura de solenoide de 12 V con un módulo MOSFET de forma segura.
   - Programar un control de acceso con lista de tarjetas autorizadas y bloqueo tras varios intentos fallidos.
 materials:
@@ -17,7 +18,8 @@ materials:
   - Raspberry Pi Pico W o ESP32-S3-DevKit, protoboard y cables
   - Módulo PN532 NFC RFID Module V3 y tarjetas o llaveros NFC (MIFARE Classic / NTAG)
   - Cerradura de solenoide de 12 V, módulo MOSFET de nivel lógico, diodo 1N4007 y fuente de 12 V
-  - Archivo pn532_uart.py (carpeta firmware del proyecto)
+  - Tira de 8 LED WS2812 (5050) y, opcionalmente, una ESP32-C3 SuperMini
+  - Archivos pn532_i2c.py, pn532_i2c_main.py y tira_colores.py (enlaces de descarga dentro de las lecciones)
 criteria:
   - Utiliza instrumentos de medida (osciloscopio) para analizar el funcionamiento de circuitos electrónicos.
   - Diseña y programa sistemas de control con sensores de identificación y actuadores electromecánicos.
@@ -26,9 +28,9 @@ schedule:
   - {week: 7, session: 1, title: "El osciloscopio: pantalla, divisiones, V/div y s/div", section: m3s1}
   - {week: 7, session: 2, title: "Sonda x1/x10, disparo y medidas automáticas: la PWM de la placa", section: m3s1}
   - {week: 7, session: 3, title: "NFC y RFID: tarjetas, UID y el módulo PN532", section: m3s2}
-  - {week: 8, session: 1, title: "Conectar el PN532 por puerto serie y leer tarjetas", section: m3s2}
+  - {week: 8, session: 1, title: "Conectar el PN532 por I2C y leer tarjetas", section: m3s2}
   - {week: 8, session: 2, title: "La cerradura de solenoide: MOSFET, diodo y fuente de 12 V", section: m3s3}
-  - {week: 8, session: 3, title: "Ver la conmutación de la cerradura con el osciloscopio", section: m3s3}
+  - {week: 8, session: 3, title: "Tira WS2812 de estado y la cerradura vista con el osciloscopio", section: m3s3}
   - {week: 9, session: 1, title: "Proyecto corto: control de acceso NFC (montaje)", section: m3s4}
   - {week: 9, session: 2, title: "Proyecto corto: programación y bloqueo por intentos", section: m3s4}
   - {week: 9, session: 3, title: "Proyecto corto: pruebas y presentación", section: m3s4}
@@ -247,11 +249,11 @@ sections:
             - {desc: "duty 0 % y 100 %", call: "(duty_u16(0), duty_u16(100))", expected: [0, 65535]}
 
   - id: m3s2
-    title: "NFC: leer tarjetas con el PN532"
+    title: "NFC: leer tarjetas con el PN532 por I2C"
     hours: 2
     kind: lesson
     foto:
-      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
+      indicaciones: "Foto del PN532 conectado por I2C a la placa (SDA, SCL, 3V3 y GND visibles) y, si puedes, la consola de Thonny mostrando el UID de una tarjeta."
     theory: |
       ## NFC y RFID
 
@@ -263,27 +265,38 @@ sections:
 
       Puede comunicarse de tres formas, que se eligen con los **dos interruptores** de la placa:
 
-      | Modo | SEL0 | SEL1 |
+      | Modo | SEL0 (1) | SEL1 (2) |
       |---|---|---|
-      | **HSU (puerto serie)** ← usaremos este | OFF | OFF |
-      | I2C | ON | OFF |
+      | HSU (puerto serie) | OFF | OFF |
+      | **I2C** ← usaremos este | **ON** | **OFF** |
       | SPI | OFF | ON |
 
       ⚠️ Cambia los interruptores **sin alimentación**.
 
-      **Conexión en modo HSU** (conector de 4 pines del módulo):
+      ## El bus I2C: dos cables para muchos dispositivos
 
-      | PN532 | Pico W | ESP32-S3 |
+      I2C usa solo **dos líneas**: **SDA** (datos) y **SCL** (reloj, la marca la placa). Cada dispositivo
+      tiene una **dirección**; la del PN532 es **0x24** (36 en decimal). Con `i2c.scan()` la placa pregunta
+      quién hay conectado: si aparece `0x24`, el cableado es correcto.
+
+      **Conexión** (conector de 4 pines del módulo; guíate por los nombres serigrafiados, el orden cambia según el fabricante):
+
+      | PN532 | Pico W (bus I2C1) | ESP32-S3 |
       |---|---|---|
-      | VCC | 3V3 | 3V3 |
-      | GND | GND | GND |
-      | SDA/TXD | GP5 (RX de UART1) | GPIO 11 (RX) |
-      | SCL/RXD | GP4 (TX de UART1) | GPIO 10 (TX) |
+      | SDA | GP6 (pin físico 9) | GPIO 10 |
+      | SCL | GP7 (pin físico 10) | GPIO 11 |
+      | VCC | 3V3 (pin físico 36) | 3V3 |
+      | GND | GND (pin físico 8) | GND |
 
-      Fíjate: el **TX** de uno va al **RX** del otro.
+      ![Conexión del PN532 V3 a la Pico W por I2C](/img/montaje_pn532.svg)
+      *PN532 en modo I2C (1 = ON, 2 = OFF) conectado al bus I2C1 de la Pico W.*
 
-      ![Conexión del PN532 V3 a la Pico W por puerto serie](/img/montaje_pn532.svg)
-      *PN532 en modo HSU (SEL0 y SEL1 en OFF) conectado a la UART1.*
+      ### 🧊 El montaje en 3D
+
+      Gira, acerca y desplaza el montaje para ver por dónde va cada cable.
+      [Abrir el simulador a pantalla completa ↗](/simuladores/pn532_i2c_pico_w_3d.html)
+
+      <iframe class="sim3d" src="/simuladores/pn532_i2c_pico_w_3d.html" title="Montaje 3D del PN532 por I2C con la Pico W" loading="lazy"></iframe>
 
       ## Cómo «habla» el PN532: tramas
 
@@ -295,49 +308,105 @@ sections:
 
       - `LEN` = número de bytes de datos; `LCS` = (256 − LEN) % 256, para que LEN + LCS acabe en 0.
       - `DCS` = (256 − suma de los datos) % 256, para que datos + DCS acabe en 0.
-      - `D4` indica «del ordenador al PN532»; las respuestas empiezan por `D5`.
+      - `D4` indica «de la placa al PN532»; las respuestas empiezan por `D5`.
+      - Tras cada orden, el PN532 contesta primero un **ACK** (`00 00 FF 00 FF 00`) y luego la respuesta.
 
-      La librería `pn532_uart.py` hace este trabajo por nosotros, pero entenderla es programar de verdad.
+      Por I2C, antes de cada lectura el módulo envía un **byte de estado**: su bit 0 vale 1 cuando ya tiene
+      la respuesta preparada. Así lo hace la librería `pn532_i2c.py`.
+
+      ## La librería y el programa de prueba
+
+      - [`pn532_i2c.py`](/descargas/pn532_i2c.py): la **librería**. No se ejecuta sola; cópiala en la raíz
+        de la placa (o en `/lib`). Tiene `version_firmware()`, `configurar()`, `leer_uid()` y `uid_hex()`.
+      - [`pn532_i2c_main.py`](/descargas/pn532_i2c_main.py): el **programa de prueba**. Guárdalo en la
+        placa con el nombre **`main.py`**. Usa el LED de la Pico W como indicador:
+
+      | LED de la placa | Significado |
+      |---|---|
+      | 3 parpadeos lentos al arrancar | el programa ha empezado |
+      | parpadeo rápido y continuo | no encuentra el PN532 (revisa cables e interruptores) |
+      | 2 parpadeos cortos | ha leído una tarjeta nueva |
+      | encendido fijo | hay una tarjeta sobre la antena |
+
+      > ¿Prefieres el puerto serie? Con los dos interruptores en OFF (HSU) puedes usar
+      > [`pn532_uart.py`](/descargas/pn532_uart.py) con `UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5))`.
     examples:
-      - title: "Lector de tarjetas NFC"
-        explanation: "Sube pn532_uart.py a la placa (carpeta firmware). Acerca tarjetas al lector y anota sus UID."
+      - title: "Prueba del lector NFC por I2C (main.py)"
+        explanation: "Copia pn532_i2c.py en la placa y guarda este programa como main.py. Acerca tarjetas y anota sus UID."
         pico_w: |
-          from machine import UART, Pin
+          from machine import Pin, I2C
           import time
-          from pn532_uart import PN532
+          from pn532_i2c import PN532, uid_hex
 
-          uart = UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5))
-          nfc = PN532(uart)
-          print("Firmware PN532:", nfc.version())
+          PIN_SDA, PIN_SCL = 6, 7          # bus I2C1 de la Pico W
+          led = Pin("LED", Pin.OUT)
 
+          def parpadeo(veces, ms=120):
+              for _ in range(veces):
+                  led.on(); time.sleep_ms(ms)
+                  led.off(); time.sleep_ms(ms)
+
+          parpadeo(3, 200)                  # el programa ha arrancado
+          i2c = I2C(1, sda=Pin(PIN_SDA), scl=Pin(PIN_SCL), freq=100_000)
+          print("Dispositivos I2C:", [hex(d) for d in i2c.scan()])   # debe salir 0x24
+
+          nfc = PN532(i2c)
+          version = nfc.version_firmware()
+          if version is None:
+              raise SystemExit("El PN532 no responde: interruptores 1 = ON, 2 = OFF")
+          print("PN532 firmware {}.{}".format(*version))
+          nfc.configurar()
+
+          ultimo = None
           while True:
-              uid = nfc.leer_uid()
+              uid = nfc.leer_uid(500)
               if uid:
-                  print("Tarjeta:", ":".join("%02X" % b for b in uid))
-                  time.sleep(1)          # evita leer la misma tarjeta muchas veces
-              time.sleep_ms(100)
+                  if uid != ultimo:
+                      print("Tarjeta:", uid_hex(uid))
+                      parpadeo(2, 60)
+                      ultimo = uid
+                  led.on()                  # tarjeta encima de la antena
+              else:
+                  if ultimo is not None:
+                      print("Tarjeta retirada")
+                  ultimo = None
+                  led.off()
+              time.sleep_ms(200)
         esp32_s3: |
-          from machine import UART
+          from machine import Pin, I2C
           import time
-          from pn532_uart import PN532
+          from pn532_i2c import PN532, uid_hex
 
-          uart = UART(1, baudrate=115200, tx=10, rx=11)
-          nfc = PN532(uart)
-          print("Firmware PN532:", nfc.version())
+          PIN_SDA, PIN_SCL = 10, 11
+          i2c = I2C(0, sda=Pin(PIN_SDA), scl=Pin(PIN_SCL), freq=100_000)
+          print("Dispositivos I2C:", [hex(d) for d in i2c.scan()])   # debe salir 0x24
 
+          nfc = PN532(i2c)
+          version = nfc.version_firmware()
+          if version is None:
+              raise SystemExit("El PN532 no responde: interruptores 1 = ON, 2 = OFF")
+          print("PN532 firmware {}.{}".format(*version))
+          nfc.configurar()
+
+          ultimo = None
           while True:
-              uid = nfc.leer_uid()
-              if uid:
-                  print("Tarjeta:", ":".join("%02X" % b for b in uid))
-                  time.sleep(1)          # evita leer la misma tarjeta muchas veces
-              time.sleep_ms(100)
+              uid = nfc.leer_uid(500)
+              if uid and uid != ultimo:
+                  print("Tarjeta:", uid_hex(uid))
+              if not uid and ultimo is not None:
+                  print("Tarjeta retirada")
+              ultimo = uid
+              time.sleep_ms(200)
     practice: |
       ### Práctica en clase
 
-      1. Pon los interruptores en HSU, conecta el módulo y lee el UID de 3 tarjetas distintas.
-      2. **Con el osciloscopio**: mide la línea SDA/TXD mientras acercas una tarjeta. Verás los bytes de la
-         trama como pulsos de 0 a 3,3 V. Mide la duración de un bit (a 115200 baudios ≈ 8,7 µs).
-      3. ¿Qué distancia máxima de lectura consigues? ¿Funciona a través de un cuaderno? ¿Y de una lámina de
+      1. Pon los interruptores en **I2C (1 = ON, 2 = OFF)**, conecta el módulo como en el simulador 3D y
+         ejecuta `i2c.scan()`: debe aparecer `0x24`.
+      2. Copia `pn532_i2c.py` y `main.py` en la placa y lee el UID de 3 tarjetas distintas. Comprueba los
+         mensajes del LED.
+      3. **Con el osciloscopio** (CH1 en SCL, CH2 en SDA, pinzas a GND): mide el periodo del reloj SCL.
+         A 100 kHz debe ser de 10 µs. Observa cómo SDA cambia mientras SCL está en bajo.
+      4. ¿Qué distancia máxima de lectura consigues? ¿Funciona a través de un cuaderno? ¿Y de una lámina de
          aluminio?
     evaluation:
       intro: "Necesitas un 75 %."
@@ -354,18 +423,27 @@ sections:
         - id: q2
           type: quiz
           points: 1
-          question: "Para usar el PN532 V3 por puerto serie (HSU), ¿cómo van los interruptores?"
+          question: "Para usar el PN532 V3 por I2C, ¿cómo van los interruptores?"
           options:
-            - {id: a, text: "SEL0 OFF y SEL1 OFF."}
-            - {id: b, text: "SEL0 ON y SEL1 OFF.", feedback: "Esa combinación es I2C."}
-            - {id: c, text: "SEL0 OFF y SEL1 ON.", feedback: "Esa combinación es SPI."}
+            - {id: a, text: "1 (SEL0) en ON y 2 (SEL1) en OFF."}
+            - {id: b, text: "Los dos en OFF.", feedback: "Esa combinación es el puerto serie (HSU)."}
+            - {id: c, text: "1 en OFF y 2 en ON.", feedback: "Esa combinación es SPI."}
+          answer: a
+        - id: q3
+          type: quiz
+          points: 1
+          question: "Ejecutas i2c.scan() y devuelve una lista vacía. ¿Qué revisas primero?"
+          options:
+            - {id: a, text: "Los cables SDA, SCL, VCC y GND (y que no estén cruzados SDA con SCL)."}
+            - {id: b, text: "La tarjeta NFC.", feedback: "scan() no necesita tarjeta: busca el módulo en el bus."}
+            - {id: c, text: "La versión de Thonny.", feedback: "Una lista vacía significa que ningún dispositivo responde en el bus: es el cableado."}
           answer: a
         - id: c1
           type: code
           points: 3
           prompt: |
-            Escribe `uid_hex(uid)` que reciba una lista de bytes (números de 0 a 255) y devuelva el texto en
-            hexadecimal con **dos cifras en mayúsculas** separadas por `:`. Lista vacía → `""`.
+            Escribe `uid_hex(uid)` (como la de la librería) que reciba una lista de bytes (números de 0 a 255) y
+            devuelva el texto en hexadecimal con **dos cifras en mayúsculas** separadas por `:`. Lista vacía → `""`.
 
             Ejemplo: `uid_hex([4, 162, 59, 28])` → `"04:A2:3B:1C"`
           starter: |
@@ -411,11 +489,11 @@ sections:
             wrong_result: "Construye la lista por partes: cabecera [0, 0, 255, LEN, LCS], después los datos y al final [DCS, 0]."
 
   - id: m3s3
-    title: "La cerradura de solenoide de 12 V"
+    title: "Actuadores: cerradura de 12 V y tira de LED WS2812"
     hours: 2
     kind: lesson
     foto:
-      indicaciones: "Foto de tu montaje de la práctica funcionando: que se vean la placa, el cableado y los componentes (y los tubos y cilindros si hay neumática)."
+      indicaciones: "Foto del montaje de la cerradura (placa, módulo MOSFET, diodo y fuente de 12 V) y de la tira WS2812 encendida en un color."
     theory: |
       ## Cómo funciona
 
@@ -450,6 +528,44 @@ sections:
 
       ![Dos canales del osciloscopio: señal de la placa y drenador del MOSFET](/img/osc_cerradura.svg)
       *CH1: orden de la placa · CH2: drenador del MOSFET durante una apertura de 3 s.*
+
+      ## La tira de LED WS2812 (NeoPixel): el semáforo del control de acceso
+
+      Cada LED de una tira **WS2812** (formato 5050) lleva dentro su propio chip: con **un solo cable de datos**
+      se elige el color de cada LED por separado. Los datos entran por **DIN**, cada LED se queda con su
+      color y pasa el resto por **DOUT** al siguiente.
+
+      | Pad de la tira | Va a |
+      |---|---|
+      | **DIN** (entrada de datos) | un pin de salida de la placa |
+      | **5V** | 5 V (VBUS en la Pico W, 5V en las ESP32) |
+      | **GND** | GND de la placa |
+      | DOUT (extremo opuesto) | solo para encadenar otra tira |
+
+      ![Pinout de una tira WS2812 de 8 LED: DIN a un lado, DOUT al otro](/img/tira_ws2812.svg)
+      *Conecta siempre el extremo marcado **DIN**. La flecha impresa en la tira indica el sentido de los datos.*
+
+      Cada color se da con tres números de 0 a 255: **(rojo, verde, azul)**. En el control de acceso usaremos:
+
+      | Estado | Color | (R, G, B) |
+      |---|---|---|
+      | Esperando tarjeta | azul | (0, 0, 255) |
+      | Acceso concedido | verde | (0, 255, 0) |
+      | Acceso denegado | rojo | (255, 0, 0) |
+      | Bloqueado | naranja | (255, 70, 0) |
+
+      **Brillo y consumo.** Cada LED puede llegar a **60 mA** en blanco pleno: 8 LED son casi **0,5 A**.
+      Por eso multiplicamos cada componente por un **brillo** (por ejemplo 0,25): con un color primario la
+      tira consume unos 120 mA, que el pin de 5 V aguanta con la placa alimentada por USB. Si subes el brillo
+      a 1,0, alimenta la tira con una fuente de 5 V aparte y **une las masas**.
+
+      ### 🧊 Montaje en 3D con una ESP32-C3 SuperMini
+
+      En el taller también hay placas **ESP32-C3 SuperMini**: la tira va con DIN → **IO3**, 5V → 5V y
+      GND → GND. Programa de prueba: [`tira_colores.py`](/descargas/tira_colores.py) (recorre verde, rojo,
+      naranja y azul). [Abrir el simulador a pantalla completa ↗](/simuladores/ws2812_esp32c3_3d.html)
+
+      <iframe class="sim3d" src="/simuladores/ws2812_esp32c3_3d.html" title="Montaje 3D de la tira WS2812 con la ESP32-C3 SuperMini" loading="lazy"></iframe>
     examples:
       - title: "Abrir la cerradura 3 segundos al pulsar"
         explanation: "Cerradura en el canal 1 del módulo MOSFET. Pulsador MARCHA para probar. try/finally garantiza que la cerradura no se quede activada."
@@ -493,6 +609,62 @@ sections:
                   abrir()
                   time.sleep_ms(500)
               time.sleep_ms(20)
+      - title: "Tira WS2812: los colores del control de acceso"
+        explanation: "Tira de 8 LED con DIN en GP22 (Pico W) o GPIO 21 (ESP32-S3), 5V y GND. Recorre los cuatro colores; para probar uno, para el programa y escribe en la consola: color(\"azul\")."
+        pico_w: |
+          from machine import Pin
+          from neopixel import NeoPixel
+          import time
+
+          NUM_LEDS = 8
+          BRILLO = 0.25                     # de 0.0 a 1.0 (consumo: ver la teoría)
+          tira = NeoPixel(Pin(22, Pin.OUT), NUM_LEDS)   # DIN → GP22 · 5V → VBUS · GND → GND
+
+          COLORES = {"verde": (0, 255, 0), "rojo": (255, 0, 0), "naranja": (255, 70, 0),
+                     "azul": (0, 0, 255), "apagado": (0, 0, 0)}
+
+          def color(nombre):
+              r, g, b = COLORES[nombre]
+              valor = (int(r * BRILLO), int(g * BRILLO), int(b * BRILLO))
+              for i in range(NUM_LEDS):
+                  tira[i] = valor
+              tira.write()
+
+          try:
+              while True:
+                  for nombre in ("verde", "rojo", "naranja", "azul"):
+                      print(nombre)
+                      color(nombre)
+                      time.sleep(1)
+          except KeyboardInterrupt:          # al pulsar Stop en Thonny
+              color("apagado")
+        esp32_s3: |
+          from machine import Pin
+          from neopixel import NeoPixel
+          import time
+
+          NUM_LEDS = 8
+          BRILLO = 0.25                     # de 0.0 a 1.0 (consumo: ver la teoría)
+          tira = NeoPixel(Pin(21, Pin.OUT), NUM_LEDS)   # DIN → GPIO 21 · 5V → 5V · GND → GND
+
+          COLORES = {"verde": (0, 255, 0), "rojo": (255, 0, 0), "naranja": (255, 70, 0),
+                     "azul": (0, 0, 255), "apagado": (0, 0, 0)}
+
+          def color(nombre):
+              r, g, b = COLORES[nombre]
+              valor = (int(r * BRILLO), int(g * BRILLO), int(b * BRILLO))
+              for i in range(NUM_LEDS):
+                  tira[i] = valor
+              tira.write()
+
+          try:
+              while True:
+                  for nombre in ("verde", "rojo", "naranja", "azul"):
+                      print(nombre)
+                      color(nombre)
+                      time.sleep(1)
+          except KeyboardInterrupt:          # al pulsar Stop en Thonny
+              color("apagado")
     practice: |
       ### Práctica de taller
 
@@ -500,6 +672,10 @@ sections:
       2. Monta la cerradura con el módulo MOSFET y el diodo (revisa el profesor antes de conectar los 12 V).
       3. **Osciloscopio**: mide a la vez la señal de la placa (CH1, sonda x1 o x10) y el drenador del MOSFET
          (CH2, sonda x10). Dibuja las dos señales y anota cuánto tarda la cerradura en abrirse desde la orden.
+      4. **Tira WS2812**: conéctala por el extremo DIN y ejecuta el ejemplo de colores. Cambia `BRILLO` a 0,1 y
+         a 0,5: ¿se nota la diferencia? (No pases de 0,25 sin fuente de 5 V aparte.)
+      5. **Osciloscopio en DIN** (s/div pequeño, unos 2 µs/div): verás los bits de datos, de unos 1,25 µs
+         cada uno. ¿Cuánto dura la ráfaga completa para 8 LED (24 bits por LED)?
     evaluation:
       intro: "Necesitas un 75 %."
       items:
@@ -590,25 +766,63 @@ sections:
               check: "('pin', 10, 'value', 1) in _log and _log[-1] == ('pin', 10, 'value', 0) and _c.aperturas == 2"
           hints:
             wrong_result: "Calcula t = min(t_ms, self.t_max_ms); dentro de try activa y espera; en finally desactiva."
+        - id: c3
+          type: code
+          points: 4
+          prompt: |
+            Escribe `pintar(tira, rgb, brillo)` que ponga **todos** los LED de la tira del color `rgb` (una tupla
+            `(r, g, b)`) multiplicado por `brillo` (cada componente convertida a entero con `int`) y llame a
+            `tira.write()` **una sola vez** al final.
+
+            Ejemplo: con `brillo = 0.25`, el naranja `(255, 70, 0)` queda `(63, 17, 0)`.
+          starter: |
+            def pintar(tira, rgb, brillo):
+                pass
+          solution: |
+            def pintar(tira, rgb, brillo):
+                r, g, b = rgb
+                valor = (int(r * brillo), int(g * brillo), int(b * brillo))
+                for i in range(len(tira)):
+                    tira[i] = valor
+                tira.write()
+          tests:
+            - before: ["from machine import Pin", "from neopixel import NeoPixel", "_t = NeoPixel(Pin(22), 8)", "_log.clear()", "pintar(_t, (255, 70, 0), 0.25)"]
+              desc: "Naranja al 25 % en los 8 LED"
+              check: "[e for e in _log if e[0] == 'neopixel'] == [('neopixel', 22, 'write', [(63, 17, 0)] * 8)]"
+            - before: ["from machine import Pin", "from neopixel import NeoPixel", "_t = NeoPixel(Pin(3), 5)", "_log.clear()", "pintar(_t, (0, 0, 255), 1.0)"]
+              desc: "Azul pleno en una tira de 5 LED"
+              check: "_log[-1] == ('neopixel', 3, 'write', [(0, 0, 255)] * 5)"
+            - before: ["from machine import Pin", "from neopixel import NeoPixel", "_t = NeoPixel(Pin(22), 8)", "_log.clear()", "pintar(_t, (255, 255, 255), 0)"]
+              desc: "Brillo 0 apaga la tira"
+              check: "_t[0] == (0, 0, 0) and _t[7] == (0, 0, 0)"
+          hints:
+            wrong_result: "Calcula el color escalado una vez, recorre range(len(tira)) asignando tira[i] = valor y llama a tira.write() fuera del bucle."
 
   - id: m3s4
     title: "Proyecto corto: control de acceso NFC"
     hours: 3
     kind: challenge
     foto:
-      indicaciones: "Foto del control de acceso: lector PN532, cerradura de 12 V, módulo MOSFET, diodo y placa. Si podéis, con una tarjeta junto al lector."
+      indicaciones: "Foto del control de acceso: lector PN532, tira WS2812 encendida, cerradura de 12 V, módulo MOSFET, diodo y placa. Si podéis, con una tarjeta junto al lector."
     theory: |
       ## El encargo
 
       Un control de acceso para el armario de herramientas del taller:
 
       - Lista de tarjetas **autorizadas** (UID en hexadecimal).
-      - Tarjeta autorizada → **ABRIR** la cerradura 3 s y LED verde.
-      - Tarjeta desconocida → **DENEGADO**.
+      - Lector **PN532 por I2C** y **tira WS2812** como semáforo: azul mientras espera una tarjeta.
+      - Tarjeta autorizada → **ABRIR** la cerradura 3 s con la tira en **verde**.
+      - Tarjeta desconocida → **DENEGADO** con la tira en **rojo**.
       - **3 intentos fallidos seguidos** → **BLOQUEO** durante 30 s: mientras dure, cualquier tarjeta
-        (aunque esté autorizada) recibe **BLOQUEADO**.
+        (aunque esté autorizada) recibe **BLOQUEADO**. La tira se pone **naranja**.
       - Un acceso correcto pone a cero los fallos.
       - Cada intento se registra en la consola (o en un archivo) con la hora.
+
+      | Pieza | Pico W | ESP32-S3 |
+      |---|---|---|
+      | PN532 (I2C, 1 = ON, 2 = OFF) | SDA GP6 · SCL GP7 · 3V3 · GND | SDA GPIO 10 · SCL GPIO 11 · 3V3 · GND |
+      | Tira WS2812 (DIN) | GP22 · 5V a VBUS | GPIO 21 · 5V |
+      | Cerradura (canal 1 del MOSFET) | GP10 | GPIO 4 |
 
       El estado se guarda en un diccionario:
 
@@ -622,77 +836,86 @@ sections:
       Los sistemas serios usan tarjetas con **cifrado**. Además, un registro de accesos son **datos
       personales**: hay que informar a quien se registra y no guardarlos más tiempo del necesario.
     examples:
-      - title: "Control de acceso completo"
-        explanation: "Sube pn532_uart.py. Pega tus funciones uid_hex() y procesar(), y cambia AUTORIZADAS por los UID de tus tarjetas."
+      - title: "Control de acceso completo: PN532 por I2C, tira WS2812 y cerradura"
+        explanation: "Copia pn532_i2c.py en la placa. Pega tus funciones procesar(), color_estado() y pintar(), y cambia AUTORIZADAS por los UID de tus tarjetas."
         pico_w: |
-          from machine import UART, Pin
+          from machine import Pin, I2C
+          from neopixel import NeoPixel
           import time
-          from pn532_uart import PN532
+          from pn532_i2c import PN532, uid_hex
 
           AUTORIZADAS = {"04:A2:3B:1C", "7A:10:9F:33"}
-          nfc = PN532(UART(1, baudrate=115200, tx=Pin(4), rx=Pin(5)))
+          BRILLO = 0.25
+          COLORES = {"verde": (0, 255, 0), "rojo": (255, 0, 0), "naranja": (255, 70, 0), "azul": (0, 0, 255)}
+
+          nfc = PN532(I2C(1, sda=Pin(6), scl=Pin(7), freq=100_000))
+          if nfc.version_firmware() is None or not nfc.configurar():
+              raise SystemExit("PN532 no responde: revisa cables e interruptores (1 = ON, 2 = OFF)")
+          tira = NeoPixel(Pin(22, Pin.OUT), 8)
           cerradura = Pin(10, Pin.OUT, value=0)
-          led = Pin("LED", Pin.OUT)
           estado = {"fallos": 0, "bloqueo_hasta": 0}
 
-          # ... pega aquí uid_hex() y procesar() ...
+          # ... pega aquí procesar(), color_estado() y pintar() ...
 
+          pintar(tira, COLORES["azul"], BRILLO)          # esperando tarjeta
           while True:
-              uid = nfc.leer_uid()
+              uid = nfc.leer_uid(500)
               if uid:
                   codigo = uid_hex(uid)
                   accion = procesar(codigo, estado, AUTORIZADAS, time.ticks_ms())
                   print(time.ticks_ms() // 1000, "s", codigo, accion)
+                  pintar(tira, COLORES[color_estado(accion)], BRILLO)
                   if accion == "ABRIR":
-                      led.on()
-                      try:
-                          cerradura.on(); time.sleep(3)
-                      finally:
-                          cerradura.off(); led.off()
-                  else:
-                      for _ in range(3):              # parpadeo de rechazo
-                          led.toggle(); time.sleep_ms(150)
-                      led.off()
-                  time.sleep(1)
-              time.sleep_ms(100)
-        esp32_s3: |
-          from machine import UART, Pin
-          import neopixel, time
-          from pn532_uart import PN532
-
-          AUTORIZADAS = {"04:A2:3B:1C", "7A:10:9F:33"}
-          nfc = PN532(UART(1, baudrate=115200, tx=10, rx=11))
-          cerradura = Pin(4, Pin.OUT, value=0)
-          np = neopixel.NeoPixel(Pin(48), 1)
-          estado = {"fallos": 0, "bloqueo_hasta": 0}
-
-          def color(r, g, b):
-              np[0] = (r, g, b); np.write()
-
-          # ... pega aquí uid_hex() y procesar() ...
-
-          while True:
-              uid = nfc.leer_uid()
-              if uid:
-                  codigo = uid_hex(uid)
-                  accion = procesar(codigo, estado, AUTORIZADAS, time.ticks_ms())
-                  print(time.ticks_ms() // 1000, "s", codigo, accion)
-                  if accion == "ABRIR":
-                      color(0, 40, 0)
                       try:
                           cerradura.on(); time.sleep(3)
                       finally:
                           cerradura.off()
                   else:
-                      color(40, 0, 0); time.sleep(1)
-                  color(0, 0, 0)
-                  time.sleep(1)
-              time.sleep_ms(100)
+                      time.sleep(1.5)
+                  pintar(tira, COLORES["azul"], BRILLO)
+              time.sleep_ms(150)
+        esp32_s3: |
+          from machine import Pin, I2C
+          from neopixel import NeoPixel
+          import time
+          from pn532_i2c import PN532, uid_hex
+
+          AUTORIZADAS = {"04:A2:3B:1C", "7A:10:9F:33"}
+          BRILLO = 0.25
+          COLORES = {"verde": (0, 255, 0), "rojo": (255, 0, 0), "naranja": (255, 70, 0), "azul": (0, 0, 255)}
+
+          nfc = PN532(I2C(0, sda=Pin(10), scl=Pin(11), freq=100_000))
+          if nfc.version_firmware() is None or not nfc.configurar():
+              raise SystemExit("PN532 no responde: revisa cables e interruptores (1 = ON, 2 = OFF)")
+          tira = NeoPixel(Pin(21, Pin.OUT), 8)
+          cerradura = Pin(4, Pin.OUT, value=0)
+          estado = {"fallos": 0, "bloqueo_hasta": 0}
+
+          # ... pega aquí procesar(), color_estado() y pintar() ...
+
+          pintar(tira, COLORES["azul"], BRILLO)          # esperando tarjeta
+          while True:
+              uid = nfc.leer_uid(500)
+              if uid:
+                  codigo = uid_hex(uid)
+                  accion = procesar(codigo, estado, AUTORIZADAS, time.ticks_ms())
+                  print(time.ticks_ms() // 1000, "s", codigo, accion)
+                  pintar(tira, COLORES[color_estado(accion)], BRILLO)
+                  if accion == "ABRIR":
+                      try:
+                          cerradura.on(); time.sleep(3)
+                      finally:
+                          cerradura.off()
+                  else:
+                      time.sleep(1.5)
+                  pintar(tira, COLORES["azul"], BRILLO)
+              time.sleep_ms(150)
     practice: |
       ### Proyecto por parejas (3 sesiones)
 
-      1. **Montaje**: PN532 + cerradura con el módulo MOSFET + LED. Revisión del profesor antes de los 12 V.
-      2. **Programación**: completa `procesar()` y pruébala aquí antes de pasarla a la placa.
+      1. **Montaje**: PN532 por I2C + tira WS2812 + cerradura con el módulo MOSFET. Revisión del profesor antes
+         de los 12 V.
+      2. **Programación**: completa `procesar()` y `color_estado()` y pruébalas aquí antes de pasarlas a la placa.
       3. **Pruebas y presentación**: demuestra apertura, denegación, bloqueo y desbloqueo. Muestra en el
          osciloscopio la señal de la cerradura durante una apertura.
 
@@ -742,6 +965,29 @@ sections:
               expected: ["DENEGADO", "DENEGADO", "ABRIR", "DENEGADO", 1]
           hints:
             wrong_result: "Respeta el orden: primero el bloqueo, después la lista de autorizados y por último los fallos."
+        - id: c2
+          type: code
+          points: 2
+          prompt: |
+            Escribe `color_estado(accion)` que devuelva el nombre del color de la tira para cada acción:
+            `"ABRIR"` → `"verde"`, `"DENEGADO"` → `"rojo"`, `"BLOQUEO"` y `"BLOQUEADO"` → `"naranja"`;
+            cualquier otra cosa (esperando tarjeta) → `"azul"`.
+          starter: |
+            def color_estado(accion):
+                pass
+          solution: |
+            def color_estado(accion):
+                if accion == "ABRIR":
+                    return "verde"
+                if accion == "DENEGADO":
+                    return "rojo"
+                if accion in ("BLOQUEO", "BLOQUEADO"):
+                    return "naranja"
+                return "azul"
+          tests:
+            - {desc: "Abrir y denegar", call: "(color_estado('ABRIR'), color_estado('DENEGADO'))", expected: ["verde", "rojo"]}
+            - {desc: "Bloqueo y bloqueado", call: "(color_estado('BLOQUEO'), color_estado('BLOQUEADO'))", expected: ["naranja", "naranja"]}
+            - {desc: "Esperando", call: "(color_estado('ESPERA'), color_estado(''))", expected: ["azul", "azul"]}
         - id: q1
           type: quiz
           points: 1
