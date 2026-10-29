@@ -23,15 +23,20 @@
     <section v-show="tab === 'teoria'" class="card prose" v-html="md(sec.theory)"></section>
 
     <section v-show="tab === 'ejemplos'" class="grid">
-      <div class="row">
+      <div v-if="hasBoardCode" class="row">
         <span class="small muted">Ver código para:</span>
         <button class="btn sm" :class="board === 'pico_w' ? '' : 'secondary'" @click="board = 'pico_w'">🟩 Pico W</button>
         <button class="btn sm" :class="board === 'esp32_s3' ? '' : 'secondary'" @click="board = 'esp32_s3'">⬛ ESP32-S3</button>
+        <button v-if="hasC3" class="btn sm" :class="board === 'esp32_c3' ? '' : 'secondary'" @click="board = 'esp32_c3'">🟦 ESP32-C3</button>
       </div>
       <article v-for="ex in sec.examples" :key="ex.title" class="card">
         <h3 style="margin-top:0">{{ ex.title }}</h3>
         <p class="muted prose" v-html="mdInline(ex.explanation)"></p>
-        <CodeBlock :code="ex[board]" />
+        <CodeBlock v-if="ex.codigo" :code="ex.codigo" :lang="ex.lenguaje || 'plaintext'" />
+        <template v-else>
+          <p v-if="!ex[board]" class="small muted">Este ejemplo es para la ESP32-C3 SuperMini del cartel: se muestra su código.</p>
+          <CodeBlock :code="ex[board] || ex.esp32_c3 || ex.pico_w" />
+        </template>
       </article>
     </section>
 
@@ -102,6 +107,10 @@ const tabs = [
   { id: 'evaluacion', label: '✅ Evaluación' },
 ]
 const sec = computed(() => data.value?.section)
+const hasBoardCode = computed(() => !!sec.value?.examples?.some((e) => !e.codigo))
+const hasC3 = computed(() => !!sec.value?.examples?.some((e) => e.esp32_c3))
+// La ESP32-C3 solo aparece en el proyecto Smart Sign: si una sección no la tiene, se vuelve a la placa del alumno
+watch(hasC3, (v) => { if (!v && board.value === 'esp32_c3') board.value = session.user?.board || 'pico_w' })
 // Con Netlify, el código se ejecuta en el navegador (las secciones traen code_tests);
 // con el servidor Python del centro, lo corrige el servidor.
 const hasBrowserCode = computed(() => !!sec.value?.evaluation.items.some((i) => i.type === 'code' && i.code_tests))

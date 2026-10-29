@@ -9,7 +9,7 @@ CODE_ITEMS = [(s["id"], i) for m in MISSIONS for s in m["sections"] for i in s["
 
 
 def test_structure():
-    assert len(MISSIONS) == 12
+    assert len(MISSIONS) == 15
     ids = set()
     for m in MISSIONS:
         assert m["schedule"], m["id"]
@@ -18,7 +18,8 @@ def test_structure():
             ids.add(s["id"])
             assert s["theory"].strip()
             for ex in s.get("examples", []):
-                assert ex.get("pico_w") and ex.get("esp32_s3"), (s["id"], ex["title"])
+                # Ejemplo de placa (Pico W + ESP32-S3, opcionalmente ESP32-C3) o ejemplo genérico (codigo + lenguaje)
+                assert ex.get("codigo") or (ex.get("pico_w") and ex.get("esp32_s3")) or ex.get("esp32_c3"), (s["id"], ex["title"])
             item_ids = [i["id"] for i in s["evaluation"]["items"]]
             assert len(item_ids) == len(set(item_ids)), s["id"]
             for item in s["evaluation"]["items"]:
@@ -30,11 +31,11 @@ def test_structure():
                     assert item.get("solution") and item.get("tests"), (s["id"], item["id"])
 
 
-def test_schedule_covers_108_sessions():
+def test_schedule_covers_135_sessions():
     assert not any(m.get("extra") for m in MISSIONS)
     sessions = [(x["week"], x["session"]) for m in MISSIONS for x in m["schedule"]]
-    assert len(sessions) == len(set(sessions)) == 108
-    assert {w for w, _ in sessions} == set(range(1, 37))
+    assert len(sessions) == len(set(sessions)) == 135
+    assert {w for w, _ in sessions} == set(range(1, 46))
     for m in MISSIONS:
         assert m.get("trimestre") in (1, 2, 3), m["id"]
         assert sum(s["hours"] for s in m["sections"]) == m["hours"] == 9, m["id"]

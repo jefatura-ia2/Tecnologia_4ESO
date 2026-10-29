@@ -1,25 +1,29 @@
 # TEC_IVJP_lab27 · 4º ESO
 
-Plataforma web para un **curso completo de Tecnología de 4º ESO** (36 semanas × 3 h = **108 h**) del IES Valle del Jerte (Plasencia). Combina **programación en MicroPython** (Raspberry Pi Pico W y ESP32-S3-DevKit), un **laboratorio de electrónica** (osciloscopio PROMAX serie 600, lector NFC PN532 y cerradura de solenoide de 12 V) y **neumática y electroneumática**: compresor, unidad de acondicionamiento, válvulas selectoras y antirretorno, **electroválvulas de 12 V 2/2 y 3/2** gobernadas con un **módulo MOSFET**, **cilindros de simple y doble efecto** y **finales de carrera**.
+Plataforma web para un **curso completo de Tecnología de 4º ESO** (45 semanas × 3 h = **135 h**; ver la nota sobre la duración más abajo) del IES Valle del Jerte (Plasencia). Combina **programación en MicroPython** (Raspberry Pi Pico W y ESP32-S3-DevKit), un **laboratorio de electrónica** (osciloscopio PROMAX serie 600, lector NFC PN532 y cerradura de solenoide de 12 V), el proyecto ágil **Smart Sign IoT** (CAD e impresión 3D, energía con batería, MQTT y sensores) y **neumática y electroneumática**: compresor, unidad de acondicionamiento, válvulas selectoras y antirretorno, **electroválvulas de 12 V 2/2 y 3/2** gobernadas con un **módulo MOSFET**, **cilindros de simple y doble efecto** y **finales de carrera**.
 
 | Trim. | | Misión | Semanas |
 |---|---|---|---|
 | 1.º | 🐍 | 1. MicroPython I: fundamentos y entradas/salidas | 1-3 |
 | 1.º | ⏱️ | 2. MicroPython II: tiempo, estados y clases | 4-6 |
 | 1.º | 🔐 | 3. Laboratorio: osciloscopio y control de acceso NFC | 7-9 |
-| 1.º | 💨 | 4. Neumática I: aire comprimido y cilindros | 10-12 |
-| 2.º | 🔀 | 5. Neumática II: válvulas y circuitos básicos | 13-15 |
-| 2.º | ⚡ | 6. Electroválvulas con MicroPython | 16-18 |
-| 2.º | ↔️ | 7. Cilindros de doble efecto y enclavamientos | 19-21 |
-| 2.º | 🎯 | 8. Finales de carrera: ciclos por posición | 22-24 |
-| 3.º | 🔁 | 9. Secuencias de varios cilindros | 25-27 |
-| 3.º | 🛑 | 10. Seguridad y modos de marcha | 28-30 |
-| 3.º | 📡 | 11. Control WiFi, registro y mantenimiento | 31-33 |
-| 3.º | 🏭 | 12. Proyecto final: automatiza una máquina | 34-36 |
+| 1.º | 🪧 | 4. Smart Sign I: dos equipos en paralelo | 10-12 |
+| 1.º | 📶 | 5. Smart Sign II: integración y control remoto | 13-15 |
+| 1.º | 🛰️ | 6. Smart Sign III: sensores y red de carteles | 16-18 |
+| 2.º | 💨 | 7. Neumática I: aire comprimido y cilindros | 19-21 |
+| 2.º | 🔀 | 8. Neumática II: válvulas y circuitos básicos | 22-24 |
+| 2.º | ⚡ | 9. Electroválvulas con MicroPython | 25-27 |
+| 2.º | ↔️ | 10. Cilindros de doble efecto y enclavamientos | 28-30 |
+| 3.º | 🎯 | 11. Finales de carrera: ciclos por posición | 31-33 |
+| 3.º | 🔁 | 12. Secuencias de varios cilindros | 34-36 |
+| 3.º | 🛑 | 13. Seguridad y modos de marcha | 37-39 |
+| 3.º | 📡 | 14. Control WiFi, registro y mantenimiento | 40-42 |
+| 3.º | 🏭 | 15. Proyecto final: automatiza una máquina | 43-45 |
 
-- **48 secciones** (4 por misión) con teoría, ejemplos para las dos placas, práctica de aula/taller y evaluación obligatoria (test, completar huecos y **72 ejercicios de código** corregidos automáticamente en un simulador de MicroPython).
+- **60 secciones** (4 por misión) con teoría, ejemplos para las dos placas (y la ESP32-C3 en el Smart Sign), práctica de aula/taller y evaluación obligatoria (test, completar huecos y **95 ejercicios de código** corregidos automáticamente en un simulador de MicroPython).
 - Cada misión acaba con un **proyecto corto** (3 h): contador de piezas, semáforo, **control de acceso NFC**, elevador, puerta desde dos puntos, expulsor, barrera, prensa, estampadora A+ B+ B− A−, prensa segura con bimanual, panel web… y un **proyecto final** con GRAFCET.
-- **Fotos obligatorias de los montajes**: en 35 secciones (los 12 proyectos cortos y las prácticas de taller o laboratorio) el alumno debe subir una foto de su montaje (desde el móvil, se reduce sola a ~1600 px). La sección no cuenta como superada hasta que hay foto; el profesor las revisa en **Panel → 📷 Fotos** (aceptar / rechazar con comentario). Una foto rechazada vuelve a pedirse, pero no bloquea lo que el alumno ya tenía desbloqueado. Qué secciones piden foto se indica en el YAML con `foto: { indicaciones: "…" }`.
+- **Smart Sign IoT** (misiones 4-6): dos equipos en paralelo (mecánica: CAD paramétrico, tolerancias e impresión 3D en Bambu Lab A1 / Artillery Sidewinder; electrónica: 18650 + TP4056 + MT3608 y deepsleep), hito de integración, broker Mosquitto (1883/9001), panel del profesor en React y sensores PIR/BH1750. Material en `smart_sign/` (guía del profesor, `marco_cartel.scad`, STL, `mosquitto.conf`, `panel_profesor.html`) y `firmware/cartel_mqtt.py`.
+- **Fotos obligatorias de los montajes**: en 44 secciones (los 15 proyectos cortos y las prácticas de taller o laboratorio) el alumno debe subir una foto de su montaje (desde el móvil, se reduce sola a ~1600 px). La sección no cuenta como superada hasta que hay foto; el profesor las revisa en **Panel → 📷 Fotos** (aceptar / rechazar con comentario). Una foto rechazada vuelve a pedirse, pero no bloquea lo que el alumno ya tenía desbloqueado. Qué secciones piden foto se indica en el YAML con `foto: { indicaciones: "…" }`.
 - **Desbloqueo progresivo**, **pistas** que no revelan la respuesta, **anti-trampa** (tiempo mínimo, espera tras fallos seguidos, alertas de código copiado).
 - **Panel del profesorado**: progreso, alertas, dificultad por pregunta, soluciones, desbloqueo para toda la clase, notas manuales y exportación CSV.
 - **Ilustraciones** de los montajes de prácticas, del osciloscopio y de los circuitos neumáticos dentro de las lecciones.
@@ -27,6 +31,9 @@ Plataforma web para un **curso completo de Tecnología de 4º ESO** (36 semanas 
 - **Calendario** del curso que salta las semanas de vacaciones. Programación sesión a sesión en [`docs/temporalizacion.md`](docs/temporalizacion.md).
 
 ---
+
+
+> **Duración**: con el Smart Sign el temario suma 45 semanas, más que un curso escolar (≈ 35 semanas lectivas). Cada año hay que elegir qué se trabaja: el profesor puede desbloquear misiones a mano para toda la clase desde su panel (por ejemplo, saltar parte de la neumática o del Smart Sign) y el calendario se ajusta con `COURSE_START_DATE` y `SKIP_WEEKS`.
 
 ## 🚀 Publicar en Netlify (recomendado)
 
@@ -121,7 +128,8 @@ scripts/build.mjs               genera el temario para la función y copia Pyodi
 scripts/dev-server.mjs          servidor local que imita Netlify
 scripts/ilustraciones/          generadores de las imágenes SVG de las lecciones (frontend/public/img)
 tests/                          pruebas Node (API y soluciones en Pyodide)
-firmware/                       taller.py (Electrovalvula, CilindroDE, Seta), pn532_uart.py (lector NFC), secretos.py
+firmware/                       taller.py (Electrovalvula, CilindroDE, Seta), pn532_i2c.py (lector NFC), cartel_mqtt.py (Smart Sign), secretos.py
+smart_sign/                     Smart Sign IoT: guía del profesor, marco_cartel.scad + STL, mosquitto.conf, panel_profesor.html
 docs/temporalizacion.md         programación sesión a sesión y calificación sugerida
 ```
 
@@ -176,6 +184,13 @@ Todas las entradas usan `Pin.PULL_UP` y van a GND (pulsado/pisado = 0). La seta 
 - **Cerradura de solenoide de 12 V** (fail-secure) en el canal 1 del módulo MOSFET (GP10 · GPIO 4), con diodo 1N4007 y como máximo 3 s activada.
 
 **Seguridad en el taller:** gafas siempre que haya aire; 3-4 bar en el aula (2 bar en las primeras pruebas); nunca conectar/desconectar tubos con presión; los 12 V nunca llegan a la placa.
+
+## Smart Sign IoT (misiones 4-6): material y conexiones
+
+- **ESP32-C3 SuperMini**: tira WS2812 de 12 LED en **IO3** (no en IO8: pin de arranque con el LED de la placa), PIR en IO4, BH1750 por I2C en IO5/IO6 (0x23).
+- Energía: batería **18650** + **TP4056** con protección + elevador **MT3608 ajustado a 5,0 V**.
+- Mecánica: metacrilato de 5 mm (160 × 120) en un soporte impreso con ranura de 5,2 mm; modelo paramétrico `smart_sign/marco_cartel.scad`.
+- Servidor: Mosquitto con `smart_sign/mosquitto.conf` (1883 TCP + 9001 WebSockets) y el panel `panel_profesor.html` servido por **http desde el servidor del centro** (no desde Netlify: el navegador bloquea `ws://` en una página `https://`).
 
 ## Notas sobre el hardware
 

@@ -919,7 +919,7 @@ sections:
       3. **Pruebas y presentación**: demuestra apertura, denegación, bloqueo y desbloqueo. Muestra en el
          osciloscopio la señal de la cerradura durante una apertura.
 
-      **Ampliación**: guarda el registro en `accesos.csv` (como en la misión 11) o añade un pulsador interior
+      **Ampliación**: guarda el registro en `accesos.csv` (como en la misión 14) o añade un pulsador interior
       para salir sin tarjeta.
     evaluation:
       intro: "Proyecto corto de la misión 3. Necesitas un 75 %."

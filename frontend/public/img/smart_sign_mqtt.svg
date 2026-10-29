@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 440" width="1060" height="440" role="img" aria-label="Arquitectura MQTT del Smart Sign: el panel del profesor publica por WebSockets en el puerto 9001 y los carteles se suscriben por TCP en el puerto 1883"><title>Arquitectura MQTT del Smart Sign: el panel del profesor publica por WebSockets en el puerto 9001 y los carteles se suscriben por TCP en el puerto 1883</title><rect width="100%" height="100%" fill="#ffffff"/><rect x="20" y="50" width="1020" height="360" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" />
+<text x="36" y="76" font-size="13" fill="#6b7280" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Red local del instituto (LAN) · el cortafuegos abre 1883 y 9001 solo dentro de la LAN</text>
+<text x="30" y="34" font-size="17" fill="#1f2937" text-anchor="start" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Publicar / suscribir con MQTT</text>
+<rect x="50" y="130" width="210" height="150" rx="10" fill="white" stroke="#1f2937" stroke-width="2" />
+<rect x="64" y="146" width="182" height="92" rx="4" fill="#eef2ff" stroke="#cbd5e1" stroke-width="1" />
+<rect x="72" y="196" width="52" height="26" rx="5" fill="#16a34a" stroke="#16a34a" stroke-width="1" />
+<text x="98" y="213" font-size="10" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Libre</text>
+<rect x="130" y="196" width="52" height="26" rx="5" fill="#dc2626" stroke="#dc2626" stroke-width="1" />
+<text x="156" y="213" font-size="10" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Ocupada</text>
+<rect x="188" y="196" width="52" height="26" rx="5" fill="#2563eb" stroke="#2563eb" stroke-width="1" />
+<text x="214" y="213" font-size="10" fill="white" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Reservada</text>
+<text x="155" y="176" font-size="13" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Aula 203: OCUPADA</text>
+<text x="155" y="258" font-size="14" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Panel del profesor</text>
+<text x="155" y="300" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >React + mqtt.js</text>
+<text x="155" y="316" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >http://servidor/  (no Netlify)</text>
+<rect x="400" y="120" width="260" height="190" rx="12" fill="white" stroke="#0f766e" stroke-width="2.5" />
+<text x="530" y="150" font-size="14" fill="#0f766e" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Servidor Linux del instituto</text>
+<rect x="420" y="166" width="220" height="70" rx="8" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.5" />
+<text x="530" y="192" font-size="15" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Broker Mosquitto</text>
+<text x="530" y="214" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >:1883 TCP · :9001 WebSockets</text>
+<text x="530" y="260" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Nginx :80 → panel_profesor.html</text>
+<text x="530" y="280" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >guarda el último estado (retain)</text>
+<line x1="260" y1="190" x2="400" y2="190" stroke="#2563eb" stroke-width="3" stroke-linecap="round"  />
+<path d="M400.0,190.0 L389.2,195.2 L389.2,184.8 Z" fill="#2563eb" stroke="#2563eb" stroke-width="1"/>
+<text x="330" y="176" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >ws://IP:9001</text>
+<text x="330" y="212" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >publish</text>
+<text x="330" y="228" font-size="11" fill="#1f2937" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >aula/203/status</text>
+<text x="330" y="243" font-size="11" fill="#1f2937" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >«rojo» · retain</text>
+<rect x="830" y="96" width="150" height="62" rx="3" fill="#cfeff5" stroke="#0e7490" stroke-width="1.5" />
+<rect x="822" y="158" width="166" height="16" rx="2" fill="#e5e7eb" stroke="#1f2937" stroke-width="1.5" />
+<line x1="832" y1="156" x2="978" y2="156" stroke="#16a34a" stroke-width="5" stroke-linecap="round"  />
+<text x="905" y="134" font-size="16" fill="#16a34a" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >AULA 105</text>
+<line x1="660" y1="215" x2="818" y2="136" stroke="#0f766e" stroke-width="2" stroke-linecap="round"  />
+<path d="M818.0,136.0 L811.9,143.9 L808.0,136.1 Z" fill="#0f766e" stroke="#0f766e" stroke-width="1"/>
+<text x="1000" y="126" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >C3</text>
+<rect x="830" y="184" width="150" height="62" rx="3" fill="#cfeff5" stroke="#0e7490" stroke-width="1.5" />
+<rect x="822" y="246" width="166" height="16" rx="2" fill="#e5e7eb" stroke="#1f2937" stroke-width="1.5" />
+<line x1="832" y1="244" x2="978" y2="244" stroke="#2563eb" stroke-width="5" stroke-linecap="round"  />
+<text x="905" y="222" font-size="16" fill="#2563eb" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >AULA 106</text>
+<line x1="660" y1="215" x2="818" y2="224" stroke="#0f766e" stroke-width="2" stroke-linecap="round"  />
+<path d="M818.0,224.0 L808.8,227.8 L809.3,219.1 Z" fill="#0f766e" stroke="#0f766e" stroke-width="1"/>
+<text x="1000" y="214" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >C3</text>
+<rect x="830" y="272" width="150" height="62" rx="3" fill="#cfeff5" stroke="#0e7490" stroke-width="1.5" />
+<rect x="822" y="334" width="166" height="16" rx="2" fill="#e5e7eb" stroke="#1f2937" stroke-width="1.5" />
+<line x1="832" y1="332" x2="978" y2="332" stroke="#dc2626" stroke-width="5" stroke-linecap="round"  />
+<text x="905" y="310" font-size="16" fill="#dc2626" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >AULA 203</text>
+<line x1="660" y1="215" x2="818" y2="312" stroke="#0f766e" stroke-width="2" stroke-linecap="round"  />
+<path d="M818.0,312.0 L808.1,311.0 L812.6,303.6 Z" fill="#0f766e" stroke="#0f766e" stroke-width="1"/>
+<text x="1000" y="302" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >C3</text>
+<text x="740" y="140" font-size="12" fill="#0f766e" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >TCP :1883 (WiFi)</text>
+<text x="905" y="384" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="bold" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >subscribe aula/{id}/status</text>
+<text x="905" y="400" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >cada cartel solo recibe su aula</text>
+<text x="155" y="380" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" style="font-family:'Inter','Segoe UI',Arial,sans-serif" >Pasillo: el panel se suscribe a aula/+/status</text></svg>

@@ -1,0 +1,642 @@
+id: m5
+number: 5
+trimestre: 1
+icon: "📶"
+title: "Smart Sign II: integración y control remoto"
+subtitle: "Hito de integración (el cartel autónomo con batería) y Sprint 2: servidor Mosquitto, MQTT en la ESP32-C3 y panel del profesor"
+weeks: [13, 14, 15]
+hours: 9
+objectives:
+  - Integrar la mecánica y la electrónica en un producto autónomo y verificarlo con pruebas de iluminación y de energía.
+  - Comprender el modelo publicar/suscribir de MQTT (broker, topics, comodines, QoS, retain).
+  - Configurar el broker Mosquitto del servidor del instituto con los puertos 1883 (TCP) y 9001 (WebSockets).
+  - Programar la ESP32-C3 para conectarse a la WiFi y suscribirse al topic de su aula con umqtt.simple.
+  - Usar un panel web del profesor que publica el estado del aula y cambia el color del cartel al instante.
+materials:
+  - Piezas impresas del Sprint 1, metacrilato de 5 mm, electrónica del cartel
+  - Luxómetro (o la app de luxómetro del móvil) y polímetro
+  - Servidor Linux del instituto con Mosquitto (o un portátil con Linux/Raspberry Pi para pruebas)
+  - Red WiFi del aula (2,4 GHz) y ordenador del profesor con navegador
+criteria:
+  - Integra sistemas mecánicos, eléctricos y electrónicos y verifica su funcionamiento con pruebas medibles.
+  - Conoce y aplica protocolos de comunicación (MQTT) para conectar dispositivos y aplicaciones en red.
+  - Programa dispositivos conectados que responden a órdenes remotas.
+schedule:
+  - {week: 13, session: 1, title: "Hito de integración: montaje del cartel", section: m5s1}
+  - {week: 13, session: 2, title: "Pruebas de iluminación (uniformidad) y de energía", section: m5s1}
+  - {week: 13, session: 3, title: "Prueba de carga con el TP4056 y de autonomía", section: m5s1}
+  - {week: 14, session: 1, title: "MQTT: broker, topics y comodines", section: m5s2}
+  - {week: 14, session: 2, title: "Mosquitto en el servidor: puertos 1883 y 9001 y firewall", section: m5s2}
+  - {week: 14, session: 3, title: "La ESP32-C3 se suscribe a aula/203/status", section: m5s3}
+  - {week: 15, session: 1, title: "Reconexión y estado guardado (retain)", section: m5s3}
+  - {week: 15, session: 2, title: "Panel del profesor: Libre · Ocupada · Reservada", section: m5s4}
+  - {week: 15, session: 3, title: "Demo: el profesor pulsa «Ocupada» y el cartel se pone rojo", section: m5s4}
+sections:
+  - id: m5s1
+    title: "Hito de integración: el cartel cobra vida"
+    hours: 3
+    kind: lesson
+    foto:
+      indicaciones: "Foto del cartel montado y encendido funcionando con batería (sin cable USB), y de la tabla de medidas de luz y consumo."
+    theory: |
+      ## Unir mecánica y electrónica
+
+      En el hito, los dos equipos montan **un solo producto**:
+
+      1. La batería, el TP4056, el MT3608 y la ESP32-C3 (o la PCB) entran en el hueco del soporte. Fíjalos con
+         cinta de doble cara o tornillos; **ningún cable debe quedar pellizcado** al cerrar la tapa.
+      2. La tira se pega en el canal, con los LED mirando **hacia arriba** (hacia el canto del metacrilato).
+      3. El metacrilato entra en la ranura y se coloca el capuchón superior.
+      4. El USB-C del TP4056 debe quedar accesible por el hueco lateral para cargar sin abrir la caja.
+
+      ## Prueba de iluminación: ¿es uniforme?
+
+      Con el cartel encendido en blanco, mide con el luxómetro (pegado al metacrilato, en una habitación con la
+      luz apagada) en **5 puntos** a lo largo del cartel. La **uniformidad** es:
+
+      ```
+      U = valor mínimo / valor medio        (1 = perfecta; aceptable si U ≥ 0,7)
+      ```
+
+      Si U es baja: los LED de los extremos quedan lejos del borde, hay algún LED más brillante, o el canto del
+      metacrilato está rugoso. Soluciones: lijar/pulir el canto, una tira de difusor (papel vegetal), o bajar el
+      brillo de los LED más brillantes.
+
+      ## Prueba de energía: ¿aguanta una jornada?
+
+      Criterio de éxito del hito: el cartel funciona **al menos 8 horas** con la batería, dejando un **20 % de
+      reserva**. Hay que comprobar que:
+
+      ```
+      capacidad útil necesaria = I_media × 8 h / (1 − 0,20)  ≤  capacidad de la batería
+      ```
+
+      Ejemplo: I_media = 95 mA → 95 × 8 / 0,8 = 950 mAh ≤ 2500 mAh ✅
+
+      **Prueba de carga**: conecta el USB-C. El LED del TP4056 se pone **rojo** mientras carga y **azul/verde**
+      cuando termina. Mide la tensión de la batería al terminar: debe rondar **4,2 V**.
+    examples:
+      - title: "Patrón de prueba de iluminación"
+        explanation: "Enciende la tira en blanco y luego LED a LED para detectar zonas oscuras o LED defectuosos."
+        esp32_c3: |
+          from machine import Pin
+          from neopixel import NeoPixel
+          import time
+
+          tira = NeoPixel(Pin(3, Pin.OUT), 12)
+
+          tira.fill((60, 60, 60)); tira.write()      # blanco tenue: mide aquí con el luxómetro
+          time.sleep(10)
+          for i in range(12):                        # recorrido LED a LED
+              tira.fill((0, 0, 0))
+              tira[i] = (0, 0, 80)
+              tira.write()
+              time.sleep(0.5)
+          tira.fill((0, 0, 0)); tira.write()
+        pico_w: |
+          from machine import Pin
+          from neopixel import NeoPixel
+          import time
+
+          tira = NeoPixel(Pin(22, Pin.OUT), 12)
+          tira.fill((60, 60, 60)); tira.write()
+          time.sleep(10)
+          for i in range(12):
+              tira.fill((0, 0, 0))
+              tira[i] = (0, 0, 80)
+              tira.write()
+              time.sleep(0.5)
+          tira.fill((0, 0, 0)); tira.write()
+        esp32_s3: |
+          from machine import Pin
+          from neopixel import NeoPixel
+          import time
+
+          tira = NeoPixel(Pin(21, Pin.OUT), 12)
+          tira.fill((60, 60, 60)); tira.write()
+          time.sleep(10)
+          for i in range(12):
+              tira.fill((0, 0, 0))
+              tira[i] = (0, 0, 80)
+              tira.write()
+              time.sleep(0.5)
+          tira.fill((0, 0, 0)); tira.write()
+    practice: |
+      ### Hito de integración (3 sesiones)
+
+      1. Montaje completo del cartel. Antes de cerrar la tapa, comprobad con el polímetro que no hay cortocircuitos.
+      2. **Iluminación**: medid la luz en 5 puntos y calculad U. Si U < 0,7, aplicad una mejora y repetid.
+      3. **Energía**: medid la corriente media y comprobad el criterio de 8 h con el 20 % de reserva.
+      4. **Carga**: cargad la batería con el TP4056 y anotad la tensión final.
+      5. Anotad todos los resultados en el README del repositorio (tabla de pruebas).
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `uniformidad(lecturas)` que reciba una lista de lecturas de luz (lux) y devuelva
+            `mínimo / media` redondeado a 2 decimales. Si la lista está vacía o la media es 0, devuelve 0.
+
+            Ejemplo: `uniformidad([80, 100, 110, 100, 90])` → `0.83`
+          starter: |
+            def uniformidad(lecturas):
+                pass
+          solution: |
+            def uniformidad(lecturas):
+                if not lecturas:
+                    return 0
+                media = sum(lecturas) / len(lecturas)
+                if media == 0:
+                    return 0
+                return round(min(lecturas) / media, 2)
+          tests:
+            - {desc: "Ejemplo", call: "uniformidad([80, 100, 110, 100, 90])", expected: 0.83}
+            - {desc: "Perfecta", call: "uniformidad([50, 50, 50])", expected: 1.0}
+            - {desc: "Vacía", call: "uniformidad([])", expected: 0}
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Escribe `cumple_jornada(capacidad_mAh, i_media_mA, horas=8, reserva=0.2)` que devuelva `True` si la
+            batería puede dar `i_media_mA` durante `horas` horas dejando la `reserva` indicada, es decir, si
+            `i_media_mA * horas / (1 - reserva) <= capacidad_mAh`.
+          starter: |
+            def cumple_jornada(capacidad_mAh, i_media_mA, horas=8, reserva=0.2):
+                pass
+          solution: |
+            def cumple_jornada(capacidad_mAh, i_media_mA, horas=8, reserva=0.2):
+                return i_media_mA * horas / (1 - reserva) <= capacidad_mAh
+          tests:
+            - {desc: "Ejemplo de la teoría", call: "cumple_jornada(2500, 95)", expected: true}
+            - {desc: "Consumo excesivo", call: "cumple_jornada(2500, 300)", expected: false}
+            - {desc: "Jornada de 12 h", call: "cumple_jornada(2000, 120, horas=12)", expected: true}
+        - id: q1
+          type: quiz
+          points: 1
+          question: "La uniformidad sale 0,55 y los extremos del cartel se ven oscuros. ¿Qué mejora pruebas primero?"
+          options:
+            - {id: a, text: "Pulir el canto del metacrilato y comprobar que la tira llega hasta los extremos."}
+            - {id: b, text: "Subir el brillo de todos los LED al máximo.", feedback: "Subiría la media pero no la uniformidad, y gastaría mucha más batería."}
+          answer: a
+
+  - id: m5s2
+    title: "MQTT y el servidor Mosquitto del instituto"
+    hours: 2
+    kind: lesson
+    foto:
+      indicaciones: "Captura o foto de la pantalla con mosquitto_sub recibiendo los mensajes publicados en aula/203/status."
+    theory: |
+      ## Publicar y suscribirse
+
+      ![Arquitectura: panel del profesor por WebSockets (9001), broker Mosquitto en el servidor y carteles por TCP (1883)](/img/smart_sign_mqtt.svg)
+      *El panel **publica** en un topic; el broker lo reparte a todos los carteles **suscritos** a ese topic.*
+
+      **MQTT** es un protocolo ligero para el Internet de las Cosas. Nadie habla directamente con nadie: todos
+      hablan con el **broker** (Mosquitto), que reparte los mensajes.
+
+      | Concepto | En nuestro proyecto |
+      |---|---|
+      | **Broker** | Mosquitto en el servidor Linux del instituto (`192.168.X.X`) |
+      | **Topic** (tema) | `aula/203/status` — jerárquico, separado por `/` |
+      | **Mensaje** | `verde`, `rojo`, `azul`, `apagado` |
+      | **Publicador** | El panel del profesor |
+      | **Suscriptor** | El cartel del aula 203 |
+
+      ## Comodines
+
+      - `+` sustituye **un nivel**: `aula/+/status` recibe `aula/203/status` y `aula/105/status`.
+      - `#` sustituye **todos los niveles que queden** (y va al final): `aula/#` recibe todo lo que empiece por `aula/`.
+
+      ## Retain y QoS
+
+      - **retain**: el broker guarda el **último** mensaje del topic y se lo entrega a quien se suscriba después.
+        Así, si un cartel se reinicia, recupera su color al instante.
+      - **QoS** (calidad de servicio): 0 = «como mucho una vez» (suficiente aquí), 1 = «al menos una vez».
+
+      ## Configurar Mosquitto (guía para el profesor / administrador)
+
+      ```bash
+      sudo apt install mosquitto mosquitto-clients
+      sudo nano /etc/mosquitto/conf.d/smart_sign.conf     # contenido abajo
+      sudo systemctl restart mosquitto
+      sudo ufw allow from 192.168.0.0/16 to any port 1883 proto tcp
+      sudo ufw allow from 192.168.0.0/16 to any port 9001 proto tcp
+      ```
+
+      Archivo de configuración ([descargar `smart_sign.conf`](/descargas/smart_sign/mosquitto.conf)):
+
+      ```
+      listener 1883
+      protocol mqtt
+
+      listener 9001
+      protocol websockets
+
+      allow_anonymous false
+      password_file /etc/mosquitto/passwd
+      ```
+
+      Usuarios: `sudo mosquitto_passwd -c /etc/mosquitto/passwd cartel` (y otro para el panel). En pruebas dentro
+      de la red del aula se puede usar `allow_anonymous true`, pero **nunca** con los puertos abiertos a Internet.
+
+      ⚠️ Si el router o el cortafuegos del centro bloquean los puertos 1883 y 9001, los carteles y el panel **no
+      podrán conectar**: pide al administrador de red que los abra **solo para la red local**.
+
+      ## Probar desde la terminal
+
+      ```bash
+      mosquitto_sub -h 192.168.X.X -u cartel -P ***** -t 'aula/#' -v        # escucha
+      mosquitto_pub -h 192.168.X.X -u panel  -P ***** -t aula/203/status -m rojo -r   # publica (con retain)
+      ```
+    examples:
+      - title: "Archivo mosquitto.conf del proyecto"
+        explanation: "Va en /etc/mosquitto/conf.d/. Dos listeners: 1883 para las placas y 9001 (WebSockets) para el navegador."
+        lenguaje: plaintext
+        codigo: |
+          # /etc/mosquitto/conf.d/smart_sign.conf
+          per_listener_settings false
+
+          # Carteles (ESP32-C3): MQTT sobre TCP
+          listener 1883
+          protocol mqtt
+
+          # Panel del profesor (navegador): MQTT sobre WebSockets
+          listener 9001
+          protocol websockets
+
+          # Seguridad: usuarios con contraseña
+          allow_anonymous false
+          password_file /etc/mosquitto/passwd
+
+          # Guardar los mensajes retenidos aunque se reinicie el servidor
+          persistence true
+          persistence_location /var/lib/mosquitto/
+    practice: |
+      ### Práctica (2 sesiones)
+
+      1. En el servidor (o en un portátil Linux de pruebas), instala Mosquitto y copia `smart_sign.conf`.
+      2. Abre dos terminales: en una, `mosquitto_sub -t 'aula/#' -v`; en otra, publica `verde`, `rojo` y `azul`
+         en `aula/203/status`. Comprueba qué recibe cada suscripción.
+      3. Prueba los comodines: suscríbete a `aula/+/status` y publica en `aula/105/status` y en `aula/105/luz`.
+      4. Publica con `-r` (retain), cierra el suscriptor y vuelve a abrirlo: ¿recibe el último mensaje?
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué Mosquitto necesita el puerto 9001 además del 1883?"
+          options:
+            - {id: a, text: "Porque el navegador del panel no puede abrir conexiones TCP directas: usa MQTT sobre WebSockets."}
+            - {id: b, text: "Porque el 1883 es solo para enviar y el 9001 para recibir.", feedback: "Por cada puerto se envía y se recibe; la diferencia es el transporte (TCP o WebSockets)."}
+            - {id: c, text: "Para tener una copia de seguridad.", feedback: "No es redundancia: el navegador solo habla WebSockets."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "Un cartel se reinicia a media mañana. ¿Qué hace falta para que recupere enseguida su color?"
+          options:
+            - {id: a, text: "Que el panel publique los estados con retain."}
+            - {id: b, text: "Subir la QoS a 2.", feedback: "La QoS asegura la entrega de un mensaje enviado, pero no guarda el último para los que llegan después."}
+          answer: a
+        - id: c1
+          type: code
+          points: 2
+          prompt: |
+            Escribe `topic_aula(aula)` que devuelva el topic de estado de un aula como **bytes**, porque
+            `umqtt.simple` trabaja con bytes. Ejemplo: `topic_aula(203)` → `b"aula/203/status"`.
+          starter: |
+            def topic_aula(aula):
+                pass
+          solution: |
+            def topic_aula(aula):
+                return "aula/{}/status".format(aula).encode()
+          tests:
+            - {desc: "Aula 203", check: "topic_aula(203) == b'aula/203/status'"}
+            - {desc: "Aula con letras", check: "topic_aula('lab1') == b'aula/lab1/status'"}
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Escribe `coincide(filtro, topic)` que devuelva `True` si el `topic` encaja con el `filtro` de
+            suscripción (cadenas de texto), aplicando los comodines `+` (un nivel) y `#` (el resto de niveles,
+            solo al final).
+
+            Ejemplos: `coincide("aula/+/status", "aula/203/status")` → `True` ·
+            `coincide("aula/#", "aula/203/luz")` → `True` · `coincide("aula/+", "aula/203/status")` → `False`
+          starter: |
+            def coincide(filtro, topic):
+                pass
+          solution: |
+            def coincide(filtro, topic):
+                f = filtro.split("/")
+                t = topic.split("/")
+                for i, nivel in enumerate(f):
+                    if nivel == "#":
+                        return True
+                    if i >= len(t):
+                        return False
+                    if nivel != "+" and nivel != t[i]:
+                        return False
+                return len(f) == len(t)
+          tests:
+            - {desc: "Comodín +", call: "coincide('aula/+/status', 'aula/203/status')", expected: true}
+            - {desc: "Comodín #", call: "coincide('aula/#', 'aula/203/luz')", expected: true}
+            - {desc: "+ solo cubre un nivel", call: "coincide('aula/+', 'aula/203/status')", expected: false}
+            - {desc: "Topic exacto y distinto", call: "(coincide('aula/203/status', 'aula/203/status'), coincide('aula/203/status', 'aula/105/status'))", expected: [true, false]}
+          hints:
+            wrong_result: "Divide los dos por '/' y recorre los niveles del filtro: '#' acepta todo lo que queda, '+' acepta cualquier nivel. Al final, las dos listas deben tener la misma longitud."
+
+  - id: m5s3
+    title: "MQTT en la ESP32-C3: el cartel escucha"
+    hours: 2
+    kind: lesson
+    foto:
+      indicaciones: "Foto del cartel cambiando de color al publicar desde la terminal, con la consola de Thonny visible."
+    theory: |
+      ## El programa del cartel
+
+      1. **Conectar a la WiFi** del instituto (2,4 GHz: la ESP32-C3 no conecta a redes de 5 GHz).
+      2. **Conectar al broker** del servidor por el puerto **1883** con un `client_id` único (`cartel_aula203`).
+      3. **Suscribirse** a `aula/203/status` y definir una función *callback* que se ejecuta con cada mensaje.
+      4. En el bucle, llamar a `check_msg()` (comprueba si ha llegado algo sin bloquear).
+
+      Mejoras sobre el código base del proyecto:
+
+      | Código base | Versión del taller | Por qué |
+      |---|---|---|
+      | `Pin(8)` | `Pin(3)` | En la ESP32-C3 SuperMini, IO8 es pin de arranque y lleva el LED de la placa |
+      | `np.fill((255, 0, 0))` | Color escalado por `BRILLO` | 255 a pleno brillo deslumbra y gasta ≈ 4 veces más |
+      | Sin reconexión | `try/except` que reconecta | Si la WiFi o el servidor se caen, el cartel no se queda colgado |
+      | Solo verde y rojo | Diccionario de colores | Añadir un estado nuevo es añadir una línea |
+      | Sin `keepalive` | `keepalive=60` y `ping()` | El broker sabe si el cartel sigue vivo |
+
+      Programa completo: [`cartel_mqtt.py`](/descargas/cartel_mqtt.py) (guárdalo en la placa como `main.py`).
+      Rellena tu red, la IP del servidor, el usuario y el número de aula al principio del archivo.
+
+      > 💡 `umqtt.simple` viene incluida en la mayoría de firmwares de MicroPython para ESP32. Si no, se instala
+      > desde Thonny: *Herramientas → Gestionar paquetes → umqtt.simple*.
+    examples:
+      - title: "Cartel MQTT (versión corta)"
+        explanation: "El código base del proyecto con las mejoras del taller. El archivo completo, con reconexión, está en Descargas (cartel_mqtt.py)."
+        esp32_c3: |
+          import network, time
+          from machine import Pin
+          from neopixel import NeoPixel
+          from umqtt.simple import MQTTClient
+
+          SSID, CLAVE = "SSID_INSTITUTO", "PASSWORD"
+          SERVIDOR = "192.168.X.X"                      # IP del servidor del instituto
+          AULA = "203"
+          TOPIC = b"aula/" + AULA.encode() + b"/status"
+          BRILLO = 0.25
+          COLORES = {b"verde": (0, 255, 0), b"rojo": (255, 0, 0),
+                     b"azul": (0, 0, 255), b"apagado": (0, 0, 0)}
+
+          tira = NeoPixel(Pin(3, Pin.OUT), 12)          # DIN → IO3
+
+          def pintar(rgb):
+              tira.fill(tuple(int(c * BRILLO) for c in rgb))
+              tira.write()
+
+          wlan = network.WLAN(network.STA_IF)
+          wlan.active(True)
+          wlan.connect(SSID, CLAVE)
+          while not wlan.isconnected():
+              time.sleep(1)
+          print("WiFi:", wlan.ifconfig()[0])
+
+          def al_llegar(topic, msg):
+              print(topic, msg)
+              if msg in COLORES:
+                  pintar(COLORES[msg])
+
+          cliente = MQTTClient("cartel_aula" + AULA, SERVIDOR, port=1883,
+                               user="cartel", password="*****", keepalive=60)
+          cliente.set_callback(al_llegar)
+          cliente.connect()
+          cliente.subscribe(TOPIC)
+          print("Escuchando", TOPIC)
+
+          while True:
+              cliente.check_msg()
+              time.sleep(0.2)
+        pico_w: |
+          # Igual que en la ESP32-C3 cambiando el pin de la tira: NeoPixel(Pin(22, Pin.OUT), 12)
+          import network, time
+          from machine import Pin
+          from neopixel import NeoPixel
+          from umqtt.simple import MQTTClient
+
+          SERVIDOR = "192.168.X.X"
+          TOPIC = b"aula/203/status"
+          COLORES = {b"verde": (0, 64, 0), b"rojo": (64, 0, 0), b"azul": (0, 0, 64), b"apagado": (0, 0, 0)}
+          tira = NeoPixel(Pin(22, Pin.OUT), 12)
+
+          wlan = network.WLAN(network.STA_IF)
+          wlan.active(True)
+          wlan.connect("SSID_INSTITUTO", "PASSWORD")
+          while not wlan.isconnected():
+              time.sleep(1)
+
+          def al_llegar(topic, msg):
+              if msg in COLORES:
+                  tira.fill(COLORES[msg]); tira.write()
+
+          cliente = MQTTClient("cartel_aula203", SERVIDOR, port=1883, user="cartel", password="*****")
+          cliente.set_callback(al_llegar)
+          cliente.connect()
+          cliente.subscribe(TOPIC)
+          while True:
+              cliente.check_msg()
+              time.sleep(0.2)
+        esp32_s3: |
+          # Igual que en la ESP32-C3 cambiando el pin de la tira: NeoPixel(Pin(21, Pin.OUT), 12)
+          import network, time
+          from machine import Pin
+          from neopixel import NeoPixel
+          from umqtt.simple import MQTTClient
+
+          SERVIDOR = "192.168.X.X"
+          TOPIC = b"aula/203/status"
+          COLORES = {b"verde": (0, 64, 0), b"rojo": (64, 0, 0), b"azul": (0, 0, 64), b"apagado": (0, 0, 0)}
+          tira = NeoPixel(Pin(21, Pin.OUT), 12)
+
+          wlan = network.WLAN(network.STA_IF)
+          wlan.active(True)
+          wlan.connect("SSID_INSTITUTO", "PASSWORD")
+          while not wlan.isconnected():
+              time.sleep(1)
+
+          def al_llegar(topic, msg):
+              if msg in COLORES:
+                  tira.fill(COLORES[msg]); tira.write()
+
+          cliente = MQTTClient("cartel_aula203", SERVIDOR, port=1883, user="cartel", password="*****")
+          cliente.set_callback(al_llegar)
+          cliente.connect()
+          cliente.subscribe(TOPIC)
+          while True:
+              cliente.check_msg()
+              time.sleep(0.2)
+    practice: |
+      ### Práctica (2 sesiones)
+
+      1. Copia `cartel_mqtt.py` en la placa como `main.py` y rellena los datos de tu aula.
+      2. Desde la terminal del servidor, publica `verde`, `rojo`, `azul` y `apagado`: el cartel debe cambiar.
+      3. Publica un mensaje desconocido (`morado`): el cartel no debe fallar.
+      4. **Prueba de robustez**: apaga el router (o reinicia Mosquitto) un minuto. ¿Se recupera el cartel solo?
+      5. Publica con retain, desenchufa el cartel y vuelve a enchufarlo: ¿recupera el color?
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `color_mensaje(msg, brillo=1.0)` que reciba un mensaje en **bytes** y devuelva la tupla RGB
+            escalada por `brillo` (cada componente con `int()`):
+            `b"verde"` → (0, 255, 0) · `b"rojo"` → (255, 0, 0) · `b"azul"` → (0, 0, 255) ·
+            `b"apagado"` → (0, 0, 0). Para cualquier otro mensaje devuelve `None` (el cartel lo ignora).
+          starter: |
+            def color_mensaje(msg, brillo=1.0):
+                pass
+          solution: |
+            COLORES = {b"verde": (0, 255, 0), b"rojo": (255, 0, 0), b"azul": (0, 0, 255), b"apagado": (0, 0, 0)}
+
+            def color_mensaje(msg, brillo=1.0):
+                if msg not in COLORES:
+                    return None
+                return tuple(int(c * brillo) for c in COLORES[msg])
+          tests:
+            - {desc: "Rojo", call: "color_mensaje(b'rojo')", expected: [255, 0, 0]}
+            - {desc: "Verde al 20 %", call: "color_mensaje(b'verde', 0.2)", expected: [0, 51, 0]}
+            - {desc: "Mensaje desconocido", call: "color_mensaje(b'morado')", expected: null}
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué hace `cliente.check_msg()` en el bucle principal?"
+          options:
+            - {id: a, text: "Comprueba si ha llegado un mensaje y, si es así, llama al callback; si no, sigue sin esperar."}
+            - {id: b, text: "Espera bloqueado hasta que llega un mensaje.", feedback: "Eso es wait_msg(). check_msg() no bloquea."}
+            - {id: c, text: "Publica el estado del cartel.", feedback: "check_msg() solo recibe."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "Dos carteles usan el mismo client_id «cartel_aula203». ¿Qué pasa?"
+          options:
+            - {id: a, text: "El broker desconecta a uno cada vez que se conecta el otro: deben tener client_id distintos."}
+            - {id: b, text: "Nada, el broker los distingue por la IP.", feedback: "MQTT identifica a cada cliente por su client_id."}
+          answer: a
+
+  - id: m5s4
+    title: "Panel del profesor y demo del Sprint 2"
+    hours: 2
+    kind: challenge
+    foto:
+      indicaciones: "Foto de la demo: el panel del profesor en la pantalla con «Ocupada» pulsado y el cartel en rojo."
+    theory: |
+      ## El panel del profesor
+
+      Es una página web (hecha con **React** y la librería **mqtt.js**) que se conecta al broker por
+      **WebSockets** (`ws://192.168.X.X:9001`) y tiene tres botones: **Libre**, **Ocupada** y **Reservada**.
+      Cada botón publica el mensaje correspondiente con *retain* en `aula/203/status`.
+
+      | Botón | Mensaje publicado | Color del cartel |
+      |---|---|---|
+      | Libre | `verde` | 🟢 |
+      | Ocupada | `rojo` | 🔴 |
+      | Reservada | `azul` | 🔵 |
+
+      Panel listo para usar: [`panel_profesor.html`](/descargas/smart_sign/panel_profesor.html) (un solo archivo
+      con React y mqtt.js). Se escribe la IP del servidor, el usuario y el aula, y funciona.
+
+      ## ¿Dónde se aloja el panel?
+
+      En el **servidor del instituto** (Nginx o `node`/`npx serve`), **no** en Netlify ni en otro sitio de
+      Internet. El motivo:
+
+      - Una página servida por **https://** no puede abrir conexiones **ws://** sin cifrar (el navegador lo
+        bloquea por *contenido mixto*).
+      - El broker está en la **red local**: desde fuera del instituto no se ve.
+
+      ```bash
+      sudo apt install nginx
+      sudo cp panel_profesor.html /var/www/html/index.html
+      # el profesor abre http://192.168.X.X/ en su ordenador del aula
+      ```
+
+      ## Demo del Sprint 2
+
+      El profesor, desde el ordenador del aula, abre el panel, pulsa **«Ocupada»** y el cartel del pasillo se
+      pone **rojo al instante**.
+    examples:
+      - title: "El corazón del panel (React + mqtt.js)"
+        explanation: "Fragmento de panel_profesor.html: se conecta por WebSockets y publica con retain al pulsar un botón."
+        lenguaje: javascript
+        codigo: |
+          const ESTADOS = { Libre: 'verde', Ocupada: 'rojo', Reservada: 'azul' };
+
+          function Panel({ servidor, aula }) {
+            const [cliente, setCliente] = React.useState(null);
+            const [estado, setEstado] = React.useState('—');
+            const topic = `aula/${aula}/status`;
+
+            React.useEffect(() => {
+              const c = mqtt.connect(`ws://${servidor}:9001`, { username: 'panel', password: '*****' });
+              c.on('connect', () => c.subscribe(topic));
+              c.on('message', (_t, msg) => setEstado(msg.toString()));   // estado real (retain)
+              setCliente(c);
+              return () => c.end();
+            }, [servidor, aula]);
+
+            const publicar = (nombre) =>
+              cliente.publish(topic, ESTADOS[nombre], { retain: true, qos: 1 });
+
+            return (
+              <div>
+                <h2>Aula {aula}: {estado}</h2>
+                {Object.keys(ESTADOS).map(n => <button key={n} onClick={() => publicar(n)}>{n}</button>)}
+              </div>
+            );
+          }
+    practice: |
+      ### Sprint 2 · Demo (2 sesiones)
+
+      1. Copia `panel_profesor.html` al servidor (Nginx) o ábrelo con `npx serve` en un ordenador de la red.
+      2. Escribe la IP del servidor, el usuario y el aula y prueba los tres botones.
+      3. Abre el panel en **dos** ordenadores a la vez: si uno cambia el estado, ¿se actualiza en el otro?
+      4. **Demo**: el profesor pulsa «Ocupada» y el cartel se pone rojo. Mide el tiempo de reacción.
+      5. Retrospectiva del Sprint 2 y Kanban del Sprint 3.
+    evaluation:
+      intro: "Sprint 2. Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `estado_a_mensaje(estado)` que convierta el botón pulsado en el panel en el mensaje MQTT
+            (bytes): `"Libre"` → `b"verde"`, `"Ocupada"` → `b"rojo"`, `"Reservada"` → `b"azul"`. No debe importar
+            si viene en mayúsculas o minúsculas ni con espacios alrededor. Cualquier otro estado → `b"apagado"`.
+          starter: |
+            def estado_a_mensaje(estado):
+                pass
+          solution: |
+            def estado_a_mensaje(estado):
+                tabla = {"libre": b"verde", "ocupada": b"rojo", "reservada": b"azul"}
+                return tabla.get(estado.strip().lower(), b"apagado")
+          tests:
+            - {desc: "Ocupada", check: "estado_a_mensaje('Ocupada') == b'rojo'"}
+            - {desc: "Mayúsculas y espacios", check: "estado_a_mensaje('  LIBRE ') == b'verde'"}
+            - {desc: "Desconocido", check: "estado_a_mensaje('Vacaciones') == b'apagado'"}
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué no se publica el panel del profesor en Netlify?"
+          options:
+            - {id: a, text: "Porque una web https no puede conectarse a ws:// sin cifrar y el broker solo está en la red local."}
+            - {id: b, text: "Porque Netlify no admite React.", feedback: "Netlify aloja React sin problema; el problema es la conexión al broker."}
+          answer: a

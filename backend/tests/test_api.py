@@ -74,7 +74,7 @@ def test_register_and_login(client):
 def test_missions_locked_and_no_answers_leak(client):
     tok = client.post("/api/auth/login", json={"username": "ana", "password": "secreto1"}).json()["token"]
     ms = client.get("/api/missions", headers=auth(tok)).json()
-    assert len(ms) == 12
+    assert len(ms) == 15
     assert ms[0]["state"]["unlocked"] and not ms[1]["state"]["unlocked"]
     assert ms[0]["sections"][0]["state"]["unlocked"] and not ms[0]["sections"][1]["state"]["unlocked"]
     assert client.get("/api/sections/m1s2", headers=auth(tok)).status_code == 403
@@ -208,7 +208,7 @@ def test_teacher_dashboard(client):
                       headers=auth(tok)).json()["ok"]
     csv = client.get("/api/teacher/export.csv", headers=auth(tok))
     assert csv.status_code == 200 and "ana" in csv.text and "8,5" in csv.text
-    assert "fotos subidas" in csv.text and "3/35" in csv.text
+    assert "fotos subidas" in csv.text and "3/44" in csv.text
     stats = client.get("/api/teacher/stats", headers=auth(tok)).json()
     assert len(stats) == sum(len(m["sections"]) for m in load_missions())
     sol = client.get("/api/teacher/sections/m1s1/solutions", headers=auth(tok)).json()
@@ -221,5 +221,5 @@ def test_teacher_dashboard(client):
 def test_calendar(client):
     tok = client.post("/api/auth/login", json={"username": "ana", "password": "secreto1"}).json()["token"]
     cal = client.get("/api/calendar", headers=auth(tok)).json()
-    assert len(cal["weeks"]) == 36
+    assert len(cal["weeks"]) == 45
     assert all(len(w["sessions"]) == 3 for w in cal["weeks"])

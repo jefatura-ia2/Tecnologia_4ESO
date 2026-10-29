@@ -9,13 +9,13 @@
 import { computed, ref } from 'vue'
 import { highlight } from '../lib/markdown.js'
 
-const props = defineProps({ code: { type: String, default: '' } })
+const props = defineProps({ code: { type: String, default: '' }, lang: { type: String, default: 'python' } })
 const copied = ref(false)
-const html = computed(() => highlight(props.code.replace(/\n$/, '')))
+const html = computed(() => highlight((props.code || '').replace(/\n$/, ''), props.lang))
 
 async function copy() {
   try {
-    await navigator.clipboard.writeText(props.code)
+    await navigator.clipboard.writeText(props.code || '')
     copied.value = true
     setTimeout(() => (copied.value = false), 1500)
   } catch { /* portapapeles no disponible */ }

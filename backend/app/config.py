@@ -48,7 +48,7 @@ try:
     COURSE_START_DATE = date.fromisoformat(_env("COURSE_START_DATE", "2026-09-14"))
 except ValueError:
     COURSE_START_DATE = date(2026, 9, 14)
-WEEKS = int(_env("COURSE_WEEKS", "36"))
+WEEKS = int(_env("COURSE_WEEKS", "45"))
 HOURS_PER_WEEK = int(_env("HOURS_PER_WEEK", "3"))
 
 # Anti-trampa
@@ -68,6 +68,9 @@ PASSING_SCORES = {
     3: 0.75,
     4: 0.75,
     5: 0.75,
+    6: 0.75,
+    7: 0.75,
+    8: 0.75,
 }
 PASSING_SCORE_EXTRA = 0.80
 

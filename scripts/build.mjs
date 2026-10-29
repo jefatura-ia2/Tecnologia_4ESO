@@ -5,10 +5,11 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
+import { marked } from 'marked'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const missionsDir = path.join(root, 'backend/app/content/missions')
-const PASSING = { 1: 0.7, 2: 0.7, 3: 0.75, 4: 0.75, 5: 0.75 }
+const PASSING = { 1: 0.7, 2: 0.7, 3: 0.75, 4: 0.75, 5: 0.75, 6: 0.75, 7: 0.75, 8: 0.75 }
 
 const missions = fs.readdirSync(missionsDir)
   .filter((f) => f.endsWith('.yml'))
@@ -46,6 +47,16 @@ fs.mkdirSync(desc, { recursive: true })
 for (const f of fs.readdirSync(path.join(root, 'firmware'))) {
   if (f.endsWith('.py') && f !== 'secretos.py') fs.copyFileSync(path.join(root, 'firmware', f), path.join(desc, f))
 }
+// Proyecto Smart Sign (misiones 4-6): modelo OpenSCAD, STL, mosquitto.conf, panel del profesor y guía
+fs.cpSync(path.join(root, 'smart_sign'), path.join(desc, 'smart_sign'), { recursive: true })
+const guia = marked.parse(fs.readFileSync(path.join(root, 'smart_sign/README.md'), 'utf8'))
+fs.writeFileSync(path.join(desc, 'smart_sign/guia.html'), `<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Smart Sign · Guía del profesor</title>
+<style>body{font:16px/1.55 system-ui,sans-serif;max-width:960px;margin:0 auto;padding:16px;color:#1f2937;background:#fff}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px;display:block;overflow-x:auto}th,td{border:1px solid #d1d5db;padding:6px 8px;text-align:left}
+th{background:#f1f5f9}pre{background:#0f172a;color:#e2e8f0;padding:12px;border-radius:8px;overflow-x:auto}code{font-size:13px}
+blockquote{border-left:4px solid #0f766e;margin:0;padding:4px 12px;background:#f0fdfa}</style></head><body>
+${guia.replace(/href="(?!https?:|#|\/)([^"]+)"/g, (m, f) => `href="${f.replace(/^\.\.\/firmware\//, '../')}"`)}</body></html>`)
 
 const sections = missions.reduce((a, m) => a + m.sections.length, 0)
 console.log(`Temario: ${missions.length} misiones, ${sections} secciones → ${path.relative(root, out)}`)

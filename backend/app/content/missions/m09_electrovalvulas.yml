@@ -1,10 +1,10 @@
-id: m6
-number: 6
+id: m9
+number: 9
 trimestre: 2
 icon: "⚡"
 title: "Electroválvulas con MicroPython"
 subtitle: "Etapa de potencia con MOSFET, la clase Electrovalvula y el cilindro de simple efecto automático"
-weeks: [16, 17, 18]
+weeks: [25, 26, 27]
 hours: 9
 objectives:
   - Explicar por qué un pin no puede mover una electroválvula de 12 V y montar la etapa de potencia con MOSFET.
@@ -19,17 +19,17 @@ criteria:
   - Diseña y monta la interfaz de potencia entre un microcontrolador y actuadores de mayor tensión.
   - Programa el control automático de actuadores neumáticos aplicando criterios de seguridad.
 schedule:
-  - {week: 16, session: 1, title: "¿Por qué no basta un pin? Corriente de la bobina", section: m6s1}
-  - {week: 16, session: 2, title: "El MOSFET como interruptor. Diodo y masa común", section: m6s1}
-  - {week: 16, session: 3, title: "Montaje y comprobación con polímetro", section: m6s1}
-  - {week: 17, session: 1, title: "La clase Electrovalvula", section: m6s2}
-  - {week: 17, session: 2, title: "Cilindro de simple efecto automático", section: m6s3}
-  - {week: 17, session: 3, title: "Estado seguro con try/finally", section: m6s3}
-  - {week: 18, session: 1, title: "Proyecto corto: expulsor de piezas (montaje)", section: m6s4}
-  - {week: 18, session: 2, title: "Proyecto corto: programa y soplado con 2/2", section: m6s4}
-  - {week: 18, session: 3, title: "Proyecto corto: pruebas y presentación", section: m6s4}
+  - {week: 25, session: 1, title: "¿Por qué no basta un pin? Corriente de la bobina", section: m9s1}
+  - {week: 25, session: 2, title: "El MOSFET como interruptor. Diodo y masa común", section: m9s1}
+  - {week: 25, session: 3, title: "Montaje y comprobación con polímetro", section: m9s1}
+  - {week: 26, session: 1, title: "La clase Electrovalvula", section: m9s2}
+  - {week: 26, session: 2, title: "Cilindro de simple efecto automático", section: m9s3}
+  - {week: 26, session: 3, title: "Estado seguro con try/finally", section: m9s3}
+  - {week: 27, session: 1, title: "Proyecto corto: expulsor de piezas (montaje)", section: m9s4}
+  - {week: 27, session: 2, title: "Proyecto corto: programa y soplado con 2/2", section: m9s4}
+  - {week: 27, session: 3, title: "Proyecto corto: pruebas y presentación", section: m9s4}
 sections:
-  - id: m6s1
+  - id: m9s1
     title: "La etapa de potencia: MOSFET, diodo y 12 V"
     hours: 3
     kind: lesson
@@ -170,7 +170,7 @@ sections:
             - {desc: "4 × 6 W con fuente de 2 A → no", call: "fuente_suficiente([6, 6, 6, 6], 12, 2)", expected: false}
             - {desc: "Una válvula", call: "fuente_suficiente([4.8], 12, 1)", expected: true}
 
-  - id: m6s2
+  - id: m9s2
     title: "La clase Electrovalvula"
     hours: 1
     kind: lesson
@@ -313,7 +313,7 @@ sections:
           hints:
             wrong_result: "En activar(), comprueba ANTES de poner el pin a 1 si estaba a 0; solo entonces suma 1 a self.activaciones."
 
-  - id: m6s3
+  - id: m9s3
     title: "Cilindro de simple efecto automático"
     hours: 2
     kind: lesson
@@ -351,7 +351,7 @@ sections:
 
       Esto es una **buena práctica industrial**: diseñar pensando en qué pasa cuando las cosas fallan.
 
-      > De momento temporizamos con `sleep` porque el ciclo es corto y sencillo. En la misión 8 usaremos
+      > De momento temporizamos con `sleep` porque el ciclo es corto y sencillo. En la misión 11 usaremos
       > finales de carrera para saber cuándo ha llegado el cilindro de verdad.
     examples:
       - title: "Ciclos automáticos con estado seguro"
@@ -482,7 +482,7 @@ sections:
           hints:
             wrong_result: "Pon el bucle dentro de try: y en finally: llama a ev.desactivar()."
 
-  - id: m6s4
+  - id: m9s4
     title: "Proyecto corto: expulsor de piezas"
     hours: 3
     kind: challenge
@@ -556,7 +556,7 @@ sections:
       2. **Programa**: ciclo completo, contador de piezas y estado seguro.
       3. **Pruebas y presentación**: ajustad los tiempos mínimos. ¿Qué pasa si pulsáis muy rápido varias veces?
     evaluation:
-      intro: "Proyecto corto de la misión 6. Necesitas un 80 %."
+      intro: "Proyecto corto de la misión 9. Necesitas un 80 %."
       items:
         - id: c1
           type: code

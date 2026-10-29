@@ -1,0 +1,530 @@
+id: m6
+number: 6
+trimestre: 1
+icon: "🛰️"
+title: "Smart Sign III: sensores y red de carteles"
+subtitle: "Sprint 3: investigación operativa, sensor de movimiento PIR y de luz BH1750 · Sprint 4: topics dinámicos y panel de todo el pasillo"
+weeks: [16, 17, 18]
+hours: 9
+objectives:
+  - Tomar medidas de campo (luz, distancias y consumo) y usarlas para justificar decisiones de diseño.
+  - Integrar un sensor de movimiento PIR y un sensor de luz BH1750 (I2C) para que el cartel se encienda solo y ajuste su brillo.
+  - Rediseñar la PCB (versión 2) con los sensores y un corte de alimentación de la tira.
+  - Escalar el sistema a varias aulas con topics dinámicos aula/{id}/status y un panel con todos los carteles.
+  - Presentar el producto final y evaluarlo con la rúbrica ágil del proyecto.
+materials:
+  - Carteles del Sprint 2, luxómetro, cinta métrica, polímetro
+  - Sensor PIR HC-SR501 (o AM312) y sensor de luz BH1750 (I2C)
+  - Servidor Mosquitto del Sprint 2 y panel del profesor
+criteria:
+  - Analiza datos medidos en el entorno real para tomar decisiones técnicas justificadas.
+  - Integra sensores en sistemas automáticos y programa su comportamiento.
+  - Diseña soluciones escalables y documenta el proyecto (README, Kanban, demos) con metodología ágil.
+schedule:
+  - {week: 16, session: 1, title: "Investigación operativa: salida al pasillo y medidas de luz y distancia", section: m6s1}
+  - {week: 16, session: 2, title: "Análisis de datos y decisión: ¿PIR, BH1750 o los dos?", section: m6s1}
+  - {week: 16, session: 3, title: "Sensor PIR: el cartel se enciende al detectar movimiento", section: m6s2}
+  - {week: 17, session: 1, title: "Sensor BH1750 (I2C): brillo automático", section: m6s2}
+  - {week: 17, session: 2, title: "PCB v2 y montaje de los sensores en el soporte", section: m6s2}
+  - {week: 17, session: 3, title: "Sprint 4: topics dinámicos aula/{id}/status", section: m6s3}
+  - {week: 18, session: 1, title: "Panel del pasillo: todos los carteles a la vez", section: m6s3}
+  - {week: 18, session: 2, title: "Demo final: preparación y README", section: m6s4}
+  - {week: 18, session: 3, title: "Demo final, rúbrica y retrospectiva del proyecto", section: m6s4}
+sections:
+  - id: m6s1
+    title: "Investigación operativa: medir el pasillo"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Decidir con datos
+
+      Antes de añadir sensores, salimos al pasillo a **medir**. Cada decisión de la versión 2 debe poder
+      justificarse con un dato de la tabla.
+
+      | Qué medimos | Cómo | Para decidir… |
+      |---|---|---|
+      | **Luz ambiente** (lux) a 9:00, 11:30 y 14:00, con y sin luces | Luxómetro junto a la puerta | Si el brillo debe ajustarse solo (BH1750) y entre qué valores |
+      | **Distancia de lectura** | Desde qué distancia se distingue el color | Brillo mínimo útil |
+      | **Distancia y ángulo de paso** | Cinta métrica: por dónde pasa la gente | Si el PIR (alcance ~3-7 m, ~110°) cubre la zona |
+      | **Tiempo con gente** | Contar pasos por minuto en clase y en recreo | Cuánto tiempo encendido tras detectar movimiento |
+      | **Consumo real** | Polímetro en serie | Cuánto ahorra cada estrategia |
+
+      Valores orientativos: pasillo interior 100-300 lux; junto a una ventana con sol, más de 1000 lux.
+
+      ## De los datos a la decisión
+
+      ```
+      Si la luz del pasillo varía mucho a lo largo del día → BH1750 para ajustar el brillo.
+      Si hay ratos largos sin nadie → PIR para apagar la tira y ahorrar.
+      ```
+
+      Escribid la decisión en el README con la tabla de datos y un gráfico (por ejemplo, lux frente a hora).
+    examples:
+      - title: "Analizar las medidas de luz"
+        explanation: "Calcula mínimo, máximo y media de las medidas del pasillo y dice si conviene el ajuste automático."
+        pico_w: |
+          medidas = {"9:00": 140, "11:30": 620, "14:00": 380, "sin luces": 45}
+          valores = list(medidas.values())
+          print("mín:", min(valores), "máx:", max(valores), "media:", sum(valores) / len(valores))
+          if max(valores) > 3 * min(valores):
+              print("La luz varía mucho: conviene el BH1750")
+          else:
+              print("Luz estable: basta con un brillo fijo")
+        esp32_s3: |
+          medidas = {"9:00": 140, "11:30": 620, "14:00": 380, "sin luces": 45}
+          valores = list(medidas.values())
+          print("mín:", min(valores), "máx:", max(valores), "media:", sum(valores) / len(valores))
+          if max(valores) > 3 * min(valores):
+              print("La luz varía mucho: conviene el BH1750")
+          else:
+              print("Luz estable: basta con un brillo fijo")
+    practice: |
+      ### Salida de campo (2 sesiones)
+
+      1. Repartid los roles: medidor de luz, medidor de distancias, contador de paso, anotador.
+      2. Tomad las medidas de la tabla en al menos 3 momentos del día.
+      3. Pasad los datos a una hoja de cálculo, haced un gráfico y escribid la decisión en el README.
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `resumen_lux(medidas)` que reciba una lista de lecturas de luz y devuelva un diccionario con
+            `"min"`, `"max"` y `"media"` (la media redondeada a 1 decimal) y la clave `"ajuste"` a `True` si el
+            máximo es más de **3 veces** el mínimo. Si la lista está vacía, devuelve `None`.
+          starter: |
+            def resumen_lux(medidas):
+                pass
+          solution: |
+            def resumen_lux(medidas):
+                if not medidas:
+                    return None
+                mn, mx = min(medidas), max(medidas)
+                return {"min": mn, "max": mx, "media": round(sum(medidas) / len(medidas), 1), "ajuste": mx > 3 * mn}
+          tests:
+            - {desc: "Pasillo variable", call: "resumen_lux([140, 620, 380, 45])", expected: {"min": 45, "max": 620, "media": 296.2, "ajuste": true}}
+            - {desc: "Luz estable", call: "resumen_lux([200, 250, 300])", expected: {"min": 200, "max": 300, "media": 250.0, "ajuste": false}}
+            - {desc: "Sin datos", call: "resumen_lux([])", expected: null}
+        - id: q1
+          type: quiz
+          points: 1
+          question: "En el pasillo hay 150 lux por la mañana y 160 lux por la tarde. ¿Qué decides?"
+          options:
+            - {id: a, text: "Un brillo fijo: el BH1750 apenas aportaría nada con una luz tan estable."}
+            - {id: b, text: "Poner siempre el BH1750 porque es más moderno.", feedback: "Las decisiones se justifican con los datos, no por la novedad."}
+          answer: a
+
+  - id: m6s2
+    title: "Sensores PIR y BH1750: el cartel se adapta"
+    hours: 3
+    kind: lesson
+    foto:
+      indicaciones: "Foto del cartel con el sensor PIR y el BH1750 montados en el soporte (o en la PCB v2) y funcionando."
+    theory: |
+      ## Sensor de movimiento PIR
+
+      Detecta la radiación infrarroja del cuerpo humano en movimiento. Su salida es **digital**: `1` mientras
+      detecta movimiento y `0` cuando no. El HC-SR501 se alimenta a 5 V (salida de 3,3 V, compatible con la
+      ESP32-C3) y tiene dos potenciómetros: **sensibilidad** y **tiempo** (ponlo al mínimo y controla el tiempo
+      por programa).
+
+      **Lógica de auto-encendido**: el cartel se enciende al detectar movimiento y se apaga cuando pasan
+      `ESPERA` segundos **sin** movimiento.
+
+      ## Sensor de luz BH1750 (I2C)
+
+      Mide la luz directamente en **lux**. Se conecta por **I2C** (dirección **0x23**): SDA → IO5,
+      SCL → IO6, VCC → 3V3, GND → GND. Se le envía el comando `0x10` (medida continua de alta resolución) y se
+      leen 2 bytes: `lux = (byte_alto × 256 + byte_bajo) / 1,2`.
+
+      ## Brillo automático
+
+      MicroPython **no** tiene `np.brightness`: se escala el color. Convertimos lux en brillo de forma lineal
+      entre un mínimo (para que se vea a oscuras sin deslumbrar) y un máximo (para que se vea con sol):
+
+      ```
+      brillo = BMIN + (BMAX − BMIN) × (lux − LUX_MIN) / (LUX_MAX − LUX_MIN)   (limitado a [BMIN, BMAX])
+      ```
+
+      ## PCB v2
+
+      Cambios respecto a la versión 1: conector de 3 pines para el PIR, conector de 4 pines I2C para el BH1750
+      (en una ventana del soporte, mirando al pasillo) y un **MOSFET de canal P** (o un módulo de interruptor)
+      para **cortar la alimentación de la tira** cuando está apagada (recuerda: ≈ 1 mA por LED aunque estén en
+      negro). El Equipo A añade al soporte una ventana de Ø23 mm para la cúpula del PIR y otra de 6 × 6 mm para
+      el BH1750.
+    examples:
+      - title: "Cartel que se enciende al pasar y ajusta su brillo"
+        explanation: "PIR en IO4 y BH1750 por I2C (IO5/IO6). El color se mantiene; el brillo depende de la luz."
+        esp32_c3: |
+          from machine import Pin, I2C
+          from neopixel import NeoPixel
+          import time
+
+          tira = NeoPixel(Pin(3, Pin.OUT), 12)
+          pir = Pin(4, Pin.IN)
+          i2c = I2C(0, sda=Pin(5), scl=Pin(6), freq=100_000)
+          BH1750 = 0x23
+          i2c.writeto(BH1750, b"\x10")                 # medida continua de alta resolución
+
+          ESPERA = 30                                   # s encendido tras el último movimiento
+          color = (0, 255, 0)                           # lo cambiará MQTT
+          ultimo = -ESPERA
+
+          def leer_lux():
+              d = i2c.readfrom(BH1750, 2)
+              return (d[0] << 8 | d[1]) / 1.2
+
+          def brillo_por_lux(lux, bmin=0.05, bmax=0.6, lmin=20, lmax=1000):
+              f = (lux - lmin) / (lmax - lmin)
+              return bmin + (bmax - bmin) * min(1, max(0, f))
+
+          while True:
+              ahora = time.time()
+              if pir.value():
+                  ultimo = ahora
+              if ahora - ultimo < ESPERA:
+                  b = brillo_por_lux(leer_lux())
+                  tira.fill(tuple(int(c * b) for c in color))
+              else:
+                  tira.fill((0, 0, 0))
+              tira.write()
+              time.sleep(0.5)
+        pico_w: |
+          from machine import Pin, I2C
+          from neopixel import NeoPixel
+          import time
+
+          tira = NeoPixel(Pin(22, Pin.OUT), 12)
+          pir = Pin(15, Pin.IN)
+          i2c = I2C(0, sda=Pin(4), scl=Pin(5), freq=100_000)
+          i2c.writeto(0x23, b"\x10")
+          ESPERA, color, ultimo = 30, (0, 255, 0), -30
+
+          def leer_lux():
+              d = i2c.readfrom(0x23, 2)
+              return (d[0] << 8 | d[1]) / 1.2
+
+          while True:
+              ahora = time.time()
+              if pir.value():
+                  ultimo = ahora
+              if ahora - ultimo < ESPERA:
+                  f = min(1, max(0, (leer_lux() - 20) / 980))
+                  b = 0.05 + 0.55 * f
+                  tira.fill(tuple(int(c * b) for c in color))
+              else:
+                  tira.fill((0, 0, 0))
+              tira.write()
+              time.sleep(0.5)
+        esp32_s3: |
+          from machine import Pin, I2C
+          from neopixel import NeoPixel
+          import time
+
+          tira = NeoPixel(Pin(21, Pin.OUT), 12)
+          pir = Pin(14, Pin.IN)
+          i2c = I2C(0, sda=Pin(8), scl=Pin(9), freq=100_000)
+          i2c.writeto(0x23, b"\x10")
+          ESPERA, color, ultimo = 30, (0, 255, 0), -30
+
+          def leer_lux():
+              d = i2c.readfrom(0x23, 2)
+              return (d[0] << 8 | d[1]) / 1.2
+
+          while True:
+              ahora = time.time()
+              if pir.value():
+                  ultimo = ahora
+              if ahora - ultimo < ESPERA:
+                  f = min(1, max(0, (leer_lux() - 20) / 980))
+                  b = 0.05 + 0.55 * f
+                  tira.fill(tuple(int(c * b) for c in color))
+              else:
+                  tira.fill((0, 0, 0))
+              tira.write()
+              time.sleep(0.5)
+    practice: |
+      ### Práctica (3 sesiones)
+
+      1. Conecta el PIR y comprueba su salida con un programa que imprima `pir.value()`. Ajusta la sensibilidad.
+      2. Conecta el BH1750, escanea el bus (`i2c.scan()` debe dar `[35]`, es decir, 0x23) e imprime los lux.
+         Compara con el luxómetro.
+      3. Une los dos en el programa del cartel con MQTT: el color viene del panel; el encendido, del PIR;
+         el brillo, del BH1750.
+      4. Equipo A: ventanas del PIR y del BH1750 en el soporte (reimprime la pieza). Equipo B: PCB v2.
+      5. Mide el consumo medio en una hora de uso real y compáralo con la versión 1.
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `brillo_por_lux(lux, bmin=0.05, bmax=0.6, lmin=20, lmax=1000)` que devuelva el brillo (entre
+            `bmin` y `bmax`) que corresponde a la luz medida, de forma lineal entre `lmin` y `lmax` y limitado a
+            ese rango. Redondea a 2 decimales.
+
+            Ejemplos: `brillo_por_lux(10)` → `0.05` · `brillo_por_lux(755)` → `0.46` · `brillo_por_lux(5000)` → `0.6`
+          starter: |
+            def brillo_por_lux(lux, bmin=0.05, bmax=0.6, lmin=20, lmax=1000):
+                pass
+          solution: |
+            def brillo_por_lux(lux, bmin=0.05, bmax=0.6, lmin=20, lmax=1000):
+                f = (lux - lmin) / (lmax - lmin)
+                f = min(1, max(0, f))
+                return round(bmin + (bmax - bmin) * f, 2)
+          tests:
+            - {desc: "Oscuro", call: "brillo_por_lux(10)", expected: 0.05}
+            - {desc: "Intermedio", call: "brillo_por_lux(755)", expected: 0.46}
+            - {desc: "Mucho sol", call: "brillo_por_lux(5000)", expected: 0.6}
+            - {desc: "Otros límites", call: "brillo_por_lux(50, 0.1, 0.5, 0, 100)", expected: 0.3}
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Escribe `encendido(movimiento, t_ultimo, t_ahora, espera=30)` que devuelva una tupla
+            `(encender, nuevo_t_ultimo)`:
+
+            - Si hay `movimiento`, el nuevo instante del último movimiento es `t_ahora`; si no, sigue siendo `t_ultimo`.
+            - `encender` es `True` si han pasado **menos** de `espera` segundos desde el (nuevo) último movimiento.
+
+            Ejemplos: `encendido(True, 0, 100)` → `(True, 100)` · `encendido(False, 100, 120)` → `(True, 100)` ·
+            `encendido(False, 100, 130)` → `(False, 100)`
+          starter: |
+            def encendido(movimiento, t_ultimo, t_ahora, espera=30):
+                pass
+          solution: |
+            def encendido(movimiento, t_ultimo, t_ahora, espera=30):
+                if movimiento:
+                    t_ultimo = t_ahora
+                return t_ahora - t_ultimo < espera, t_ultimo
+          tests:
+            - {desc: "Detecta movimiento", call: "encendido(True, 0, 100)", expected: [true, 100]}
+            - {desc: "Aún dentro de la espera", call: "encendido(False, 100, 120)", expected: [true, 100]}
+            - {desc: "Se acabó la espera", call: "encendido(False, 100, 130)", expected: [false, 100]}
+            - {desc: "Espera de 60 s", call: "encendido(False, 100, 150, espera=60)", expected: [true, 100]}
+        - id: q1
+          type: quiz
+          points: 1
+          question: "`i2c.scan()` devuelve `[35]`. ¿Qué significa?"
+          options:
+            - {id: a, text: "Que hay un dispositivo en la dirección 35 = 0x23: el BH1750."}
+            - {id: b, text: "Que el sensor mide 35 lux.", feedback: "scan() devuelve direcciones de los dispositivos del bus, no medidas."}
+          answer: a
+
+  - id: m6s3
+    title: "Escalabilidad: la red de carteles del pasillo"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## Un topic por aula
+
+      Con un cartel por aula, cada uno se suscribe a **su** topic y el panel los controla todos:
+
+      ```
+      aula/105/status   aula/106/status   aula/203/status   ...
+      ```
+
+      - El número de aula se guarda en un archivo de la placa (`config.py`) para que el **mismo programa** sirva
+        para todos los carteles.
+      - El panel del pasillo se suscribe a `aula/+/status` y obtiene el aula de cada mensaje partiendo el topic:
+        `"aula/203/status".split("/")[1]` → `"203"`.
+
+      ## ¿Sigue vivo el cartel? (LWT)
+
+      Cada cartel publica `online` en `aula/{id}/conexion` al conectarse y deja al broker un **último
+      testamento** (*Last Will and Testament*): si el cartel desaparece sin despedirse (batería agotada, WiFi
+      caída), el broker publica `offline` por él.
+
+      ```python
+      cliente.set_last_will(b"aula/203/conexion", b"offline", retain=True)
+      cliente.connect()
+      cliente.publish(b"aula/203/conexion", b"online", retain=True)
+      ```
+
+      ## Panel del pasillo y notificaciones
+
+      En React, el panel pasa de **un** estado a una **lista** (array) de carteles que se dibuja con
+      `carteles.map(...)`. El archivo [`panel_profesor.html`](/descargas/smart_sign/panel_profesor.html) ya
+      incluye el modo **Pasillo**: escribe varias aulas separadas por comas.
+
+      **PWA y notificaciones**: si el panel se instala como aplicación web (PWA) puede avisar cuando un cartel
+      pasa a `offline`. Para notificaciones *push* reales hace falta servir el panel por **HTTPS** (con un
+      certificado del servidor del centro) y usar `wss://` en el broker.
+    examples:
+      - title: "Un programa para todos los carteles"
+        explanation: "config.py guarda el aula de cada cartel; el programa principal construye los topics."
+        esp32_c3: |
+          # config.py (distinto en cada cartel)
+          AULA = "203"
+
+          # main.py (igual en todos)
+          from config import AULA
+          TOPIC_ESTADO = "aula/{}/status".format(AULA).encode()
+          TOPIC_CONEXION = "aula/{}/conexion".format(AULA).encode()
+          CLIENT_ID = "cartel_aula" + AULA
+          print(CLIENT_ID, TOPIC_ESTADO, TOPIC_CONEXION)
+        pico_w: |
+          AULA = "203"
+          TOPIC_ESTADO = "aula/{}/status".format(AULA).encode()
+          TOPIC_CONEXION = "aula/{}/conexion".format(AULA).encode()
+          CLIENT_ID = "cartel_aula" + AULA
+          print(CLIENT_ID, TOPIC_ESTADO, TOPIC_CONEXION)
+        esp32_s3: |
+          AULA = "203"
+          TOPIC_ESTADO = "aula/{}/status".format(AULA).encode()
+          TOPIC_CONEXION = "aula/{}/conexion".format(AULA).encode()
+          CLIENT_ID = "cartel_aula" + AULA
+          print(CLIENT_ID, TOPIC_ESTADO, TOPIC_CONEXION)
+    practice: |
+      ### Sprint 4 (2 sesiones)
+
+      1. Cada grupo configura su cartel con un número de aula distinto en `config.py`.
+      2. Añadid el último testamento (LWT) y el mensaje `online`.
+      3. Abrid el panel en modo **Pasillo** con todas las aulas y cambiad los estados.
+      4. Desenchufad un cartel: ¿aparece `offline` en el panel? ¿Cuánto tarda? (depende del `keepalive`).
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `aula_de_topic(topic)` que devuelva el identificador del aula (texto) de un topic con el formato
+            `aula/{id}/...`. Si el topic no empieza por `aula/` o no tiene al menos 2 niveles, devuelve `None`.
+
+            Ejemplo: `aula_de_topic("aula/203/status")` → `"203"`
+          starter: |
+            def aula_de_topic(topic):
+                pass
+          solution: |
+            def aula_de_topic(topic):
+                partes = topic.split("/")
+                if len(partes) < 2 or partes[0] != "aula" or not partes[1]:
+                    return None
+                return partes[1]
+          tests:
+            - {desc: "Estado del 203", call: "aula_de_topic('aula/203/status')", expected: "203"}
+            - {desc: "Conexión del lab1", call: "aula_de_topic('aula/lab1/conexion')", expected: "lab1"}
+            - {desc: "Otro topic", call: "(aula_de_topic('pasillo/1/luz'), aula_de_topic('aula'))", expected: [null, null]}
+        - id: c2
+          type: code
+          points: 4
+          prompt: |
+            Escribe `estado_pasillo(mensajes)` que reciba una lista de pares `(topic, mensaje)` (texto) en orden de
+            llegada y devuelva un diccionario `{aula: último mensaje}` solo con los topics de **estado**
+            (`aula/{id}/status`).
+
+            Ejemplo: `[("aula/203/status", "rojo"), ("aula/105/status", "verde"), ("aula/203/status", "azul"),
+            ("aula/105/conexion", "online")]` → `{"203": "azul", "105": "verde"}`
+          starter: |
+            def estado_pasillo(mensajes):
+                pass
+          solution: |
+            def estado_pasillo(mensajes):
+                estados = {}
+                for topic, msg in mensajes:
+                    partes = topic.split("/")
+                    if len(partes) == 3 and partes[0] == "aula" and partes[2] == "status":
+                        estados[partes[1]] = msg
+                return estados
+          tests:
+            - {desc: "Ejemplo", call: "estado_pasillo([('aula/203/status', 'rojo'), ('aula/105/status', 'verde'), ('aula/203/status', 'azul'), ('aula/105/conexion', 'online')])", expected: {"203": "azul", "105": "verde"}}
+            - {desc: "Sin mensajes", call: "estado_pasillo([])", expected: {}}
+
+  - id: m6s4
+    title: "Demo final del Smart Sign y evaluación ágil"
+    hours: 2
+    kind: challenge
+    foto:
+      indicaciones: "Foto de la demo final: el panel del pasillo con varios carteles y los carteles físicos encendidos en la pared."
+    theory: |
+      ## Demo final
+
+      El panel del servidor muestra el estado de **todo el pasillo en tiempo real**; los carteles se encienden al
+      pasar alguien y ajustan su brillo a la luz. Cada equipo presenta en 5 minutos:
+
+      1. El problema y las historias de usuario.
+      2. El producto: mecánica (CAD, tolerancias, impresión), electrónica (energía y autonomía) y software (MQTT).
+      3. Los datos de campo y las decisiones que justificaron.
+      4. Lo que mejoraríais en una versión 3.
+
+      ## Rúbrica del proyecto Smart Sign
+
+      | Criterio | Peso | Qué se valora |
+      |---|---|---|
+      | **Trabajo en paralelo (Sprint 1)** | 20 % | Coordinación entre equipos, cumplimiento del Sprint Goal, calidad de la mecánica o la electrónica |
+      | **Hito de integración** | 15 % | El cartel ensamblado funciona con batería e ilumina de forma uniforme |
+      | **Conexión y software (Sprint 2)** | 25 % | Mosquitto (1883/9001), panel desplegado y comunicación con la ESP32 por MQTT |
+      | **Investigación y sensores** | 15 % | Calidad de los datos de campo y justificación de la PCB v2 y de la lógica de sensores |
+      | **Metodología ágil y documentación** | 25 % | Kanban, Dailys, Sprint Reviews y README en GitHub |
+
+      Cada criterio se puntúa de 0 a 10 y la nota final es la **media ponderada**.
+    examples:
+      - title: "Resumen del pasillo en la consola"
+        explanation: "Imprime cuántas aulas hay en cada estado a partir del diccionario del panel."
+        pico_w: |
+          estados = {"105": "verde", "106": "rojo", "203": "rojo", "204": "azul"}
+          for color in ("verde", "rojo", "azul"):
+              aulas = [a for a, e in estados.items() if e == color]
+              print(color, len(aulas), aulas)
+        esp32_s3: |
+          estados = {"105": "verde", "106": "rojo", "203": "rojo", "204": "azul"}
+          for color in ("verde", "rojo", "azul"):
+              aulas = [a for a, e in estados.items() if e == color]
+              print(color, len(aulas), aulas)
+    practice: |
+      ### Demo final (2 sesiones)
+
+      1. Completad el README: historias de usuario, contrato de medidas, fotos, tablas de pruebas, datos de campo,
+         esquemas, enlaces a los STL/SCAD y al código.
+      2. Ensayad la demo de 5 minutos.
+      3. Demo final ante la clase y el profesor. Coevaluación con la rúbrica.
+      4. Retrospectiva del proyecto completo.
+    evaluation:
+      intro: "Demo final. Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `nota_proyecto(notas)` que reciba un diccionario con las notas (0-10) de los cinco criterios y
+            devuelva la media ponderada redondeada a 2 decimales. Claves y pesos: `"paralelo"` 20 %,
+            `"hito"` 15 %, `"software"` 25 %, `"investigacion"` 15 %, `"agil"` 25 %.
+
+            Ejemplo: todas 8 salvo `"software"` 6 → `7.5`
+          starter: |
+            def nota_proyecto(notas):
+                pass
+          solution: |
+            PESOS = {"paralelo": 0.20, "hito": 0.15, "software": 0.25, "investigacion": 0.15, "agil": 0.25}
+
+            def nota_proyecto(notas):
+                return round(sum(notas[c] * p for c, p in PESOS.items()), 2)
+          tests:
+            - {desc: "Ejemplo", call: "nota_proyecto({'paralelo': 8, 'hito': 8, 'software': 6, 'investigacion': 8, 'agil': 8})", expected: 7.5}
+            - {desc: "Todo 10", call: "nota_proyecto({'paralelo': 10, 'hito': 10, 'software': 10, 'investigacion': 10, 'agil': 10})", expected: 10.0}
+            - {desc: "Notas variadas", call: "nota_proyecto({'paralelo': 7, 'hito': 9, 'software': 5, 'investigacion': 6, 'agil': 10})", expected: 7.4}
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `resumen_pasillo(estados)` que reciba `{aula: color}` y devuelva un diccionario con cuántas
+            aulas hay `"libres"` (verde), `"ocupadas"` (rojo) y `"reservadas"` (azul). Los demás colores no cuentan.
+          starter: |
+            def resumen_pasillo(estados):
+                pass
+          solution: |
+            def resumen_pasillo(estados):
+                nombres = {"verde": "libres", "rojo": "ocupadas", "azul": "reservadas"}
+                r = {"libres": 0, "ocupadas": 0, "reservadas": 0}
+                for color in estados.values():
+                    if color in nombres:
+                        r[nombres[color]] += 1
+                return r
+          tests:
+            - {desc: "Pasillo", call: "resumen_pasillo({'105': 'verde', '106': 'rojo', '203': 'rojo', '204': 'azul', '205': 'apagado'})", expected: {"libres": 1, "ocupadas": 2, "reservadas": 1}}
+            - {desc: "Vacío", call: "resumen_pasillo({})", expected: {"libres": 0, "ocupadas": 0, "reservadas": 0}}

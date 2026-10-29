@@ -1,10 +1,10 @@
-id: m11
-number: 11
+id: m14
+number: 14
 trimestre: 3
 icon: "📡"
 title: "Control WiFi, registro y mantenimiento"
 subtitle: "Servidor web en la placa, panel de control seguro, registro de ciclos y diagnóstico"
-weeks: [31, 32, 33]
+weeks: [40, 41, 42]
 hours: 9
 objectives:
   - Conectar la placa a la WiFi y servir una página web y datos JSON.
@@ -19,17 +19,17 @@ criteria:
   - Integra comunicaciones en sistemas automáticos para su supervisión y control remoto de forma segura.
   - Analiza datos de funcionamiento para el mantenimiento de máquinas.
 schedule:
-  - {week: 31, session: 1, title: "La placa en la red: WiFi e IP", section: m11s1}
-  - {week: 31, session: 2, title: "HTTP: peticiones, rutas y respuestas", section: m11s1}
-  - {week: 31, session: 3, title: "Panel de control: rutas /estado, /ciclo y /paro", section: m11s2}
-  - {week: 32, session: 1, title: "La seguridad manda: lo remoto nunca anula lo local", section: m11s2}
-  - {week: 32, session: 2, title: "Registro de ciclos en un archivo CSV", section: m11s3}
-  - {week: 32, session: 3, title: "Mantenimiento: contadores y ciclos lentos", section: m11s3}
-  - {week: 33, session: 1, title: "Proyecto corto: panel de la estampadora (servidor)", section: m11s4}
-  - {week: 33, session: 2, title: "Proyecto corto: página de estadísticas", section: m11s4}
-  - {week: 33, session: 3, title: "Proyecto corto: pruebas y presentación", section: m11s4}
+  - {week: 40, session: 1, title: "La placa en la red: WiFi e IP", section: m14s1}
+  - {week: 40, session: 2, title: "HTTP: peticiones, rutas y respuestas", section: m14s1}
+  - {week: 40, session: 3, title: "Panel de control: rutas /estado, /ciclo y /paro", section: m14s2}
+  - {week: 41, session: 1, title: "La seguridad manda: lo remoto nunca anula lo local", section: m14s2}
+  - {week: 41, session: 2, title: "Registro de ciclos en un archivo CSV", section: m14s3}
+  - {week: 41, session: 3, title: "Mantenimiento: contadores y ciclos lentos", section: m14s3}
+  - {week: 42, session: 1, title: "Proyecto corto: panel de la estampadora (servidor)", section: m14s4}
+  - {week: 42, session: 2, title: "Proyecto corto: página de estadísticas", section: m14s4}
+  - {week: 42, session: 3, title: "Proyecto corto: pruebas y presentación", section: m14s4}
 sections:
-  - id: m11s1
+  - id: m14s1
     title: "WiFi y servidor web en la placa"
     hours: 2
     kind: lesson
@@ -159,7 +159,7 @@ sections:
             - {desc: "GET /estado", call: "extraer_ruta('GET /estado HTTP/1.1\\r\\nHost: x\\r\\n\\r\\n')", expected: "/estado"}
             - {desc: "Vacía → /", call: "extraer_ruta('')", expected: "/"}
 
-  - id: m11s2
+  - id: m14s2
     title: "Panel de control seguro"
     hours: 2
     kind: lesson
@@ -290,7 +290,7 @@ sections:
             - {desc: "Paro siempre", call: "atender('/paro', {'fase': 'BAJANDO', 'emergencia': True})", expected: "PARO"}
             - {desc: "Estado y ruta desconocida", call: "(atender('/estado', {'fase': 'REPOSO', 'emergencia': False}), atender('/abrir', {'fase': 'REPOSO', 'emergencia': False}))", expected: ["ESTADO", "NO_EXISTE"]}
 
-  - id: m11s3
+  - id: m14s3
     title: "Registro de ciclos y mantenimiento"
     hours: 2
     kind: lesson
@@ -435,7 +435,7 @@ sections:
             - {desc: "12300 ciclos, revisión cada 5000", call: "faltan_para_revision(12300, 5000)", expected: 2700}
             - {desc: "Justo tras una revisión", call: "faltan_para_revision(10000, 5000)", expected: 5000}
 
-  - id: m11s4
+  - id: m14s4
     title: "Proyecto corto: panel de la estampadora"
     hours: 3
     kind: challenge
@@ -444,7 +444,7 @@ sections:
     theory: |
       ## El encargo
 
-      Añadir a la estampadora (misión 9) un **panel web** que muestre en el móvil:
+      Añadir a la estampadora (misión 12) un **panel web** que muestre en el móvil:
 
       - Estado (fase, emergencia) y botones CICLO / PARO (con las reglas de seguridad).
       - **Estadísticas** de los tiempos de ciclo registrados: número de ciclos, media, máximo y número
@@ -498,7 +498,7 @@ sections:
       2. **Página**: botones, estado y estadísticas con refresco automático.
       3. **Pruebas y presentación**: demostración desde el móvil, incluida la denegación con emergencia.
     evaluation:
-      intro: "Proyecto corto de la misión 11. Necesitas un 80 %."
+      intro: "Proyecto corto de la misión 14. Necesitas un 80 %."
       items:
         - id: c1
           type: code

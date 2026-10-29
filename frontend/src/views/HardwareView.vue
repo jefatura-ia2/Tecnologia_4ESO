@@ -86,8 +86,30 @@
           <tr><th>Osciloscopio PROMAX serie OD-600</th><td>Osciloscopio digital (OD-603, OD-606, OD-610…). Sonda en x10 y el mismo ajuste en el menú del canal; compensa la sonda con su salida de calibración; la pinza de masa solo a GND. Nunca se mide la red de 230 V.</td></tr>
           <tr><th>PN532 NFC RFID Module V3</th><td>Lector NFC de 13,56 MHz. En el curso se usa por I2C con la librería <a href="/descargas/pn532_i2c.py">pn532_i2c.py</a> y el programa de prueba <a href="/descargas/pn532_i2c_main.py">pn532_i2c_main.py</a> (guárdalo como main.py). <a href="/simuladores/pn532_i2c_pico_w_3d.html" target="_blank" rel="noopener">Montaje en 3D ↗</a></td></tr>
           <tr><th>Tira WS2812 (NeoPixel) de 8 LED</th><td>LED RGB direccionables con un solo cable de datos (DIN). Hasta 60 mA por LED en blanco: con alimentación USB usa brillo ≤ 0,25. Programa de prueba: <a href="/descargas/tira_colores.py">tira_colores.py</a>. <a href="/simuladores/ws2812_esp32c3_3d.html" target="_blank" rel="noopener">Montaje en 3D con ESP32-C3 ↗</a></td></tr>
-          <tr><th>ESP32-C3 SuperMini</th><td>Placa pequeña (22,5 × 18 mm) con WiFi/BLE y USB-C, programable con MicroPython. En la misión 3 se usa para la tira WS2812 (DIN en IO3).</td></tr>
+          <tr><th>ESP32-C3 SuperMini</th><td>Placa pequeña (22,5 × 18 mm) con WiFi/BLE y USB-C, programable con MicroPython. En la misión 3 se usa para la tira WS2812 (DIN en IO3) y es el cerebro del Smart Sign (misiones 4-6).</td></tr>
           <tr><th>Cerradura de solenoide 12 V</th><td>Fail-secure: cerrada sin corriente, se abre con 12 V (≈ 0,5-1 A). Siempre con módulo MOSFET y diodo de libre circulación; no dejarla activada más de unos segundos.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Proyecto Smart Sign IoT (misiones 4-6)</h3>
+      <table class="table">
+        <tbody>
+          <tr><th>Batería 18650 + portapilas</th><td>Li-ion de 3,7 V nominal (4,2 V cargada), ≈ 2500 mAh. Portapilas con cable y conector JST. Nunca se cortocircuita ni se descarga por debajo de 3 V.</td></tr>
+          <tr><th>TP4056 con protección (USB-C)</th><td>Cargador de una celda Li-ion con protección DW01: entrada USB-C, pines B+/B− a la batería y OUT+/OUT− a la carga. LED rojo cargando, azul/verde cargada.</td></tr>
+          <tr><th>MT3608 (elevador)</th><td>Convertidor <em>boost</em> de 2-24 V a 5-28 V. <strong>Ajusta la salida a 5,0 V con el potenciómetro y el polímetro antes de conectar la placa.</strong> Rendimiento ≈ 85 %.</td></tr>
+          <tr><th>Metacrilato de 5 mm</th><td>Plancha de 160 × 120 mm iluminada por el canto. Mide su espesor real con el calibre: suele variar ±0,2 mm. Corte solo con la láser y el profesor.</td></tr>
+          <tr><th>Sensor PIR HC-SR501 / AM312</th><td>Movimiento por infrarrojos: salida digital (1 = movimiento). En la ESP32-C3, IO4.</td></tr>
+          <tr><th>Sensor de luz BH1750</th><td>Luz en lux por I2C (dirección 0x23). ESP32-C3: SDA → IO5, SCL → IO6, VCC → 3V3.</td></tr>
+          <tr><th>Impresoras 3D</th><td><strong>Bambu Lab A1</strong> (256 × 256 × 256 mm): piezas de precisión y la probeta de tolerancias. <strong>Artillery Sidewinder X1</strong> (300 × 300 × 400 mm): piezas grandes y PETG.</td></tr>
+          <tr><th>Descargas</th><td>
+            <a href="/descargas/smart_sign/marco_cartel.scad">marco_cartel.scad</a> (OpenSCAD paramétrico) ·
+            <a href="/descargas/smart_sign/stl/soporte.stl">soporte.stl</a> ·
+            <a href="/descargas/smart_sign/stl/tapa.stl">tapa.stl</a> ·
+            <a href="/descargas/smart_sign/stl/capuchon.stl">capuchon.stl</a> ·
+            <a href="/descargas/smart_sign/stl/probeta.stl">probeta.stl</a> ·
+            <a href="/descargas/cartel_mqtt.py">cartel_mqtt.py</a> ·
+            <a href="/descargas/smart_sign/mosquitto.conf">mosquitto.conf</a> ·
+            <a href="/descargas/smart_sign/panel_profesor.html">panel_profesor.html</a> (se aloja en el servidor del instituto)</td></tr>
         </tbody>
       </table>
     </div>

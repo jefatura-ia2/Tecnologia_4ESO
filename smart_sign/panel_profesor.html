@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Smart Sign · Panel del profesor</title>
+<!--
+  Smart Sign IoT · Panel del profesor (misiones 5 y 6 de TEC_IVJP_lab27)
+  Se aloja en el SERVIDOR DEL INSTITUTO (Nginx o «npx serve»), NO en Netlify:
+  una página https no puede abrir ws:// sin cifrar y el broker solo está en la red local.
+  Conecta con Mosquitto por WebSockets (puerto 9001) y publica con retain en aula/<id>/status.
+  Necesita acceso a unpkg.com para cargar React y mqtt.js (o descarga los tres .js y cambia las rutas).
+-->
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<style>
+  :root { --bg:#f4f6fa; --card:#fff; --text:#1d2433; --muted:#667085; --line:#d9dee8;
+          --verde:#16a34a; --rojo:#dc2626; --azul:#2563eb; --gris:#9ca3af; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#12151c; --card:#1b2029; --text:#e8ebf2; --muted:#98a2b3; --line:#2c3340; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:16px; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:20px; margin:0; }
+  .estado-con { font-size:14px; padding:2px 10px; border-radius:99px; border:1px solid var(--line); }
+  main { padding:16px; max-width:1100px; margin:0 auto; }
+  form.config { display:grid; gap:10px; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); align-items:end; background:var(--card);
+                padding:14px; border-radius:12px; border:1px solid var(--line); margin-bottom:16px; }
+  label { font-size:13px; color:var(--muted); display:grid; gap:4px; }
+  input { width:100%; min-width:0; font:inherit; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--text); }
+  button { font:inherit; padding:9px 14px; border-radius:8px; border:1px solid var(--line); cursor:pointer; background:var(--card); color:var(--text); }
+  button.primario { background:#1f3a8a; color:#fff; border-color:#1f3a8a; }
+  .resumen { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; color:var(--muted); }
+  .grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); }
+  .cartel { min-width:0; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; display:grid; gap:10px; }
+  .cartel h2 { margin:0; font-size:18px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+  .luz { height:56px; border-radius:10px; display:grid; place-items:center; color:#fff; font-weight:700; letter-spacing:.5px; transition:background .3s; }
+  .botones { display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; }
+  .botones button { min-width:0; padding:9px 4px; font-size:14px; }
+  .botones button.activo { outline:3px solid var(--text); }
+  .b-verde { background:var(--verde); color:#fff; border-color:var(--verde); }
+  .b-rojo { background:var(--rojo); color:#fff; border-color:var(--rojo); }
+  .b-azul { background:var(--azul); color:#fff; border-color:var(--azul); }
+  .pequeño { font-size:13px; color:var(--muted); }
+  .online { color:var(--verde); } .offline { color:var(--rojo); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const { useState, useEffect, useRef } = React;
+const h = React.createElement;
+
+const ESTADOS = [
+  { nombre: 'Libre', msg: 'verde', clase: 'b-verde', color: 'var(--verde)' },
+  { nombre: 'Ocupada', msg: 'rojo', clase: 'b-rojo', color: 'var(--rojo)' },
+  { nombre: 'Reservada', msg: 'azul', clase: 'b-azul', color: 'var(--azul)' },
+];
+const NOMBRE = { verde: 'LIBRE', rojo: 'OCUPADA', azul: 'RESERVADA', apagado: 'APAGADO' };
+const COLOR = { verde: 'var(--verde)', rojo: 'var(--rojo)', azul: 'var(--azul)' };
+
+function leerConfig() {
+  const def = { servidor: location.hostname || '192.168.1.10', puerto: 9001, usuario: 'panel', clave: '', aulas: '203' };
+  try { return { ...def, ...JSON.parse(localStorage.getItem('smartsign-config') || '{}') }; } catch { return def; }
+}
+
+function App() {
+  const [config, setConfig] = useState(leerConfig);
+  const [borrador, setBorrador] = useState(config);
+  const [conexion, setConexion] = useState('desconectado');
+  const [carteles, setCarteles] = useState({});     // { '203': { estado: 'rojo', conexion: 'online' } }
+  const cliente = useRef(null);
+  const aulas = config.aulas.split(',').map((a) => a.trim()).filter(Boolean);
+
+  useEffect(() => {
+    const c = mqtt.connect(`ws://${config.servidor}:${config.puerto}`, {
+      username: config.usuario || undefined, password: config.clave || undefined,
+      clientId: 'panel_' + Math.random().toString(16).slice(2, 8), reconnectPeriod: 3000,
+    });
+    cliente.current = c;
+    setConexion('conectando…');
+    c.on('connect', () => { setConexion('conectado'); c.subscribe(['aula/+/status', 'aula/+/conexion']); });
+    c.on('reconnect', () => setConexion('reconectando…'));
+    c.on('close', () => setConexion('desconectado'));
+    c.on('error', (e) => setConexion('error: ' + e.message));
+    c.on('message', (topic, payload) => {
+      const [raiz, aula, tipo] = topic.split('/');
+      if (raiz !== 'aula' || !aula) return;
+      const valor = payload.toString().trim().toLowerCase();
+      setCarteles((prev) => {
+        const antes = prev[aula] || {};
+        if (tipo === 'conexion' && antes.conexion === 'online' && valor === 'offline') avisar(`El cartel del aula ${aula} se ha desconectado`);
+        return { ...prev, [aula]: { ...antes, [tipo === 'status' ? 'estado' : 'conexion']: valor } };
+      });
+    });
+    return () => c.end(true);
+  }, [config]);
+
+  function publicar(aula, msg) {
+    cliente.current?.publish(`aula/${aula}/status`, msg, { retain: true, qos: 1 });
+  }
+  function guardar(e) {
+    e.preventDefault();
+    localStorage.setItem('smartsign-config', JSON.stringify(borrador));
+    setConfig(borrador);
+  }
+  const campo = (k, etiqueta, tipo = 'text') => h('label', null, etiqueta,
+    h('input', { type: tipo, value: borrador[k], onChange: (e) => setBorrador({ ...borrador, [k]: e.target.value }) }));
+
+  const cuenta = { verde: 0, rojo: 0, azul: 0 };
+  aulas.forEach((a) => { const e = carteles[a]?.estado; if (e in cuenta) cuenta[e]++; });
+
+  return h('div', null,
+    h('header', null,
+      h('h1', null, '🪧 Smart Sign · Panel del profesor'),
+      h('span', { className: 'estado-con' }, 'Broker: ' + conexion),
+    ),
+    h('main', null,
+      h('form', { className: 'config', onSubmit: guardar },
+        campo('servidor', 'IP del servidor'), campo('puerto', 'Puerto WebSockets'),
+        campo('usuario', 'Usuario'), campo('clave', 'Contraseña', 'password'),
+        campo('aulas', 'Aulas (separadas por comas)'),
+        h('button', { className: 'primario', type: 'submit' }, 'Conectar'),
+      ),
+      aulas.length > 1 && h('div', { className: 'resumen' },
+        h('span', null, `🟢 ${cuenta.verde} libres`), h('span', null, `🔴 ${cuenta.rojo} ocupadas`), h('span', null, `🔵 ${cuenta.azul} reservadas`)),
+      h('div', { className: 'grid' }, aulas.map((aula) => {
+        const c = carteles[aula] || {};
+        return h('section', { className: 'cartel', key: aula },
+          h('h2', null, 'Aula ' + aula,
+            h('span', { className: 'pequeño ' + (c.conexion || '') }, c.conexion ? '● ' + c.conexion : '○ sin datos')),
+          h('div', { className: 'luz', style: { background: COLOR[c.estado] || 'var(--gris)' } }, NOMBRE[c.estado] || '—'),
+          h('div', { className: 'botones' }, ESTADOS.map((s) =>
+            h('button', { key: s.msg, type: 'button', className: s.clase + (c.estado === s.msg ? ' activo' : ''), onClick: () => publicar(aula, s.msg) }, s.nombre))),
+          h('button', { type: 'button', onClick: () => publicar(aula, 'apagado') }, 'Apagar cartel'),
+        );
+      })),
+      h('p', { className: 'pequeño' }, 'Los estados se publican con retain: un cartel que se reinicia recupera su color al conectarse.'),
+    ),
+  );
+}
+
+function avisar(texto) {
+  // Las notificaciones del sistema solo funcionan en contexto seguro (https o localhost)
+  if ('Notification' in window && Notification.permission === 'granted') new Notification('Smart Sign', { body: texto });
+  else console.warn(texto);
+}
+if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {});
+
+ReactDOM.createRoot(document.getElementById('app')).render(h(App));
+</script>
+</body>
+</html>

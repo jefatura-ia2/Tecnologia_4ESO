@@ -1,0 +1,756 @@
+id: m4
+number: 4
+trimestre: 1
+icon: "🪧"
+title: "Smart Sign I: dos equipos en paralelo"
+subtitle: "Proyecto Smart Sign IoT · Sprint 1: el Equipo A diseña e imprime el soporte y el marco; el Equipo B monta la electrónica y la energía"
+weeks: [10, 11, 12]
+hours: 9
+objectives:
+  - Organizar un proyecto con metodología ágil (Scrum y Kanban) y coordinar dos equipos que dependen el uno del otro.
+  - Diseñar en CAD el soporte de pared y el marco de un cartel de 160 × 120 mm con un encaje de metacrilato de 5 mm y tolerancia de 0,2 mm.
+  - Preparar e imprimir piezas en 3D (Bambu Lab A1 y Artillery Sidewinder) eligiendo material, orientación y parámetros.
+  - Montar el sistema de energía del cartel (batería 18650, cargador TP4056 y elevador MT3608) y calcular consumos y autonomía.
+  - Programar la ESP32-C3 SuperMini para encender la tira de LED y entrar en reposo profundo (deepsleep).
+materials:
+  - Ordenador con Tinkercad o Fusion 360 (y opcionalmente OpenSCAD) y el laminador Bambu Studio o Cura
+  - Impresoras 3D Bambu Lab A1 y Artillery Sidewinder, filamento PLA y PETG, calibre digital
+  - Plancha de metacrilato de 5 mm (160 × 120 mm), cortadora láser si la hay
+  - ESP32-C3 SuperMini, tira WS2812 de 12 LED, batería 18650 con portapilas, módulo TP4056 con protección, elevador MT3608
+  - Estación de soldadura, estaño, polímetro, KiCad o EasyEDA
+criteria:
+  - Diseña y fabrica objetos con herramientas CAD y de fabricación digital, aplicando tolerancias y normalización.
+  - Diseña y monta circuitos electrónicos con gestión de energía, calculando consumos y autonomía.
+  - Trabaja en equipo con metodologías ágiles, coordinando tareas interdependientes y comunicando decisiones técnicas.
+schedule:
+  - {week: 10, session: 1, title: "El reto Smart Sign: historias de usuario, Scrum y Kanban", section: m4s1}
+  - {week: 10, session: 2, title: "Formar los equipos A y B y firmar el contrato de medidas", section: m4s1}
+  - {week: 10, session: 3, title: "Equipo A: plano 160 × 120 y modelado CAD del soporte", section: m4s2}
+  - {week: 11, session: 1, title: "Equipo A: encaje del metacrilato y probeta de tolerancias", section: m4s2}
+  - {week: 11, session: 2, title: "Equipo A: laminado e impresión (Bambu Lab A1 / Sidewinder)", section: m4s2}
+  - {week: 11, session: 3, title: "Equipo B: esquema de energía, PCB y soldadura", section: m4s3}
+  - {week: 12, session: 1, title: "Equipo B: LED de prueba y consumo en deepsleep", section: m4s3}
+  - {week: 12, session: 2, title: "Sprint Review 1: preparación de la demo", section: m4s4}
+  - {week: 12, session: 3, title: "Sprint Review 1: demo de los dos equipos y retrospectiva", section: m4s4}
+sections:
+  - id: m4s1
+    title: "El reto Smart Sign y el método ágil"
+    hours: 2
+    kind: lesson
+    theory: |
+      ## El reto
+
+      Vamos a construir un **cartel inteligente** para la puerta de un aula: una plancha de metacrilato de
+      **160 × 120 mm** iluminada por el canto con una tira de LED que muestra el estado del aula
+      (🟢 libre, 🔴 ocupada, 🔵 reservada…). Funciona con **batería**, se cuelga en la pared y, más adelante,
+      el profesor lo cambiará desde una **App Web** del servidor del instituto.
+
+      El proyecto dura cuatro misiones como un equipo de producto real:
+
+      | Fase | Misión | Qué se consigue |
+      |---|---|---|
+      | **Sprint 1** · dos equipos en paralelo | 4 | Equipo A: soporte y marco impresos · Equipo B: electrónica y energía |
+      | **Hito de integración** + **Sprint 2** | 5 | El cartel completo y autónomo · control remoto por MQTT |
+      | **Sprint 3** + **Sprint 4** | 6 | Sensores (luz y movimiento) · red de carteles de todo el pasillo |
+
+      ## Historias de usuario
+
+      Los requisitos se escriben desde el punto de vista de quien usa el producto:
+
+      > *Como **profesor**, quiero marcar mi aula como «Ocupada» desde el ordenador **para que** nadie
+      > interrumpa un examen.*
+      >
+      > *Como **alumno**, quiero ver desde el pasillo si el aula está libre **para** saber si puedo entrar.*
+
+      ## Scrum en el aula
+
+      - **Sprint**: periodo corto (aquí, 3 semanas) con un **objetivo** claro (*Sprint Goal*).
+      - **Daily** (5 minutos al empezar cada sesión): ¿qué hice?, ¿qué haré?, ¿qué me bloquea?
+      - **Sprint Review**: cada equipo **enseña** lo que funciona. Nada de diapositivas: piezas y LED.
+      - **Retrospectiva**: qué mejorar en el siguiente sprint.
+
+      ## Tablero Kanban
+
+      | Por hacer | En curso | Hecho |
+      |---|---|---|
+      | Modelar ranura | Probeta de tolerancias | Plano acotado |
+      | Soldar TP4056 | | |
+
+      Regla de oro: **pocas tareas «En curso» a la vez**. Una tarea solo pasa a «Hecho» si se puede enseñar.
+
+      ## Dos equipos que dependen uno del otro
+
+      - **Equipo A · Diseño y fabricación (mecánica)**: soporte de pared, marco y encaje del metacrilato.
+      - **Equipo B · Electrónica y energía**: ESP32-C3, tira LED, batería 18650, cargador TP4056 y elevador MT3608.
+
+      El Equipo A necesita las **medidas** de lo que va dentro; el Equipo B necesita saber **cuánto sitio**
+      tiene. Por eso, el primer día se firma un **contrato de medidas** (una tabla en el README del proyecto):
+
+      | Componente | Medidas máximas (mm) | Responsable |
+      |---|---|---|
+      | Batería 18650 en portapilas | 78 × 21 × 21 | B |
+      | TP4056 (USB-C) | 28 × 17 × 5 | B |
+      | MT3608 | 37 × 17 × 6 | B |
+      | ESP32-C3 SuperMini | 23 × 18 × 4 | B |
+      | Tira WS2812 de 12 LED | 160 × 10,5 × 3 | B |
+      | Hueco interior del soporte | 171 × 40 × 22 (menos las 4 torretas de las esquinas) | A |
+
+      **Rotación de roles**: cada semana algunos miembros cambian de equipo para que todos aprendan
+      mecánica y electrónica. El cambio se apunta en el tablero.
+    examples:
+      - title: "Tablero Kanban en la consola"
+        explanation: "Un tablero sencillo en Python para practicar listas y diccionarios. Funciona igual en cualquier placa o en el ordenador."
+        pico_w: |
+          tareas = [
+              {"tarea": "Plano acotado", "equipo": "A", "estado": "Hecho", "puntos": 2},
+              {"tarea": "Probeta de tolerancias", "equipo": "A", "estado": "En curso", "puntos": 3},
+              {"tarea": "Soldar TP4056", "equipo": "B", "estado": "Por hacer", "puntos": 2},
+          ]
+
+          for columna in ("Por hacer", "En curso", "Hecho"):
+              print("==", columna, "==")
+              for t in tareas:
+                  if t["estado"] == columna:
+                      print("  [{}] {} ({} p)".format(t["equipo"], t["tarea"], t["puntos"]))
+        esp32_s3: |
+          tareas = [
+              {"tarea": "Plano acotado", "equipo": "A", "estado": "Hecho", "puntos": 2},
+              {"tarea": "Probeta de tolerancias", "equipo": "A", "estado": "En curso", "puntos": 3},
+              {"tarea": "Soldar TP4056", "equipo": "B", "estado": "Por hacer", "puntos": 2},
+          ]
+
+          for columna in ("Por hacer", "En curso", "Hecho"):
+              print("==", columna, "==")
+              for t in tareas:
+                  if t["estado"] == columna:
+                      print("  [{}] {} ({} p)".format(t["equipo"], t["tarea"], t["puntos"]))
+    practice: |
+      ### Práctica en clase (por equipos de 4-6)
+
+      1. Escribid **3 historias de usuario** del cartel (profesor, alumnado, conserjería).
+      2. Montad el tablero Kanban (papel en la pared o un tablero de GitHub Projects) con las tareas del Sprint 1.
+      3. Repartid los equipos A y B y **firmad el contrato de medidas**. Escribidlo en el README del repositorio.
+      4. Definid el **Sprint Goal**: «Al final de la semana 12, el Equipo A enseña el metacrilato encajado en las
+         piezas impresas y el Equipo B enseña la tira encendida con batería».
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué se hace en la Sprint Review?"
+          options:
+            - {id: a, text: "Cada equipo enseña funcionando lo que ha terminado en el sprint."}
+            - {id: b, text: "Se reparten las notas finales.", feedback: "Es una demostración del producto, no una evaluación final."}
+            - {id: c, text: "Se hace una presentación de diapositivas sobre lo que se piensa hacer.", feedback: "Se enseña lo que ya funciona, no planes."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Para qué sirve el contrato de medidas entre los equipos A y B?"
+          options:
+            - {id: a, text: "Para que la electrónica quepa en el soporte sin tener que reimprimirlo."}
+            - {id: b, text: "Para repartir el presupuesto.", feedback: "Trata de dimensiones: es la interfaz entre mecánica y electrónica."}
+            - {id: c, text: "Para decidir quién presenta la demo.", feedback: "Es un acuerdo técnico de dimensiones."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `cuenta_kanban(tareas)` que reciba una lista de diccionarios con la clave `"estado"`
+            (`"Por hacer"`, `"En curso"` o `"Hecho"`) y devuelva cuántas hay en cada columna:
+            `{"Por hacer": n1, "En curso": n2, "Hecho": n3}` (con las tres claves aunque valgan 0).
+          starter: |
+            def cuenta_kanban(tareas):
+                pass
+          solution: |
+            def cuenta_kanban(tareas):
+                cuenta = {"Por hacer": 0, "En curso": 0, "Hecho": 0}
+                for t in tareas:
+                    cuenta[t["estado"]] += 1
+                return cuenta
+          tests:
+            - {desc: "Tres tareas", call: "cuenta_kanban([{'estado': 'Hecho'}, {'estado': 'En curso'}, {'estado': 'Hecho'}])", expected: {"Por hacer": 0, "En curso": 1, "Hecho": 2}}
+            - {desc: "Sin tareas", call: "cuenta_kanban([])", expected: {"Por hacer": 0, "En curso": 0, "Hecho": 0}}
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `progreso_sprint(tareas)` que devuelva el porcentaje de **puntos** terminados (estado `"Hecho"`)
+            sobre el total de puntos, redondeado a entero. Si no hay puntos, devuelve `0`.
+
+            Ejemplo: tareas de 2 p (Hecho), 3 p (En curso) y 5 p (Hecho) → `70`
+          starter: |
+            def progreso_sprint(tareas):
+                pass
+          solution: |
+            def progreso_sprint(tareas):
+                total = sum(t["puntos"] for t in tareas)
+                if total == 0:
+                    return 0
+                hechos = sum(t["puntos"] for t in tareas if t["estado"] == "Hecho")
+                return round(100 * hechos / total)
+          tests:
+            - {desc: "Ejemplo", call: "progreso_sprint([{'estado': 'Hecho', 'puntos': 2}, {'estado': 'En curso', 'puntos': 3}, {'estado': 'Hecho', 'puntos': 5}])", expected: 70}
+            - {desc: "Nada terminado", call: "progreso_sprint([{'estado': 'Por hacer', 'puntos': 4}])", expected: 0}
+            - {desc: "Lista vacía", call: "progreso_sprint([])", expected: 0}
+
+  - id: m4s2
+    title: "Equipo A: diseño CAD y fabricación del soporte y el marco"
+    hours: 3
+    kind: lesson
+    foto:
+      indicaciones: "Foto de las piezas impresas (soporte, tapa y capuchón) con el metacrilato encajado, y de la probeta de tolerancias con el calibre."
+    theory: |
+      ## El producto que diseña el Equipo A
+
+      El cartel es una plancha de **metacrilato de 5 mm** (160 × 120 mm) iluminada **por el canto**: la tira de
+      LED va escondida bajo el borde inferior y la luz viaja por dentro del metacrilato. Donde el metacrilato
+      está grabado o lijado, la luz «sale» y se ve el dibujo.
+
+      ![Plano del cartel: vista frontal acotada y sección A-A del soporte con la ranura del metacrilato y la tira LED](/img/smart_sign_plano.svg)
+      *Vista frontal y sección A-A. La ranura mide 5,2 mm: metacrilato de 5 mm + 0,2 mm de tolerancia.*
+
+      ![Vista explosionada en 3D del cartel: tapa, soporte de pared, metacrilato y capuchón superior](/img/smart_sign_3d.png)
+      *Vista explosionada del modelo paramétrico `marco_cartel.scad`: tapa, soporte, metacrilato y capuchón.*
+
+      | Pieza | Medidas exteriores (mm) | Función | Impresora recomendada |
+      |---|---|---|---|
+      | **1. Soporte de pared** (caja base) | 176 × 45 × 38 | Sujeta el metacrilato, esconde la tira y aloja batería y electrónica. Se cuelga con dos ojales | Bambu Lab A1 (precisión de la ranura) |
+      | **2. Tapa inferior** | 176 × 45 × 2 | Cierra la caja con 4 tornillos M3; acceso para cargar y reparar | Bambu Lab A1 |
+      | **3. Capuchón superior** (marco) | 164 × 9 × 9 | Protege el canto superior y refleja la luz hacia dentro | Bambu Lab A1 |
+      | Prototipos rápidos y piezas grandes | — | Pruebas de volumen, versiones en PETG | Artillery Sidewinder |
+
+      ## Tolerancias: por qué la ranura no mide 5 mm
+
+      Una impresora FDM deja las paredes un poco «gordas» (el plástico se aplasta) y el metacrilato real no mide
+      exactamente 5,00 mm (puede variar ±0,2 mm). Si la ranura midiera 5,0 mm, el metacrilato **no entraría**.
+
+      ```
+      ranura = espesor del metacrilato + tolerancia = 5,0 + 0,2 = 5,2 mm
+      juego  = ranura impresa (medida) − espesor medido del metacrilato
+      ```
+
+      | Juego medido | Resultado |
+      |---|---|
+      | menor que 0 | **no entra** |
+      | de 0 a 0,1 mm | **justo**: entra a presión, puede rajar el metacrilato |
+      | de 0,1 a 0,4 mm | **correcto** ✅ |
+      | más de 0,4 mm | **flojo**: baila, hay que pegar o calzar |
+
+      👉 **Mide siempre con el calibre** el metacrilato real antes de fijar la cota, e imprime una
+      **probeta de tolerancias** (una pieza pequeña con ranuras de 5,0 · 5,1 · 5,2 · 5,3 · 5,4 mm) para ver
+      cuál encaja mejor con *vuestra* impresora y *vuestro* metacrilato. En la Bambu Lab A1 se imprime en
+      unos 10 minutos.
+
+      ## Del plano al CAD
+
+      **En Tinkercad** (rápido, para empezar):
+
+      1. Caja de 176 × 45 × 38 mm. Hueco interior (agujero) de 171 × 40 × 22 abierto por abajo: paredes de 2,4 mm.
+      2. Ranura: agujero de **160,4 × 5,2 × 10** mm centrado arriba.
+      3. Canal de la tira: agujero de **162 × 11,1 × 3,6** mm justo debajo de la ranura, y un agujero de Ø5 mm
+         para que pasen los cables de la tira a la caja.
+      4. Dos **ojales** en la cara trasera (agujero de Ø8 + ranura de 4 mm hacia arriba) para colgar el soporte
+         en dos tornillos de la pared.
+      5. Hueco de 10 × 4 mm en un lateral para el **USB-C** del cargador TP4056.
+      6. Cuatro torretas de Ø7 mm en las esquinas con agujero de Ø2,6 mm (rosca para M3) para la tapa.
+      7. Comprueba que entre el hueco y el canal de la tira queda un «suelo» de 2,4 mm.
+
+      **En Fusion 360 o OpenSCAD** (diseño **paramétrico**): las medidas son **parámetros**. Si el metacrilato
+      mide 5,3 mm, se cambia un número y todo se recalcula. Modelo paramétrico de referencia:
+      [`marco_cartel.scad`](/descargas/smart_sign/marco_cartel.scad) (se abre con OpenSCAD y se exporta a STL).
+      Piezas ya exportadas para 5 mm y 0,2 mm de holgura:
+      [soporte](/descargas/smart_sign/stl/soporte.stl) ·
+      [tapa](/descargas/smart_sign/stl/tapa.stl) ·
+      [capuchón](/descargas/smart_sign/stl/capuchon.stl) ·
+      [probeta](/descargas/smart_sign/stl/probeta.stl).
+
+      ![El soporte visto desde abajo: hueco de la electrónica, torretas para la tapa, ojales de pared y hueco del USB-C](/img/smart_sign_soporte_3d.png)
+      *El soporte visto desde abajo: hueco de la electrónica, torretas M3, ojales para la pared y hueco del USB-C.*
+
+      ```
+      espesor_metacrilato = 5;     // mídelo con el calibre
+      holgura = 0.2;               // la que mejor encaje en la probeta
+      ranura = espesor_metacrilato + holgura;
+      ```
+
+      ## Fabricación: laminado e impresión
+
+      | Parámetro | Valor recomendado | Por qué |
+      |---|---|---|
+      | Material | **PLA** (interior) · **PETG** si da el sol o está cerca de un radiador | El PLA se ablanda hacia 60 °C; el PETG aguanta unos 80 °C |
+      | Altura de capa | 0,2 mm (0,12 mm para la probeta) | Equilibrio entre tiempo y precisión |
+      | Perímetros | 4 (paredes de ~1,6-2,4 mm) | Resistencia en los ojales y las torretas |
+      | Relleno | 15-20 % (giroide) | Ligero y suficiente |
+      | Orientación | Soporte con la **ranura hacia arriba**, sin soportes | La ranura sale limpia y con medida fiable |
+      | Soportes | Solo para el hueco del USB-C (o diséñalo con techo en arco de 45°) | Evitar soportes ahorra tiempo y plástico |
+      | Color | Blanco o gris claro en el canal de la tira | Refleja la luz hacia el metacrilato |
+
+      **Las dos impresoras del taller:**
+
+      - **Bambu Lab A1** (volumen 256 × 256 × 256 mm): rápida y precisa. Para la probeta, la ranura y las
+        piezas definitivas. Caben 2-3 iteraciones de la probeta en una sesión.
+      - **Artillery Sidewinder** (volumen 300 × 300 × 400 mm): para piezas grandes, versiones en PETG o
+        imprimir varias piezas a la vez mientras la A1 está ocupada.
+
+      **Cuánto plástico gastamos:** `masa (g) = volumen (cm³) × densidad`. Densidad del PLA ≈ 1,24 g/cm³ y del
+      PETG ≈ 1,27 g/cm³. El laminador da el volumen o los gramos: anótalo para calcular el coste.
+
+      ## Seguridad en la zona de impresión
+
+      - La boquilla está a más de 200 °C y la cama a 60 °C: **no se toca** mientras imprime.
+      - Despega las piezas con la cama **fría** y la espátula hacia fuera, nunca hacia la mano.
+      - Corte del metacrilato: solo con la **cortadora láser** y el profesor, con la tapa cerrada y extracción
+        de humos. Retira el film protector **después** de cortar.
+    examples:
+      - title: "Modelo paramétrico del soporte (OpenSCAD)"
+        explanation: "Abre marco_cartel.scad en OpenSCAD, cambia espesor_metacrilato y holgura por los valores medidos y exporta cada pieza a STL (F6 y luego Exportar STL)."
+        lenguaje: openscad
+        codigo: |
+          // Fragmento de marco_cartel.scad: la ranura y el canal de la tira se calculan con parámetros
+          ancho_metacrilato   = 160;    // mm
+          espesor_metacrilato = 5;      // mídelo con el calibre
+          holgura             = 0.2;    // la que mejor encaje en la probeta
+          prof_ranura         = 10;
+          ancho_tira          = 10.5;   // tira WS2812
+          alto_tira           = 3;
+
+          ranura = espesor_metacrilato + holgura;    // 5,2 mm
+          L = ancho_metacrilato + 16;                // 176 mm
+          P = 45; H = 38;
+
+          module ranura_y_canal() {
+              // ranura donde entra el metacrilato
+              translate([(L - ancho_metacrilato - 0.4) / 2, (P - ranura) / 2, H - prof_ranura])
+                  cube([ancho_metacrilato + 0.4, ranura, prof_ranura + 1]);
+              // canal de la tira LED, justo debajo
+              translate([(L - ancho_metacrilato - 2) / 2, (P - ancho_tira - 0.6) / 2, H - prof_ranura - alto_tira - 0.6])
+                  cube([ancho_metacrilato + 2, ancho_tira + 0.6, alto_tira + 0.6]);
+          }
+      - title: "Probeta de tolerancias (OpenSCAD)"
+        explanation: "Cinco ranuras de 5,0 a 5,4 mm (en marco_cartel.scad, pieza = \"probeta\"). Imprímela, prueba el metacrilato en cada una y apunta cuál queda «correcta»."
+        lenguaje: openscad
+        codigo: |
+          // module probeta() de marco_cartel.scad
+          espesor = 5;                                // espesor nominal del metacrilato
+          holguras = [0, 0.1, 0.2, 0.3, 0.4];
+          difference() {
+              cube([len(holguras) * 14 + 4, 20, 12]);
+              for (i = [0 : len(holguras) - 1])
+                  translate([4 + i * 14, -1, 4])
+                      cube([espesor + holguras[i], 22, 9]);
+          }
+          // número grabado encima de cada ranura: 0 1 2 3 4 (décimas de mm)
+          for (i = [0 : len(holguras) - 1])
+              translate([5 + i * 14, 2, 12]) linear_extrude(0.6) text(str(i), size = 5);
+    practice: |
+      ### Práctica de taller · Equipo A (3 sesiones)
+
+      1. **Plano**: dibuja a mano el plano acotado (vista frontal y sección A-A) con las medidas del contrato.
+      2. **Probeta**: mide el metacrilato con el calibre en 3 puntos, imprime la probeta en la Bambu Lab A1 y
+         anota en la bitácora qué ranura encaja mejor. Calcula el juego de cada una.
+      3. **CAD**: modela el soporte, la tapa y el capuchón en Tinkercad o Fusion 360 (o adapta `marco_cartel.scad`).
+      4. **Laminado**: prepara las piezas en Bambu Studio o Cura con la tabla de parámetros. Apunta tiempo y gramos.
+      5. **Impresión**: imprime el soporte en la A1; si la A1 está ocupada, el capuchón en la Sidewinder.
+      6. **Comprobación**: mide la ranura impresa, prueba el metacrilato y la tira dentro del canal. Si no
+         encaja, cambia el parámetro y reimprime (eso también es avanzar: apúntalo en el Kanban).
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Por qué la ranura para un metacrilato de 5 mm se diseña de 5,2 mm?"
+          options:
+            - {id: a, text: "Porque la impresión FDM engorda las paredes y el metacrilato no mide exactamente 5 mm: hace falta holgura."}
+            - {id: b, text: "Para ahorrar plástico.", feedback: "0,2 mm no ahorran plástico: es la tolerancia del encaje."}
+            - {id: c, text: "Porque el metacrilato se dilata con la luz de los LED.", feedback: "La dilatación es despreciable; el motivo es la precisión de la impresión y del material."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "El cartel va junto a una ventana orientada al sur. ¿Qué material eliges para el soporte?"
+          options:
+            - {id: a, text: "PETG, porque aguanta más temperatura que el PLA."}
+            - {id: b, text: "PLA, porque es el más fácil de imprimir.", feedback: "El PLA se ablanda hacia 60 °C: al sol, detrás de un cristal, se puede deformar."}
+          answer: a
+        - id: q3
+          type: quiz
+          points: 1
+          question: "¿Cómo orientas el soporte en la cama de la impresora?"
+          options:
+            - {id: a, text: "Con la ranura hacia arriba, para que salga limpia y sin soportes."}
+            - {id: b, text: "Con la ranura hacia abajo, apoyada en la cama.", feedback: "Necesitaría soportes dentro de la ranura y la medida saldría peor."}
+            - {id: c, text: "De pie, sobre su lado más pequeño.", feedback: "Es inestable y las capas quedarían débiles en los ojales."}
+          answer: a
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe dos funciones:
+
+            - `ranura(espesor, holgura)` → ancho de la ranura, redondeado a 2 decimales.
+            - `encaje(espesor_medido, ranura_medida)` → según el juego (`ranura_medida − espesor_medido`):
+              `"no entra"` si es menor que 0; `"justo"` si es menor que 0,1; `"correcto"` si es menor o igual que 0,4;
+              `"flojo"` si es mayor. Redondea el juego a 2 decimales antes de comparar.
+
+            Ejemplos: `ranura(5, 0.2)` → `5.2` · `encaje(5.05, 5.25)` → `"correcto"`
+          starter: |
+            def ranura(espesor, holgura):
+                pass
+
+            def encaje(espesor_medido, ranura_medida):
+                pass
+          solution: |
+            def ranura(espesor, holgura):
+                return round(espesor + holgura, 2)
+
+            def encaje(espesor_medido, ranura_medida):
+                juego = round(ranura_medida - espesor_medido, 2)
+                if juego < 0:
+                    return "no entra"
+                if juego < 0.1:
+                    return "justo"
+                if juego <= 0.4:
+                    return "correcto"
+                return "flojo"
+          tests:
+            - {desc: "Ranura de 5,2 mm", call: "ranura(5, 0.2)", expected: 5.2}
+            - {desc: "Encaje correcto", call: "encaje(5.05, 5.25)", expected: "correcto"}
+            - {desc: "No entra y justo", call: "(encaje(5.2, 5.1), encaje(5.0, 5.05))", expected: ["no entra", "justo"]}
+            - {desc: "Flojo y límite de 0,4 mm", call: "(encaje(4.8, 5.4), encaje(5.0, 5.4))", expected: ["flojo", "correcto"]}
+          hints:
+            wrong_result: "Calcula juego = round(ranura_medida - espesor_medido, 2) y compara en orden: < 0, < 0.1, <= 0.4, y el resto."
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `impresora(pieza)` que reciba las medidas de una pieza `(x, y, z)` en mm y devuelva:
+            `"Bambu Lab A1"` si cabe en 256 × 256 × 256; si no, `"Artillery Sidewinder"` si cabe en
+            300 × 300 × 400; si no, `"no cabe"`. Se puede **girar en el plano** de la cama (intercambiar x e y),
+            pero no tumbar (z es la altura).
+          starter: |
+            def impresora(pieza):
+                pass
+          solution: |
+            def cabe(pieza, cama):
+                x, y, z = pieza
+                cx, cy, cz = cama
+                return z <= cz and ((x <= cx and y <= cy) or (y <= cx and x <= cy))
+
+            def impresora(pieza):
+                if cabe(pieza, (256, 256, 256)):
+                    return "Bambu Lab A1"
+                if cabe(pieza, (300, 300, 400)):
+                    return "Artillery Sidewinder"
+                return "no cabe"
+          tests:
+            - {desc: "Soporte del cartel", call: "impresora((176, 45, 38))", expected: "Bambu Lab A1"}
+            - {desc: "Pieza grande", call: "impresora((280, 120, 50))", expected: "Artillery Sidewinder"}
+            - {desc: "Pieza alta", call: "impresora((100, 100, 300))", expected: "Artillery Sidewinder"}
+            - {desc: "Demasiado grande", call: "impresora((350, 100, 20))", expected: "no cabe"}
+        - id: c3
+          type: code
+          points: 2
+          prompt: |
+            Escribe `masa_coste(volumen_cm3, densidad, precio_kg)` que devuelva una tupla `(gramos, euros)`:
+            gramos = volumen × densidad (redondeado a 1 decimal) y euros = gramos × precio_kg / 1000 (redondeado
+            a 2 decimales).
+
+            Ejemplo: 40 cm³ de PLA (1,24 g/cm³) a 20 €/kg → `(49.6, 0.99)`
+          starter: |
+            def masa_coste(volumen_cm3, densidad, precio_kg):
+                pass
+          solution: |
+            def masa_coste(volumen_cm3, densidad, precio_kg):
+                gramos = round(volumen_cm3 * densidad, 1)
+                return gramos, round(gramos * precio_kg / 1000, 2)
+          tests:
+            - {desc: "Soporte en PLA", call: "masa_coste(40, 1.24, 20)", expected: [49.6, 0.99]}
+            - {desc: "Capuchón en PETG", call: "masa_coste(10, 1.27, 25)", expected: [12.7, 0.32]}
+
+  - id: m4s3
+    title: "Equipo B: electrónica y energía del cartel"
+    hours: 2
+    kind: lesson
+    foto:
+      indicaciones: "Foto de la electrónica sobre la mesa: batería 18650, TP4056, MT3608, ESP32-C3 y la tira encendida; y del polímetro midiendo el consumo."
+    theory: |
+      ## El sistema de energía
+
+      ![Esquema de bloques: USB-C, TP4056, batería 18650, interruptor, MT3608 a 5 V, ESP32-C3 y tira WS2812](/img/smart_sign_energia.svg)
+      *El TP4056 carga la batería; el MT3608 eleva sus 3,7 V a los 5 V que necesitan la placa y la tira.*
+
+      | Bloque | Qué hace | Cuidado con… |
+      |---|---|---|
+      | **Batería 18650** (Li-ion, 3,7 V nominal, ~2500 mAh) | Almacena la energía | No cortocircuitar nunca; portapilas con la polaridad marcada |
+      | **TP4056** (con protección DW01) | Carga la batería por USB-C (hasta 4,2 V) y la protege de descargas profundas | Usar el módulo **con protección** (salida OUT+ / OUT−) |
+      | **MT3608** (elevador *boost*) | Sube 3,7 V → **5,0 V** | **Ajusta el potenciómetro a 5,0 V con el polímetro antes** de conectar la placa |
+      | **ESP32-C3 SuperMini** | El cerebro: WiFi y control de la tira | Se alimenta por el pin 5V; GND común con todo |
+      | **Tira WS2812** (12 LED) | La luz del cartel | DIN en **IO3**; brillo bajo para ahorrar |
+
+      ## ¿Cuánto dura la batería?
+
+      El elevador no es perfecto (eficiencia **η ≈ 85 %**): lo que consume el circuito a 5 V hay que «pagarlo»
+      a 3,7 V con un poco más de corriente:
+
+      ```
+      I_batería = I_5V × 5 V / (3,7 V × η)
+      autonomía (h) = capacidad útil (mAh) / I_batería (mA)       (útil ≈ 80 % de la nominal)
+      ```
+
+      Ejemplo: placa + 12 LED a brillo bajo ≈ 60 mA a 5 V → I_batería = 60 × 5 / (3,7 × 0,85) ≈ 95 mA →
+      autonomía ≈ 2000 / 95 ≈ **21 h**. ✅ Más de una jornada escolar (8 h).
+
+      ⚠️ **Truco del consumo oculto**: cada LED WS2812 **apagado** sigue gastando ≈ 1 mA (su chip está
+      encendido). 12 LED = 12 mA aunque no luzcan. Por eso en la versión 2 se pone un MOSFET para cortar la
+      alimentación de la tira.
+
+      ## Reposo profundo (deepsleep)
+
+      Si el cartel solo tiene que actualizarse de vez en cuando, la ESP32-C3 puede **dormir**: apaga el
+      procesador y la WiFi y se despierta pasado un tiempo. Durante el reposo consume micro- o miliamperios
+      (según la placa) en lugar de 20-80 mA. **Ojo**: al despertar, el programa empieza **desde el principio**.
+
+      ```python
+      import machine
+      machine.deepsleep(10_000)    # duerme 10 s y se reinicia
+      ```
+
+      **Medir el consumo**: polímetro en **mA** (o µA) **en serie** entre la batería y el TP4056, nunca en
+      paralelo. Cambia la punta roja al borne de corriente.
+
+      ## La PCB del cartel (KiCad / EasyEDA)
+
+      En lugar de cables sueltos, el Equipo B diseña una **placa de circuito impreso** con: zócalo para la
+      ESP32-C3, conector **JST** para la batería, conector de 3 pines para la tira (5V · DIN · GND),
+      huecos para los módulos TP4056 y MT3608 e interruptor. Pistas de alimentación anchas (≥ 0,8 mm).
+      Se suelda en la **estación de soldadura** (350 °C, punta limpia, extracción de humos) empezando por los
+      componentes más bajos.
+
+      > 🔗 Para aprender a diseñar la PCB paso a paso, consulta el taller **PicoLab·IA** en *Recursos*.
+
+      ## Pines del cartel (ESP32-C3 SuperMini)
+
+      | Señal | Pin | Nota |
+      |---|---|---|
+      | DIN de la tira WS2812 | **IO3** | Evitamos **IO8**: es un pin de arranque y lleva el LED azul de la placa |
+      | 5V | 5V | Desde el MT3608 |
+      | GND | GND | Común a todo |
+    examples:
+      - title: "Prueba de la tira y del reposo profundo"
+        explanation: "Enciende la tira en verde, rojo y azul (2 s cada color), la apaga y duerme 10 s. Mide el consumo en cada fase con el polímetro."
+        esp32_c3: |
+          from machine import Pin, deepsleep
+          from neopixel import NeoPixel
+          import time
+
+          NUM_LEDS = 12
+          BRILLO = 0.2                              # MicroPython no tiene np.brightness: se escala el color
+          tira = NeoPixel(Pin(3, Pin.OUT), NUM_LEDS) # DIN → IO3 (no uses IO8)
+
+          def pintar(rgb):
+              tira.fill(tuple(int(c * BRILLO) for c in rgb))
+              tira.write()
+
+          for color in ((0, 255, 0), (255, 0, 0), (0, 0, 255)):
+              pintar(color)
+              time.sleep(2)                          # mide aquí el consumo con la tira encendida
+          pintar((0, 0, 0))
+          print("A dormir 10 s...")
+          time.sleep(1)                              # margen para poder parar el programa desde Thonny
+          deepsleep(10_000)                          # al despertar, el programa vuelve a empezar
+        pico_w: |
+          from machine import Pin, deepsleep
+          from neopixel import NeoPixel
+          import time
+
+          NUM_LEDS = 12
+          BRILLO = 0.2
+          tira = NeoPixel(Pin(22, Pin.OUT), NUM_LEDS)  # DIN → GP22
+
+          def pintar(rgb):
+              tira.fill(tuple(int(c * BRILLO) for c in rgb))
+              tira.write()
+
+          for color in ((0, 255, 0), (255, 0, 0), (0, 0, 255)):
+              pintar(color)
+              time.sleep(2)
+          pintar((0, 0, 0))
+          time.sleep(1)
+          deepsleep(10_000)
+        esp32_s3: |
+          from machine import Pin, deepsleep
+          from neopixel import NeoPixel
+          import time
+
+          NUM_LEDS = 12
+          BRILLO = 0.2
+          tira = NeoPixel(Pin(21, Pin.OUT), NUM_LEDS)  # DIN → GPIO 21
+
+          def pintar(rgb):
+              tira.fill(tuple(int(c * BRILLO) for c in rgb))
+              tira.write()
+
+          for color in ((0, 255, 0), (255, 0, 0), (0, 0, 255)):
+              pintar(color)
+              time.sleep(2)
+          pintar((0, 0, 0))
+          time.sleep(1)
+          deepsleep(10_000)
+    practice: |
+      ### Práctica de taller · Equipo B (2 sesiones)
+
+      1. **Antes de conectar nada**: alimenta el MT3608 con la batería y ajusta su salida a **5,0 V** con el polímetro.
+      2. Monta batería + TP4056 + interruptor + MT3608 y comprueba las tensiones en cada punto (tabla en la bitácora).
+      3. Conecta la ESP32-C3 y la tira (DIN → IO3) y ejecuta la prueba. Puedes probar el código antes en el
+         simulador **Wokwi** (wokwi.com) con una ESP32-C3 y una tira WS2812.
+      4. Mide la corriente **en serie** con la batería: tira en verde, en rojo, en azul, apagada y en deepsleep.
+      5. Diseña el esquema de la PCB en KiCad o EasyEDA con los conectores acordados en el contrato de medidas.
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué hay que hacer con el MT3608 antes de conectar la ESP32-C3?"
+          options:
+            - {id: a, text: "Ajustar su salida a 5,0 V con el potenciómetro y el polímetro."}
+            - {id: b, text: "Nada, viene ajustado de fábrica a 5 V.", feedback: "Suele venir a otra tensión (incluso más de 20 V): sin ajustar puede quemar la placa."}
+            - {id: c, text: "Conectarlo al revés para probarlo.", feedback: "Nunca: invertir la polaridad lo destruye."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Cómo se conecta el polímetro para medir la corriente que da la batería?"
+          options:
+            - {id: a, text: "En serie, abriendo el circuito entre la batería y el TP4056, en la escala de mA."}
+            - {id: b, text: "En paralelo con la batería.", feedback: "En modo corriente, en paralelo es un cortocircuito: puede fundir el fusible del polímetro."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `corriente_bateria(i_5v_mA, eficiencia)` que devuelva la corriente que sale de la batería
+            (3,7 V) para dar `i_5v_mA` a 5 V con el rendimiento indicado, redondeada a 1 decimal.
+
+            Ejemplo: `corriente_bateria(60, 0.85)` → `95.4`
+          starter: |
+            def corriente_bateria(i_5v_mA, eficiencia):
+                pass
+          solution: |
+            def corriente_bateria(i_5v_mA, eficiencia):
+                return round(i_5v_mA * 5 / (3.7 * eficiencia), 1)
+          tests:
+            - {desc: "Ejemplo de la teoría", call: "corriente_bateria(60, 0.85)", expected: 95.4}
+            - {desc: "Boost ideal", call: "corriente_bateria(37, 1)", expected: 50.0}
+        - id: c2
+          type: code
+          points: 3
+          prompt: |
+            Escribe `autonomia_h(capacidad_mAh, i_bat_mA)` que devuelva las horas de funcionamiento usando solo el
+            **80 %** de la capacidad (para no descargar la batería del todo), redondeadas a 1 decimal.
+
+            Ejemplo: `autonomia_h(2500, 95.4)` → `21.0`
+          starter: |
+            def autonomia_h(capacidad_mAh, i_bat_mA):
+                pass
+          solution: |
+            def autonomia_h(capacidad_mAh, i_bat_mA):
+                return round(capacidad_mAh * 0.8 / i_bat_mA, 1)
+          tests:
+            - {desc: "Ejemplo", call: "autonomia_h(2500, 95.4)", expected: 21.0}
+            - {desc: "Batería pequeña", call: "autonomia_h(1000, 200)", expected: 4.0}
+
+  - id: m4s4
+    title: "Sprint Review 1: demo de los dos equipos"
+    hours: 2
+    kind: challenge
+    foto:
+      indicaciones: "Foto de la demo: las piezas impresas con el metacrilato encajado junto a la electrónica con la tira encendida y funcionando con batería."
+    theory: |
+      ## Qué se enseña en la Sprint Review
+
+      | Equipo A · Mecánica | Equipo B · Electrónica |
+      |---|---|
+      | Probeta y juego medido de la ranura elegida | Tensiones medidas en cada punto (batería, TP4056, MT3608) |
+      | Soporte, tapa y capuchón impresos | Tira encendida en verde, rojo y azul **con batería** |
+      | Metacrilato encajado y canal de la tira | Tabla de consumos (encendida, apagada, deepsleep) |
+      | Tiempo de impresión, gramos y coste | Autonomía estimada para 8 h de clase |
+
+      ## Consumo medio con reposo
+
+      Si el cartel pasa parte del tiempo dormido, la corriente **media** es una media **ponderada por el tiempo**:
+
+      ```
+      I_media = (I_activo · t_activo + I_reposo · t_reposo) / (t_activo + t_reposo)
+      ```
+
+      Ejemplo: despierto 2 s a 80 mA y dormido 58 s a 1 mA → (80·2 + 1·58) / 60 ≈ **3,6 mA**.
+
+      ## Retrospectiva (10 minutos)
+
+      Cada miembro escribe en un pósit: 😀 qué ha ido bien · 😕 qué mejorar · 💡 una idea para el Sprint 2.
+      Se elige **una** mejora concreta y se apunta en el tablero.
+    examples:
+      - title: "Lista de comprobación de la demo"
+        explanation: "Ejecútala en la placa o en el ordenador para no olvidar nada durante la demo."
+        pico_w: |
+          demo = {
+              "A": ["probeta y juego medido", "soporte, tapa y capuchón", "metacrilato encajado", "gramos y coste"],
+              "B": ["tensiones medidas", "tira con batería", "tabla de consumos", "autonomía estimada"],
+          }
+          for equipo, puntos in demo.items():
+              print("Equipo", equipo)
+              for p in puntos:
+                  print("  [ ]", p)
+        esp32_s3: |
+          demo = {
+              "A": ["probeta y juego medido", "soporte, tapa y capuchón", "metacrilato encajado", "gramos y coste"],
+              "B": ["tensiones medidas", "tira con batería", "tabla de consumos", "autonomía estimada"],
+          }
+          for equipo, puntos in demo.items():
+              print("Equipo", equipo)
+              for p in puntos:
+                  print("  [ ]", p)
+    practice: |
+      ### Sprint Review (2 sesiones)
+
+      1. **Preparación**: cada equipo ensaya su demo de 4 minutos con la lista de comprobación.
+      2. **Demo**: el Equipo A enseña las piezas con el metacrilato encajado; el Equipo B, la electrónica
+         funcionando con batería. El otro equipo y el profesor hacen preguntas.
+      3. **Retrospectiva** y actualización del tablero para el Hito de integración (misión 5).
+    evaluation:
+      intro: "Sprint Review 1. Necesitas un 75 %."
+      items:
+        - id: c1
+          type: code
+          points: 4
+          prompt: |
+            Escribe `consumo_medio(i_on, t_on, i_off, t_off)` que devuelva la corriente media en mA (redondeada a 1
+            decimal) de un cartel que está `t_on` segundos activo consumiendo `i_on` mA y `t_off` segundos en reposo
+            consumiendo `i_off` mA. Si el tiempo total es 0, devuelve 0.
+
+            Ejemplo: `consumo_medio(80, 2, 1, 58)` → `3.6`
+          starter: |
+            def consumo_medio(i_on, t_on, i_off, t_off):
+                pass
+          solution: |
+            def consumo_medio(i_on, t_on, i_off, t_off):
+                total = t_on + t_off
+                if total == 0:
+                    return 0
+                return round((i_on * t_on + i_off * t_off) / total, 1)
+          tests:
+            - {desc: "Ejemplo", call: "consumo_medio(80, 2, 1, 58)", expected: 3.6}
+            - {desc: "Siempre encendido", call: "consumo_medio(60, 10, 1, 0)", expected: 60.0}
+            - {desc: "Sin tiempo", call: "consumo_medio(60, 0, 1, 0)", expected: 0}
+        - id: q1
+          type: quiz
+          points: 1
+          question: "En la retrospectiva, ¿qué se decide?"
+          options:
+            - {id: a, text: "Una mejora concreta del modo de trabajar para el siguiente sprint."}
+            - {id: b, text: "Quién tiene la culpa de los retrasos.", feedback: "La retrospectiva mira al proceso, no busca culpables."}
+          answer: a

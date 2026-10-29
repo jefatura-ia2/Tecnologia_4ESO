@@ -65,8 +65,8 @@ test('registro y login', async () => {
 
 test('bloqueos y sin fugas de respuestas', async () => {
   const ms = (await call('GET', '/api/missions', { token: ana })).data
-  assert.equal(ms.length, 12)
-  assert.ok(!ms.some((m) => m.extra) && ms[11].trimestre === 3 && ms[2].id === 'm3')
+  assert.equal(ms.length, 15)
+  assert.ok(!ms.some((m) => m.extra) && ms[14].trimestre === 3 && ms[5].trimestre === 1 && ms[3].id === 'm4' && ms[2].id === 'm3')
   assert.ok(ms[0].state.unlocked && !ms[1].state.unlocked)
   assert.equal((await call('GET', '/api/sections/m1s2', { token: ana })).status, 403)
   const r = await call('GET', '/api/sections/m1s1', { token: ana })
@@ -189,10 +189,10 @@ test('profesor: panel, alertas de similitud, notas y CSV', async () => {
   const csv = await call('GET', '/api/teacher/export.csv', { token: profe })
   assert.equal(csv.status, 200)
   assert.ok(csv.text.includes('ana') && csv.text.includes('9,5'))
-  assert.ok(csv.text.includes('fotos subidas') && csv.text.includes('3/35'))
+  assert.ok(csv.text.includes('fotos subidas') && csv.text.includes('3/44'))
 
   const stats = (await call('GET', '/api/teacher/stats', { token: profe })).data
-  assert.equal(stats.length, 48)
+  assert.equal(stats.length, 60)
   assert.ok(stats[0].items[0].n >= 1)
 
   const sol = (await call('GET', '/api/teacher/sections/m3s1/solutions', { token: profe })).data
@@ -208,9 +208,9 @@ test('profesor: panel, alertas de similitud, notas y CSV', async () => {
   assert.equal((await call('GET', '/api/teacher/overview', { token: profe })).data.totals.students, 1)
 })
 
-test('calendario de 36 semanas', async () => {
+test('calendario de 45 semanas', async () => {
   const cal = (await call('GET', '/api/calendar', { token: ana })).data
-  assert.equal(cal.weeks.length, 36)
+  assert.equal(cal.weeks.length, 45)
   assert.ok(cal.weeks.every((w) => w.sessions.length === 3))
   assert.ok(cal.weeks.every((w) => !w.extra))
 })
