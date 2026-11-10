@@ -91,6 +91,17 @@
         </tbody>
       </table>
 
+      <h3>Pomo motorizado (misión 3, sección 5)</h3>
+      <table class="table">
+        <tbody>
+          <tr><th>Servo MG996R</th><td>Servo de engranajes metálicos: 9,4 kg·cm a 4,8 V (11 kg·cm a 6 V), 0,17 s/60°, hasta ≈ 2,5 A con el eje bloqueado. PWM de 50 Hz: 0,5 ms = 0°, 1,5 ms = 90°. Señal en GP15 (Pico W) o GPIO 5 (ESP32-S3); <strong>alimentación externa de 5-6 V con GND común</strong> y condensador de 470-1000 µF.</td></tr>
+          <tr><th>Prototipos impresos</th><td>
+            <a href="/descargas/pomo_mg996r/01_puente_MG996R.stl">01_puente_MG996R.stl</a> (se atornilla a los tubos del pomo y sostiene el servo) ·
+            <a href="/descargas/pomo_mg996r/02_acoplamiento_MG996R.stl">02_acoplamiento_MG996R.stl</a> (une el servo con la pletina; prisionero M3) ·
+            <a href="/simuladores/pomo_mg996r_anatomia.html">despiece interactivo</a></td></tr>
+        </tbody>
+      </table>
+
       <h3>Proyecto Smart Sign IoT (misiones 4-6)</h3>
       <table class="table">
         <tbody>

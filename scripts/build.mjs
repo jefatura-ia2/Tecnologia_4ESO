@@ -49,6 +49,8 @@ for (const f of fs.readdirSync(path.join(root, 'firmware'))) {
 }
 // Proyecto Smart Sign (misiones 4-6): modelo OpenSCAD, STL, mosquitto.conf, panel del profesor y guía
 fs.cpSync(path.join(root, 'smart_sign'), path.join(desc, 'smart_sign'), { recursive: true })
+// Pomo motorizado con servo MG996R (misión 3, sección 5): STL de los prototipos
+fs.cpSync(path.join(root, 'pomo_mg996r'), path.join(desc, 'pomo_mg996r'), { recursive: true })
 const guia = marked.parse(fs.readFileSync(path.join(root, 'smart_sign/README.md'), 'utf8'))
 fs.writeFileSync(path.join(desc, 'smart_sign/guia.html'), `<!doctype html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><title>Smart Sign · Guía del profesor</title>

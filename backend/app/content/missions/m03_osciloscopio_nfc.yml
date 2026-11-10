@@ -32,8 +32,8 @@ schedule:
   - {week: 8, session: 2, title: "La cerradura de solenoide: MOSFET, diodo y fuente de 12 V", section: m3s3}
   - {week: 8, session: 3, title: "Tira WS2812 de estado y la cerradura vista con el osciloscopio", section: m3s3}
   - {week: 9, session: 1, title: "Proyecto corto: control de acceso NFC (montaje)", section: m3s4}
-  - {week: 9, session: 2, title: "Proyecto corto: programación y bloqueo por intentos", section: m3s4}
-  - {week: 9, session: 3, title: "Proyecto corto: pruebas y presentación", section: m3s4}
+  - {week: 9, session: 2, title: "Proyecto corto: programación, bloqueo por intentos y presentación", section: m3s4}
+  - {week: 9, session: 3, title: "Análisis y simulación del pomo motorizado con servo MG996R", section: m3s5}
 sections:
   - id: m3s1
     title: "Introducción al osciloscopio PROMAX serie 600"
@@ -800,7 +800,7 @@ sections:
 
   - id: m3s4
     title: "Proyecto corto: control de acceso NFC"
-    hours: 3
+    hours: 2
     kind: challenge
     foto:
       indicaciones: "Foto del control de acceso: lector PN532, tira WS2812 encendida, cerradura de 12 V, módulo MOSFET, diodo y placa. Si podéis, con una tarjeta junto al lector."
@@ -1005,3 +1005,291 @@ sections:
             - {id: a, text: "Son datos personales: hay que informar y no guardarlos más tiempo del necesario."}
             - {id: b, text: "Nada, son solo números.", feedback: "Asociados a personas, son datos personales."}
           answer: a
+
+  - id: m3s5
+    title: "Análisis y simulación del pomo motorizado (servo MG996R)"
+    hours: 1
+    kind: lesson
+    foto:
+      indicaciones: "Foto del prototipo impreso (puente y acoplamiento) montado en el pomo o presentado junto al servo MG996R, con el calibre a la vista. Sin caras."
+    theory: |
+      ## Del solenoide al pomo motorizado
+
+      En el proyecto corto la puerta se abría con una **cerradura de solenoide**. Ahora vamos a analizar el
+      mecanismo que queremos automatizar de verdad: el **pomo de la puerta**. Un **servo MG996R** girará la
+      pieza que libera el seguro, sin cambiar la cerradura ni taladrar la puerta.
+
+      Antes de imprimir o programar nada, hay que **entender cómo funciona el mecanismo**: qué pieza gira,
+      cuánto, con qué fuerza y dónde se puede sujetar el motor.
+
+      ## Simulación del conjunto
+
+      Haz **clic** en la figura para **montar o despiezar** el conjunto y mueve el **puntero** de izquierda a
+      derecha para girar el servo de 0° a 90°. Con el teclado: flechas (±15°), Inicio (0°), Fin (90°) y
+      Espacio (montar/despiezar). La esquina inferior derecha indica el ángulo y el estado del seguro.
+
+      <iframe class="sim3d" src="/simuladores/pomo_mg996r_anatomia.html" title="Despiece interactivo del pomo motorizado con servo MG996R" loading="lazy" style="height:min(80vh, 640px)"></iframe>
+
+      [Abrir la simulación a pantalla completa](/simuladores/pomo_mg996r_anatomia.html)
+
+      ## Análisis del mecanismo
+
+      | Pieza | Qué hace | Dato |
+      |---|---|---|
+      | **Cuerpo y collar del pomo** | Contienen el muelle y el seguro; el collar es la parte que se gira a mano | Cuerpo Ø18 mm, collar Ø21 mm |
+      | **Husillo cuadrado hueco** | Transmite el giro del pomo a la cerradura | Cuadradillo de 8 mm |
+      | **Pletina central** | Sale del husillo y acciona el seguro: **es lo que hay que girar** | Sección 4 × 1,7 mm |
+      | **Tubos roscados** (2) | Unen las dos mitades del pomo a través de la puerta | Separados 30 mm entre ejes, Ø8 mm |
+      | **01 · Puente** (impreso) | Se atornilla a los dos tubos y sostiene el servo boca abajo, **coaxial** con la pletina | 46 × 62 × 58,5 mm |
+      | **02 · Acoplamiento** (impreso) | Une la pletina con el eje estriado del servo; un **prisionero** lateral lo fija | Ø14 × 19 mm |
+      | **Servo MG996R** | Gira la pletina **90° en sentido horario**: el seguro queda **libre a partir de ≈ 85°** | 40,7 × 19,7 mm |
+
+      Cadena de transmisión:
+
+      ```
+      placa (PWM) → servo MG996R → eje estriado → acoplamiento → pletina → seguro del pomo
+      ```
+
+      > ⚠️ El cierre interior del pomo no se ve y **no está dibujado**: las medidas del modelo son **estimadas**.
+      > Antes de imprimir la versión definitiva, mide con el calibre **vuestro** pomo (separación de los tubos,
+      > sección de la pletina, altura a la que sobresale) y comprueba que el giro de 90° libera el seguro.
+
+      ## ¿Tiene fuerza suficiente el servo?
+
+      El servo debe vencer el **par** (momento) que opone el seguro: `par = fuerza × brazo`.
+
+      1. Pega una palanca de longitud conocida a la pletina (por ejemplo, 15 mm).
+      2. Tira de la punta con un dinamómetro (o una báscula de equipaje) hasta que el seguro se libere.
+      3. Compara con el par del servo con un **margen de seguridad** de 2:
+
+      | MG996R | 4,8 V | 6 V |
+      |---|---|---|
+      | Par máximo | 9,4 kg·cm ≈ 0,92 N·m | 11 kg·cm ≈ 1,08 N·m |
+      | Velocidad (sin carga) | 0,17 s / 60° | 0,14 s / 60° |
+      | Corriente con el eje bloqueado | ≈ 2,5 A | ≈ 2,5 A |
+
+      `1 kg·cm = 0,0981 N·m`. Ejemplo: 20 N a 15 mm → 0,3 N·m; con margen 2 hacen falta 0,6 N·m < 0,92 N·m ✅
+
+      ## Control del servo por PWM
+
+      El servo recibe un pulso cada **20 ms** (50 Hz). La **anchura del pulso** fija el ángulo:
+      **0,5 ms → 0°**, **1,5 ms → 90°** y **2,5 ms → 180°**. En MicroPython se usa `duty_u16` (0-65535):
+
+      ```
+      pulso_us = 500 + ángulo × 2000 / 180
+      duty_u16 = pulso_us / 20000 × 65535
+      ```
+
+      | Conexión | Pico W | ESP32-S3 |
+      |---|---|---|
+      | Señal del servo (cable naranja) | GP15 | GPIO 5 |
+      | + del servo (cable rojo) | Fuente **externa** de 5-6 V | Fuente **externa** de 5-6 V |
+      | − del servo (cable marrón) | GND **común** con la placa | GND **común** con la placa |
+
+      - **Nunca** alimentes el MG996R desde el 3V3 ni desde el USB de la placa: en el arranque pide picos de más
+        de 1 A y la placa se reinicia. Pon un condensador de 470-1000 µF entre + y − del servo.
+      - Limita el giro a **0-90°**: si el servo empuja contra un tope, se calienta y gasta 2,5 A.
+
+      ## Prototipos impresos
+
+      | Pieza | Material | Ajustes recomendados |
+      |---|---|---|
+      | [01 · Puente](/descargas/pomo_mg996r/01_puente_MG996R.stl) | PETG (o PLA para probar medidas) | Capa 0,2 mm · 4 perímetros · relleno 30 % · en la orientación del STL |
+      | [02 · Acoplamiento](/descargas/pomo_mg996r/02_acoplamiento_MG996R.stl) | PETG | Capa 0,12-0,16 mm · relleno 100 % (transmite todo el par) |
+
+      ![Las dos piezas del prototipo: el puente que se atornilla a los tubos del pomo y el acoplamiento cilíndrico con la ranura de la pletina y el agujero del prisionero](/img/pomo_mg996r_piezas.png)
+      *Piezas del prototipo: 01 · puente y 02 · acoplamiento (vista previa de los STL).*
+
+      - El agujero lateral del acoplamiento es para el **prisionero M3**: taladra a Ø2,5 mm y rosca, o mete una
+        tuerca M3. Sin prisionero, el acoplamiento patina sobre la pletina.
+      - Si la ranura de la pletina queda floja o no entra, ajusta la holgura como en la probeta del Smart Sign
+        (misión 4) y vuelve a imprimir: **eso es iterar un prototipo**.
+    examples:
+      - title: "Prueba del servo: bloqueado ↔ libre"
+        explanation: "Mueve el servo a 0° (bloqueado) y a 90° (libre) tres veces. Comprueba primero con el servo SIN montar en el pomo."
+        pico_w: |
+          from machine import Pin, PWM
+          import time
+
+          servo = PWM(Pin(15))
+          servo.freq(50)                       # un pulso cada 20 ms
+
+          def angulo_a_duty(angulo):
+              angulo = min(90, max(0, angulo))   # nunca más de 90°: el pomo hace tope
+              pulso_us = 500 + angulo * 2000 / 180
+              return round(pulso_us / 20000 * 65535)
+
+          def mover(angulo):
+              servo.duty_u16(angulo_a_duty(angulo))
+              print("servo", angulo, "°")
+
+          for _ in range(3):
+              mover(0)                         # seguro BLOQUEADO
+              time.sleep(1)
+              mover(90)                        # seguro LIBRE (desde ≈ 85°)
+              time.sleep(1)
+          mover(0)
+        esp32_s3: |
+          from machine import Pin, PWM
+          import time
+
+          servo = PWM(Pin(5))
+          servo.freq(50)
+
+          def angulo_a_duty(angulo):
+              angulo = min(90, max(0, angulo))
+              pulso_us = 500 + angulo * 2000 / 180
+              return round(pulso_us / 20000 * 65535)
+
+          def mover(angulo):
+              servo.duty_u16(angulo_a_duty(angulo))
+              print("servo", angulo, "°")
+
+          for _ in range(3):
+              mover(0)
+              time.sleep(1)
+              mover(90)
+              time.sleep(1)
+          mover(0)
+      - title: "El control de acceso NFC abre el pomo"
+        explanation: "En el proyecto corto, sustituye la cerradura de solenoide por el servo: tarjeta válida → 90° durante 5 s → vuelve a 0°."
+        pico_w: |
+          from machine import Pin, PWM
+          import time
+
+          servo = PWM(Pin(15)); servo.freq(50)
+          DUTY = {0: 1638, 90: 4915}           # 0,5 ms y 1,5 ms
+
+          def abrir_puerta(segundos=5):
+              servo.duty_u16(DUTY[90])         # libera el seguro
+              time.sleep(segundos)
+              servo.duty_u16(DUTY[0])          # lo vuelve a bloquear
+
+          # dentro del bucle del lector NFC:
+          # if uid in AUTORIZADAS:
+          #     abrir_puerta()
+          abrir_puerta(2)
+        esp32_s3: |
+          from machine import Pin, PWM
+          import time
+
+          servo = PWM(Pin(5)); servo.freq(50)
+          DUTY = {0: 1638, 90: 4915}
+
+          def abrir_puerta(segundos=5):
+              servo.duty_u16(DUTY[90])
+              time.sleep(segundos)
+              servo.duty_u16(DUTY[0])
+
+          abrir_puerta(2)
+    practice: |
+      ### Práctica (1 sesión + impresión)
+
+      1. Usa la **simulación**: despieza el conjunto, nombra cada pieza y describe la cadena de transmisión.
+      2. Mide vuestro pomo con el calibre (separación de los tubos, pletina, altura) y compáralo con el modelo.
+      3. Imprime el **acoplamiento** (≈ 15 min) y el **puente** (≈ 2-3 h, se puede dejar imprimiendo) y prueba el encaje.
+      4. Mide el par necesario con la palanca y el dinamómetro y comprueba el margen del MG996R.
+      5. Prueba el servo **sin montar** con la fuente externa; después móntalo y verifica que a 90° el seguro queda libre.
+    evaluation:
+      intro: "Necesitas un 75 %."
+      items:
+        - id: q1
+          type: quiz
+          points: 1
+          question: "¿Qué pieza del pomo tiene que girar el servo para liberar el seguro?"
+          options:
+            - {id: a, text: "La pletina central que sale del husillo cuadrado."}
+            - {id: b, text: "Los tubos roscados.", feedback: "Los tubos solo unen las dos mitades del pomo; en ellos se atornilla el puente."}
+            - {id: c, text: "El collar exterior del pomo.", feedback: "El collar es lo que se gira a mano, pero el servo actúa sobre la pletina, coaxial con su eje."}
+          answer: a
+        - id: q2
+          type: quiz
+          points: 1
+          question: "¿Por qué el servo MG996R necesita una fuente externa de 5-6 V con GND común?"
+          options:
+            - {id: a, text: "Porque pide picos de más de 1 A (hasta 2,5 A bloqueado) y la placa no puede darlos; la GND común es la referencia de la señal PWM."}
+            - {id: b, text: "Porque la señal PWM es de 12 V.", feedback: "La señal es de 3,3 V, la de la propia placa; lo que la placa no puede dar es la corriente del motor."}
+          answer: a
+        - id: q3
+          type: quiz
+          points: 1
+          question: "¿Para qué sirve el prisionero del acoplamiento?"
+          options:
+            - {id: a, text: "Para que el acoplamiento no patine ni se suelte de la pletina al transmitir el par."}
+            - {id: b, text: "Para regular el ángulo del servo.", feedback: "El ángulo lo fija la anchura del pulso PWM."}
+          answer: a
+        - id: c1
+          type: code
+          points: 3
+          prompt: |
+            Escribe `angulo_a_duty(angulo)` que devuelva el `duty_u16` (entero) para un servo de 50 Hz con pulsos de
+            0,5 ms (0°) a 2,5 ms (180°). Limita antes el ángulo a 0-180.
+
+            `pulso_us = 500 + angulo * 2000 / 180` y `duty = round(pulso_us / 20000 * 65535)`
+
+            Ejemplos: `angulo_a_duty(0)` → `1638` · `angulo_a_duty(90)` → `4915`
+          starter: |
+            def angulo_a_duty(angulo):
+                pass
+          solution: |
+            def angulo_a_duty(angulo):
+                angulo = min(180, max(0, angulo))
+                pulso_us = 500 + angulo * 2000 / 180
+                return round(pulso_us / 20000 * 65535)
+          tests:
+            - {desc: "0° y 90°", call: "(angulo_a_duty(0), angulo_a_duty(90))", expected: [1638, 4915]}
+            - {desc: "180° y 45°", call: "(angulo_a_duty(180), angulo_a_duty(45))", expected: [8192, 3277]}
+            - {desc: "Ángulo negativo limitado", call: "angulo_a_duty(-10)", expected: 1638}
+        - id: c2
+          type: code
+          points: 2
+          prompt: |
+            Escribe `estado_seguro(angulo, umbral=85)` que devuelva `"LIBRE"` si el servo ha girado al menos `umbral`
+            grados y `"BLOQUEADO"` en caso contrario (como el indicador de la simulación).
+          starter: |
+            def estado_seguro(angulo, umbral=85):
+                pass
+          solution: |
+            def estado_seguro(angulo, umbral=85):
+                return "LIBRE" if angulo >= umbral else "BLOQUEADO"
+          tests:
+            - {desc: "0° y 90°", call: "(estado_seguro(0), estado_seguro(90))", expected: ["BLOQUEADO", "LIBRE"]}
+            - {desc: "Justo en el umbral", call: "(estado_seguro(85), estado_seguro(84.9))", expected: ["LIBRE", "BLOQUEADO"]}
+            - {desc: "Otro umbral", call: "estado_seguro(80, umbral=75)", expected: "LIBRE"}
+        - id: c3
+          type: code
+          points: 3
+          prompt: |
+            Escribe `par_suficiente(fuerza_N, brazo_mm, par_servo_kgcm, margen=2)` que devuelva `True` si el par del
+            servo (en N·m: `par_servo_kgcm * 0.0981`) es mayor o igual que `margen` veces el par necesario
+            (`fuerza_N * brazo_mm / 1000`, en N·m).
+
+            Ejemplos: `par_suficiente(20, 15, 9.4)` → `True` · `par_suficiente(40, 15, 9.4)` → `False`
+          starter: |
+            def par_suficiente(fuerza_N, brazo_mm, par_servo_kgcm, margen=2):
+                pass
+          solution: |
+            def par_suficiente(fuerza_N, brazo_mm, par_servo_kgcm, margen=2):
+                necesario = fuerza_N * brazo_mm / 1000
+                return par_servo_kgcm * 0.0981 >= margen * necesario
+          tests:
+            - {desc: "Seguro suave", call: "par_suficiente(20, 15, 9.4)", expected: true}
+            - {desc: "Seguro duro", call: "par_suficiente(40, 15, 9.4)", expected: false}
+            - {desc: "A 6 V con margen 1,5", call: "par_suficiente(40, 15, 11, margen=1.5)", expected: true}
+        - id: c4
+          type: code
+          points: 2
+          prompt: |
+            Escribe `tiempo_giro(angulo, s_por_60=0.17)` que devuelva los segundos que tarda el servo en girar
+            `angulo` grados (usa el valor absoluto), redondeados a 2 decimales.
+
+            Ejemplo: `tiempo_giro(90)` → `0.26`
+          starter: |
+            def tiempo_giro(angulo, s_por_60=0.17):
+                pass
+          solution: |
+            def tiempo_giro(angulo, s_por_60=0.17):
+                return round(abs(angulo) / 60 * s_por_60, 2)
+          tests:
+            - {desc: "90° a 4,8 V", call: "tiempo_giro(90)", expected: 0.26}
+            - {desc: "Otros casos", call: "(tiempo_giro(60), tiempo_giro(90, 0.2), tiempo_giro(-180, 0.14))", expected: [0.17, 0.3, 0.42]}

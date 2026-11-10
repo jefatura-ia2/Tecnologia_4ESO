@@ -129,6 +129,7 @@ scripts/dev-server.mjs          servidor local que imita Netlify
 scripts/ilustraciones/          generadores de las imágenes SVG de las lecciones (frontend/public/img)
 tests/                          pruebas Node (API y soluciones en Pyodide)
 firmware/                       taller.py (Electrovalvula, CilindroDE, Seta), pn532_i2c.py (lector NFC), cartel_mqtt.py (Smart Sign), secretos.py
+pomo_mg996r/                    STL del pomo motorizado con servo MG996R (puente y acoplamiento, misión 3)
 smart_sign/                     Smart Sign IoT: guía del profesor, marco_cartel.scad + STL, mosquitto.conf, panel_profesor.html
 docs/temporalizacion.md         programación sesión a sesión y calificación sugerida
 ```

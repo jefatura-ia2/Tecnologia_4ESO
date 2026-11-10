@@ -36,6 +36,17 @@ export const RECURSOS = [
     etiquetas: ['WS2812', 'NeoPixel', 'ESP32-C3', '3D'],
   },
   {
+    id: 'pomo-mg996r',
+    icono: '🚪',
+    titulo: 'Pomo motorizado con servo MG996R (despiece interactivo)',
+    autor: 'TEC_IVJP_lab27 · IES Valle del Jerte',
+    archivo: '/simuladores/pomo_mg996r_anatomia.html',
+    sesiones: 'Simulación + STL',
+    resumen: 'Despiece interactivo del mecanismo de accionamiento y bloqueo del pomo: clic para montar o despiezar y puntero para girar el servo de 0° a 90° (seguro libre desde ≈ 85°). STL del prototipo: puente (/descargas/pomo_mg996r/01_puente_MG996R.stl) y acoplamiento (/descargas/pomo_mg996r/02_acoplamiento_MG996R.stl).',
+    relacion: 'Misión 3, sección 5: análisis del mecanismo que se va a automatizar.',
+    etiquetas: ['Mecanismos', 'Servo', 'Impresión 3D', 'Simulación'],
+  },
+  {
     id: 'smart-sign-panel',
     icono: '🪧',
     titulo: 'Smart Sign: panel del profesor (MQTT)',

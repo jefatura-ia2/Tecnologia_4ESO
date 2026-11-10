@@ -189,10 +189,10 @@ test('profesor: panel, alertas de similitud, notas y CSV', async () => {
   const csv = await call('GET', '/api/teacher/export.csv', { token: profe })
   assert.equal(csv.status, 200)
   assert.ok(csv.text.includes('ana') && csv.text.includes('9,5'))
-  assert.ok(csv.text.includes('fotos subidas') && csv.text.includes('3/44'))
+  assert.ok(csv.text.includes('fotos subidas') && csv.text.includes('3/45'))
 
   const stats = (await call('GET', '/api/teacher/stats', { token: profe })).data
-  assert.equal(stats.length, 60)
+  assert.equal(stats.length, 61)
   assert.ok(stats[0].items[0].n >= 1)
 
   const sol = (await call('GET', '/api/teacher/sections/m3s1/solutions', { token: profe })).data

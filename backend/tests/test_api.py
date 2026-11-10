@@ -208,7 +208,7 @@ def test_teacher_dashboard(client):
                       headers=auth(tok)).json()["ok"]
     csv = client.get("/api/teacher/export.csv", headers=auth(tok))
     assert csv.status_code == 200 and "ana" in csv.text and "8,5" in csv.text
-    assert "fotos subidas" in csv.text and "3/44" in csv.text
+    assert "fotos subidas" in csv.text and "3/45" in csv.text
     stats = client.get("/api/teacher/stats", headers=auth(tok)).json()
     assert len(stats) == sum(len(m["sections"]) for m in load_missions())
     sol = client.get("/api/teacher/sections/m1s1/solutions", headers=auth(tok)).json()

@@ -139,15 +139,16 @@ Temario completo: **45 semanas × 3 sesiones de 1 h = 135 h** en quince misiones
 | 8 | 2 | La cerradura de solenoide: MOSFET, diodo y fuente de 12 V | `m3s3` |
 | 8 | 3 | Tira WS2812 de estado y la cerradura vista con el osciloscopio | `m3s3` |
 | 9 | 1 | Proyecto corto: control de acceso NFC (montaje) | `m3s4` |
-| 9 | 2 | Proyecto corto: programación y bloqueo por intentos | `m3s4` |
-| 9 | 3 | Proyecto corto: pruebas y presentación | `m3s4` |
+| 9 | 2 | Proyecto corto: programación, bloqueo por intentos y presentación | `m3s4` |
+| 9 | 3 | Análisis y simulación del pomo motorizado con servo MG996R | `m3s5` |
 
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
 | m3s1 · Introducción al osciloscopio PROMAX serie 600 | Lección | 2 | 3 test · 1 completar · 2 código |
 | m3s2 · NFC: leer tarjetas con el PN532 por I2C | Lección | 2 | 3 test · 0 completar · 2 código |
 | m3s3 · Actuadores: cerradura de 12 V y tira de LED WS2812 | Lección | 2 | 2 test · 0 completar · 3 código |
-| m3s4 · Proyecto corto: control de acceso NFC | Proyecto corto | 3 | 2 test · 0 completar · 2 código |
+| m3s4 · Proyecto corto: control de acceso NFC | Proyecto corto | 2 | 2 test · 0 completar · 2 código |
+| m3s5 · Análisis y simulación del pomo motorizado (servo MG996R) | Lección | 1 | 3 test · 0 completar · 4 código |
 
 ### 🪧 Misión 4: Smart Sign I: dos equipos en paralelo
 
