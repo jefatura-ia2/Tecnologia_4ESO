@@ -42,7 +42,7 @@ export const RECURSOS = [
     autor: 'TEC_IVJP_lab27 · IES Valle del Jerte',
     archivo: '/simuladores/pomo_mg996r_anatomia.html',
     sesiones: 'Simulación + STL',
-    resumen: 'Despiece interactivo del mecanismo de accionamiento y bloqueo del pomo: clic para montar o despiezar y puntero para girar el servo de 0° a 90° (seguro libre desde ≈ 85°). STL del prototipo: puente (/descargas/pomo_mg996r/01_puente_MG996R.stl) y acoplamiento (/descargas/pomo_mg996r/02_acoplamiento_MG996R.stl).',
+    resumen: 'Despiece interactivo del mecanismo de accionamiento y bloqueo del pomo: clic para montar o despiezar y puntero para girar el servo de 0° a 90° (seguro libre desde ≈ 85°). STL del prototipo: puente (/descargas/pomo_mg996r/01_puente_MG996R.stl) y acoplamiento (/descargas/pomo_mg996r/02_acoplamiento_MG996R.stl) y bloque de medida del par con dinamómetro (/descargas/pomo_mg996r/03_bloque_medida_par.stl).',
     relacion: 'Misión 3, sección 5: análisis del mecanismo que se va a automatizar.',
     etiquetas: ['Mecanismos', 'Servo', 'Impresión 3D', 'Simulación'],
   },

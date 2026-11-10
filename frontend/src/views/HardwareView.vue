@@ -98,6 +98,7 @@
           <tr><th>Prototipos impresos</th><td>
             <a href="/descargas/pomo_mg996r/01_puente_MG996R.stl">01_puente_MG996R.stl</a> (se atornilla a los tubos del pomo y sostiene el servo) ·
             <a href="/descargas/pomo_mg996r/02_acoplamiento_MG996R.stl">02_acoplamiento_MG996R.stl</a> (une el servo con la pletina; prisionero M3) ·
+            <a href="/descargas/pomo_mg996r/03_bloque_medida_par.stl">03_bloque_medida_par.stl</a> (mide el par con el dinamómetro de muelle: anclaje a 15 mm del eje) ·
             <a href="/simuladores/pomo_mg996r_anatomia.html">despiece interactivo</a></td></tr>
         </tbody>
       </table>

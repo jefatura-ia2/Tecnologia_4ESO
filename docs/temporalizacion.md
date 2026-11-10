@@ -148,7 +148,7 @@ Temario completo: **45 semanas × 3 sesiones de 1 h = 135 h** en quince misiones
 | m3s2 · NFC: leer tarjetas con el PN532 por I2C | Lección | 2 | 3 test · 0 completar · 2 código |
 | m3s3 · Actuadores: cerradura de 12 V y tira de LED WS2812 | Lección | 2 | 2 test · 0 completar · 3 código |
 | m3s4 · Proyecto corto: control de acceso NFC | Proyecto corto | 2 | 2 test · 0 completar · 2 código |
-| m3s5 · Análisis y simulación del pomo motorizado (servo MG996R) | Lección | 1 | 3 test · 0 completar · 4 código |
+| m3s5 · Análisis y simulación del pomo motorizado (servo MG996R) | Lección | 1 | 3 test · 0 completar · 5 código |
 
 ### 🪧 Misión 4: Smart Sign I: dos equipos en paralelo
 

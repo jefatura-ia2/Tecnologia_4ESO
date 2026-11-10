@@ -1056,11 +1056,28 @@ sections:
 
       ## ¿Tiene fuerza suficiente el servo?
 
-      El servo debe vencer el **par** (momento) que opone el seguro: `par = fuerza × brazo`.
+      El servo debe vencer el **par** (momento) que opone el seguro: `M = F · r`. Para medirlo usamos el
+      **dinamómetro de muelle del laboratorio** y un pequeño dispositivo impreso que convierte la fuerza en par.
 
-      1. Pega una palanca de longitud conocida a la pletina (por ejemplo, 15 mm).
-      2. Tira de la punta con un dinamómetro (o una báscula de equipaje) hasta que el seguro se libere.
-      3. Compara con el par del servo con un **margen de seguridad** de 2:
+      ![Dispositivo de medida del par: bloque de acoplamiento con la varilla plana pasante, prisionero M3 y anclaje Ø3 para el dinamómetro a 15 mm del eje](/img/pomo_dispositivo_par.png)
+      *Montaje (M = F · r con r = 15 mm), despiece y planta del dispositivo de medida.*
+
+      | Pieza | Función |
+      |---|---|
+      | **Bloque de acoplamiento** 25 × 20 × 10 mm ([STL](/descargas/pomo_mg996r/03_bloque_medida_par.stl)) | Brazo de palanca rígido que se monta sobre el eje |
+      | **Varilla plana 4 × 1,7 mm** (pasante) | Es el eje de la manilla: la misma sección que la pletina del pomo |
+      | **Prisionero M3** | Fija el bloque a la varilla para que no patine al tirar |
+      | **Anclaje Ø3** | Punto donde se engancha el dinamómetro, a **r = 15 mm** del eje |
+
+      **Procedimiento**
+
+      1. Introduce el bloque en la pletina (o en la varilla de pruebas) y aprieta el prisionero M3.
+      2. Pon a cero el dinamómetro, engánchalo al anclaje y tira **perpendicular al brazo** (tangente al giro):
+         si tiras inclinado, la lectura sale mayor que la fuerza que de verdad hace girar.
+      3. Tira despacio y anota la fuerza **F** justo cuando el seguro se libera. Repite **5 veces** y usa la media
+         (o el valor máximo, para ir del lado seguro).
+      4. Calcula el par: `M = F · r = F (N) × 0,015 m`. Si el dinamómetro marca gramos: `F (N) = g × 0,00981`.
+      5. Compara con el par del servo con un **margen de seguridad** de 2:
 
       | MG996R | 4,8 V | 6 V |
       |---|---|---|
@@ -1096,6 +1113,7 @@ sections:
       |---|---|---|
       | [01 · Puente](/descargas/pomo_mg996r/01_puente_MG996R.stl) | PETG (o PLA para probar medidas) | Capa 0,2 mm · 4 perímetros · relleno 30 % · en la orientación del STL |
       | [02 · Acoplamiento](/descargas/pomo_mg996r/02_acoplamiento_MG996R.stl) | PETG | Capa 0,12-0,16 mm · relleno 100 % (transmite todo el par) |
+      | [03 · Bloque de medida del par](/descargas/pomo_mg996r/03_bloque_medida_par.stl) | PLA o PETG | Capa 0,16 mm · relleno 100 % · ranura de la varilla sin soportes |
 
       ![Las dos piezas del prototipo: el puente que se atornilla a los tubos del pomo y el acoplamiento cilíndrico con la ranura de la pletina y el agujero del prisionero](/img/pomo_mg996r_piezas.png)
       *Piezas del prototipo: 01 · puente y 02 · acoplamiento (vista previa de los STL).*
@@ -1187,8 +1205,8 @@ sections:
 
       1. Usa la **simulación**: despieza el conjunto, nombra cada pieza y describe la cadena de transmisión.
       2. Mide vuestro pomo con el calibre (separación de los tubos, pletina, altura) y compáralo con el modelo.
-      3. Imprime el **acoplamiento** (≈ 15 min) y el **puente** (≈ 2-3 h, se puede dejar imprimiendo) y prueba el encaje.
-      4. Mide el par necesario con la palanca y el dinamómetro y comprueba el margen del MG996R.
+      3. Imprime el **acoplamiento** (≈ 15 min), el **bloque de medida** (≈ 15 min) y el **puente** (≈ 2-3 h, se puede dejar imprimiendo) y prueba el encaje.
+      4. Mide el par necesario con el **bloque de medida y el dinamómetro de muelle** (5 medidas) y comprueba el margen del MG996R.
       5. Prueba el servo **sin montar** con la fuente externa; después móntalo y verifica que a 90° el seguro queda libre.
     evaluation:
       intro: "Necesitas un 75 %."
@@ -1276,6 +1294,27 @@ sections:
             - {desc: "Seguro suave", call: "par_suficiente(20, 15, 9.4)", expected: true}
             - {desc: "Seguro duro", call: "par_suficiente(40, 15, 9.4)", expected: false}
             - {desc: "A 6 V con margen 1,5", call: "par_suficiente(40, 15, 11, margen=1.5)", expected: true}
+        - id: c5
+          type: code
+          points: 3
+          prompt: |
+            Escribe `par_medido(lecturas_N, r_mm=15)` que reciba las lecturas del dinamómetro (en N) de varias
+            repeticiones y devuelva el par necesario en N·m usando la lectura **máxima** (para ir del lado
+            seguro), redondeado a 3 decimales. Si no hay lecturas, devuelve `0`.
+
+            Ejemplo: `par_medido([18, 21, 19.5, 20, 20.5])` → `0.315`
+          starter: |
+            def par_medido(lecturas_N, r_mm=15):
+                pass
+          solution: |
+            def par_medido(lecturas_N, r_mm=15):
+                if not lecturas_N:
+                    return 0
+                return round(max(lecturas_N) * r_mm / 1000, 3)
+          tests:
+            - {desc: "Cinco medidas", call: "par_medido([18, 21, 19.5, 20, 20.5])", expected: 0.315}
+            - {desc: "Otro brazo", call: "par_medido([10, 12], r_mm=20)", expected: 0.24}
+            - {desc: "Sin medidas", call: "par_medido([])", expected: 0}
         - id: c4
           type: code
           points: 2
