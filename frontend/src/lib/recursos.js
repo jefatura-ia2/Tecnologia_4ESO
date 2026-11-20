@@ -58,6 +58,17 @@ export const RECURSOS = [
     etiquetas: ['MQTT', 'React', 'IoT', 'Servidor'],
   },
   {
+    id: 'letrero-bandera-3d',
+    icono: '🏷️',
+    titulo: 'Smart Sign: letrero tipo bandera en 3D (carril + pieza de pared)',
+    autor: 'TEC_IVJP_lab27 · IES Valle del Jerte',
+    archivo: '/simuladores/letrero_bandera_3d.html',
+    sesiones: 'Montaje interactivo + STL',
+    resumen: 'Visor 3D del letrero tipo bandera: carril con letras, placas LED tras PLA translúcido, ESP32-C3 y reductor 12 → 5 V, y pieza de pared. Despiece, corte por el eje para ver la espiga y los Molex enchufados, y pasos de montaje. Modelo paramétrico y STL: /descargas/smart_sign/letrero_bandera/letrero_aulas.py y /descargas/smart_sign/letrero_bandera/letrero_bandera_stl.zip.',
+    relacion: 'Misión 4, sección «Equipo A: diseño CAD y fabricación» (variante del cartel).',
+    etiquetas: ['CAD', 'Impresión 3D', 'Tolerancias', '3D'],
+  },
+  {
     id: 'smart-sign-guia',
     icono: '📐',
     titulo: 'Smart Sign: guía del profesor y modelo 3D paramétrico',
