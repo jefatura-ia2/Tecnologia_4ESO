@@ -297,6 +297,35 @@ sections:
       **Cuánto plástico gastamos:** `masa (g) = volumen (cm³) × densidad`. Densidad del PLA ≈ 1,24 g/cm³ y del
       PETG ≈ 1,27 g/cm³. El laminador da el volumen o los gramos: anótalo para calcular el coste.
 
+      ## Variante: letrero tipo bandera (montaje 3D)
+
+      Además del cartel de metacrilato, el centro estudia un **letrero tipo bandera**: sale perpendicular a la
+      pared para que se lea desde lejos por el pasillo. Tiene dos módulos que se unen **sin cables sueltos**:
+
+      | Módulo | Piezas | Función |
+      |---|---|---|
+      | **Pieza de pared** (base) | Base, tapa, Molex en su cuna, calzo de ajuste (0,5-2 mm), 2 tornillos M3 × 16 | Se atornilla a la pared y lleva la alimentación hasta el conector |
+      | **Módulo carril** | Carril con espiga, Molex dentro de la espiga, tapa inferior del canal, reductor 12 → 5 V, ESP32-C3 SuperMini, 2 placas WS2812 de 8 LED, 2 tapas de PLA translúcido, letras | Ilumina el letrero; se enchufa a la base deslizándolo |
+
+      Usa el visor para **despiezar** el conjunto, hacer un **corte por el eje**, ver la base transparente,
+      ocultar piezas de la lista y mirar el **detalle de la unión**. Con el ratón: arrastrar para girar, rueda
+      para acercar y clic derecho (o Mayús) para desplazar.
+
+      <iframe class="sim3d" src="/simuladores/letrero_bandera_3d.html" title="Montaje 3D del letrero tipo bandera: carril y pieza de pared" loading="lazy" style="height:min(80vh, 640px)"></iframe>
+
+      [Abrir el montaje 3D del letrero a pantalla completa](/simuladores/letrero_bandera_3d.html)
+
+      **Secuencia de montaje**
+
+      1. Encajar el Molex de la base en su cuna (queda con 0,4 mm de juego para centrarse solo) y meter detrás el calzo de 1,0 mm.
+      2. Pegar el Molex del carril en el túnel de la espiga (asoma 9,5 mm).
+      3. Colocar el reductor, la ESP32, las placas LED (tornillos M2) y las tapas LED; deslizar la tapa inferior por el extremo libre hasta que haga «clic».
+      4. Empujar el carril: la **espiga se alinea antes de que se toquen los Molex** y la conexión se hace sola.
+      5. Fijar con los 2 tornillos M3 × 16 desde debajo de la base. Si los Molex no enchufan a fondo, calzo más grueso; si el carril no llega a tope, más fino.
+
+      > 💡 El **calzo** es una forma sencilla de absorber las tolerancias de impresión sin reimprimir la base:
+      > es la misma idea que la probeta de las ranuras, aplicada a la profundidad de un conector.
+
       ## Seguridad en la zona de impresión
 
       - La boquilla está a más de 200 °C y la cama a 60 °C: **no se toca** mientras imprime.
@@ -355,6 +384,8 @@ sections:
       5. **Impresión**: imprime el soporte en la A1; si la A1 está ocupada, el capuchón en la Sidewinder.
       6. **Comprobación**: mide la ranura impresa, prueba el metacrilato y la tira dentro del canal. Si no
          encaja, cambia el parámetro y reimprime (eso también es avanzar: apúntalo en el Kanban).
+      7. **Variante bandera**: abre el montaje 3D del letrero tipo bandera, haz el corte por el eje y el detalle
+         de la unión, y explica en la bitácora para qué sirven la espiga y el calzo.
     evaluation:
       intro: "Necesitas un 75 %."
       items:

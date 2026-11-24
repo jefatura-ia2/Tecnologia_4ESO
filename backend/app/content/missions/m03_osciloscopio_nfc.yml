@@ -1032,6 +1032,31 @@ sections:
 
       [Abrir la simulación a pantalla completa](/simuladores/pomo_mg996r_anatomia.html)
 
+      ## Despiece del pomo exterior: bloqueo, llave y servo
+
+      Este segundo modelo muestra **por dentro** el pomo de la puerta del aula: el pomo exterior tipo tulipán,
+      la roseta, los dos vástagos, el muelle de torsión, el cuadradillo, el **pestillo de bloqueo**, el cilindro
+      de llave, el pomo interior y el **módulo del servo MG996R** con sus engranajes 1:1.
+
+      - **Despiece**: separa las piezas (P-01 a P-13) para ver cómo encajan.
+      - **Pomo exterior, pomo interior y llave**: gira cada uno y observa qué pieza arrastra a cuál.
+      - **Bloqueo**: pulsa el botón interior y comprueba que el pomo exterior ya no gira (solo 2,5° de holgura).
+      - **Explicar el bloqueo paso a paso**: guía de 10 pasos, desde el estado libre hasta la apertura con el servo.
+      - **Servo MG996R**: «Liberar bloqueo» (≈ 45°) y «Abrir puerta» (90°), con el ancho de pulso en µs.
+      - **Vista**: isométrica, alzados, planta o el **plano de 4 vistas**; arrastra para girar el dibujo.
+
+      <iframe class="sim3d" src="/simuladores/pomo_exterior_despiece.html" title="Despiece isométrico del pomo exterior con bloqueo, llave y servo MG996R" loading="lazy" style="height:min(85vh, 760px)"></iframe>
+
+      [Abrir el despiece del pomo exterior a pantalla completa](/simuladores/pomo_exterior_despiece.html)
+
+      > 📏 Las cotas de este despiece (vástagos Ø 6,45 mm a 35 mm, cuadradillo 6 × 6 mm) proceden del croquis del
+      > pomo exterior y no coinciden con las del modelo simplificado de arriba. El par y la carrera son **estimados**:
+      > **mide vuestro pomo con el calibre** antes de diseñar o imprimir piezas.
+
+      **Fíjate en esto**: llave, pomo interior y servo empujan la misma barra de 4 mm con **topes de un solo
+      sentido**. Por eso el servo puede liberar el bloqueo, pero cuando abres con la llave o con el pomo interior
+      el servo **no queda arrastrado** (ni se fuerza su reductora).
+
       ## Análisis del mecanismo
 
       | Pieza | Qué hace | Dato |

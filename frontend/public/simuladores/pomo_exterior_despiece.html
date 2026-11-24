@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pomo exterior: despiece isométrico</title>
+<style>
+:root{
+  --bg:#F4F6F9; --panel:#FFFFFF; --line:#0F172A; --amber:#B45309; --cyan:#0369A1; --orange:#EA580C; --muted:#475569; --edge:rgba(3,105,161,.35);
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B132B; --panel:#0F1A3A; --line:#F1F5F9; --amber:#FBBF24; --cyan:#38BDF8; --orange:#F97316; --muted:#94A3B8; --edge:rgba(56,189,248,.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B132B; --panel:#0F1A3A; --line:#F1F5F9; --amber:#FBBF24; --cyan:#38BDF8; --orange:#F97316; --muted:#94A3B8; --edge:rgba(56,189,248,.35);
+  color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--line);font-family:"Courier New",Courier,monospace;}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:12px;padding:10px;
+  height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));}
+.stagebox{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center}
+.stage{width:min(100%,calc((100dvh - 22px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) * 16 / 9));aspect-ratio:16/9;
+  border:1px solid var(--edge);background:#FFFFFF;box-shadow:0 1px 3px rgba(15,23,42,.12);overflow:hidden}
+.stage svg{display:block;width:100%;height:100%;font-family:"Courier New",Courier,monospace;touch-action:none;cursor:grab}
+.panel{min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding-right:2px}
+.panel section{background:var(--panel);border:1px solid var(--edge);padding:6px 9px 8px}
+.panel h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 4px;font-weight:bold}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.span2{grid-column:1/-1}
+.ctl{margin-bottom:1px}
+.ctl label{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:0}
+.ctl output{color:var(--cyan);font-weight:bold}
+input[type=range]{width:100%;accent-color:var(--amber);height:18px;margin:1px 0}
+button{font:inherit;font-size:12.5px;color:var(--line);background:var(--panel);border:1px solid var(--edge);padding:5px 7px;cursor:pointer;border-radius:2px;line-height:1.2}
+button:hover{border-color:var(--cyan)}
+button.primary{border-color:var(--amber);color:var(--amber)}
+button[aria-pressed="true"]{background:rgba(56,189,248,.16);border-color:var(--cyan);color:var(--cyan)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+button:disabled,input:disabled{opacity:.45;cursor:default}
+details{font-size:12px;color:var(--muted)}
+summary{cursor:pointer;padding:4px 2px}
+.note{font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.45}
+@media (max-height:760px) and (min-width:901px){.panel h2{display:none}.panel section{padding:6px 8px}}
+@media (max-width:900px),(max-height:520px) and (max-width:1100px){
+  .wrap{display:block;height:auto}
+  .stage{width:100%}
+  .panel{overflow:visible;margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .panel details{grid-column:1/-1}
+}
+html.embebido .wrap{display:block;height:auto;padding:6px}
+html.embebido .stage{width:100%}
+html.embebido .panel{overflow:visible;margin-top:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+html.embebido .panel details{grid-column:1/-1}
+</style>
+<script>if (window.self !== window.top) document.documentElement.classList.add('embebido')</script>
+</head>
+<body>
+<div class="wrap">
+  <main class="stagebox">
+    <div class="stage">
+    <svg id="svg" viewBox="0 0 1600 900" role="img" aria-label="Despiece isométrico del pomo exterior de puerta">
+      <defs>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <rect width="1600" height="900" fill="#FFFFFF"/>
+      <g id="grid"></g>
+      <g id="scene"></g>
+    </svg>
+    </div>
+  </main>
+
+  <aside class="panel" aria-label="Controles">
+    <section>
+      <h2>Vista</h2>
+      <div class="grid2" role="group" aria-label="Punto de vista">
+        <button type="button" data-view="iso" aria-pressed="true">Isométrica</button>
+        <button type="button" data-view="isoP" aria-pressed="false">Iso posterior</button>
+        <button type="button" data-view="lat" aria-pressed="false">Alzado lateral</button>
+        <button type="button" data-view="pla" aria-pressed="false">Planta</button>
+        <button type="button" data-view="fro" aria-pressed="false">Frontal</button>
+        <button type="button" data-view="pos" aria-pressed="false">Posterior</button>
+        <button type="button" data-view="plano" aria-pressed="false" class="span2">Plano 4 vistas</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Movimiento</h2>
+      <div class="ctl">
+        <label for="sExp"><span>Despiece</span><output id="oExp">0 %</output></label>
+        <input id="sExp" type="range" min="0" max="100" step="0.5" value="0">
+      </div>
+      <div class="ctl">
+        <label for="sRot"><span>Pomo exterior</span><output id="oRot">0°</output></label>
+        <input id="sRot" type="range" min="0" max="45" step="0.25" value="0">
+      </div>
+      <div class="ctl">
+        <label for="sInt"><span>Pomo interior</span><output id="oInt">0°</output></label>
+        <input id="sInt" type="range" min="0" max="90" step="0.5" value="0">
+      </div>
+      <div class="ctl">
+        <label for="sKey"><span>Llave</span><output id="oKey">0°</output></label>
+        <input id="sKey" type="range" min="0" max="90" step="0.5" value="0">
+      </div>
+    </section>
+
+    <section>
+      <h2>Bloqueo</h2>
+      <div class="grid2">
+        <button id="bLock" type="button" aria-pressed="false" class="span2">Pulsar botón interior</button>
+        <button id="bGuide" class="primary span2" type="button" aria-pressed="false">Explicar el bloqueo paso a paso</button>
+        <button id="bPrev" type="button" hidden>◀ Anterior</button>
+        <button id="bNext" type="button" hidden>Siguiente ▶</button>
+        <button id="bRep" type="button" hidden>Repetir paso</button>
+        <button id="bAuto" type="button" aria-pressed="false" hidden>Todos los pasos</button>
+      </div>
+      <p id="gText" class="note" aria-live="polite" hidden></p>
+    </section>
+
+    <section>
+      <h2>Servo MG996R</h2>
+      <div class="ctl">
+        <label for="sServo"><span>Servo</span><output id="oServo">0° · 1000 µs</output></label>
+        <input id="sServo" type="range" min="0" max="90" step="0.5" value="0">
+      </div>
+      <div class="grid2">
+        <button id="bSvRel" type="button">Liberar bloqueo</button>
+        <button id="bSvOpen" type="button">Abrir puerta</button>
+        <button id="bServo" type="button" aria-pressed="true" class="span2">Mostrar módulo servo</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Opciones</h2>
+      <div class="grid2">
+        <button id="bPlay" class="primary span2" type="button">Reproducir demo</button>
+        <button id="bCotas" type="button" aria-pressed="true">Cotas</button>
+        <button id="bRet" type="button" aria-pressed="true">Retorno muelle</button>
+      </div>
+    </section>
+
+    <details>
+      <summary>Notas técnicas</summary>
+      <p class="note">Apertura manual por ambos lados. Exterior: el pomo abre si no hay bloqueo; con bloqueo, la llave. Interior: el pomo interior (P-13) abre siempre, también con el bloqueo puesto (salida libre). Su eje hueco arrastra el mismo pivote del manguito con un tope propio: los primeros 30° retiran el pestillo y hacen saltar el pulsador de su centro, y de 45° a 90° retrae el resbalón. Llave, pomo interior y servo actúan en paralelo por topes de un solo sentido, así que ninguno arrastra a los demás.</p>
+      <p class="note">Módulo servo (interior de la puerta): un soporte atornillado a los dos vástagos de 35 mm lleva un servo MG996R cuyo piñón (z 22, m 1) engrana 1:1 con una rueda loca montada sobre un manguito deslizante en la barra de 4 mm. Un tope de un solo sentido empuja el pivote del manguito: el servo gira la barra como lo haría la llave (≈ 38° libera el pestillo, 90° retrae el resbalón), pero cuando la barra gira por la llave o el pomo, el pivote se separa del tope y el servo nunca queda arrastrado. Por el mismo motivo, el rotor del cilindro arrastra la barra con holgura en un solo sentido. Señal estimada: 1000–2000 µs a 50 Hz para 0–90° (calibrar en cada servo). Par del MG996R ≈ 0,92 N·m a 4,8 V frente a ≈ 0,25 N·m requeridos (estimado); prever fuente de 5–6 V y 2,5 A.</p>
+      <p class="note">Arrastra sobre el dibujo para orbitar libremente; doble clic para volver a la isométrica. Bloqueo: el botón interior empuja la barra de 4 mm, que saca el pestillo P-08 hacia la ranura del casquillo fijo y deja el pomo sin giro. La llave hace girar el cilindro y la barra: hacia los 30° libera el pestillo (y el botón) y a partir de 45° retrae el resbalón. Al soltar los controles de giro, pomo y llave vuelven a 0° (desactívalo con «Retorno por muelle»). El par y la carrera mostrados son valores estimados con fines ilustrativos; las cotas proceden del croquis.</p>
+    </details>
+  </aside>
+</div>
+
+<script>
+(function(){
+const W=1600,H=900, C30=Math.cos(Math.PI/6), D2R=Math.PI/180;
+const COL={red:'#DC2626',line:'#0F172A',amber:'#B45309',cyan:'#0284C7',orange:'#EA580C',muted:'#64748B',bg:'#FFFFFF'};
+const state={e:0,th:0,att:0,c:1,lock:0,key:0,kv:0,sv:0,ik:0};
+let servoOn=true;
+const barRot=()=>Math.max(state.key,state.sv,state.ik);
+const servoVisible=()=>servoOn||(typeof guide!=='undefined'&&guide.on&&guide.i===8);
+const thEff=()=>state.lock>0.5?Math.min(state.th,2.5):state.th;
+let K=5,OX=800,OY=450,out=[];
+
+/* Proyección isométrica. a = eje del conjunto (+a hacia derecha-arriba),
+   (u,v) = plano de sección; u vertical en pantalla. */
+let CR=[0,0,0],CU=[0,0,0],CD=[0,0,0];
+function setCam(az,el){const A=az*D2R,E=el*D2R,sa=Math.sin(A),ca=Math.cos(A),cE=Math.cos(E),sE=Math.sin(E);CR=[sa,-ca,0];CU=[-ca*sE,-sa*sE,cE];CD=[cE*ca,cE*sa,sE];}
+const VIEWS={iso:{az:45,el:35.264,name:'Proyección isométrica'},isoP:{az:-45,el:35.264,name:'Isométrica posterior'},
+  lat:{az:0,el:0,name:'Alzado lateral'},pla:{az:0,el:90,name:'Planta'},fro:{az:90,el:0,name:'Vista frontal (pomo)'},pos:{az:-90,el:0,name:'Vista posterior (puerta)'}};
+const cam={az:45,el:35.264};let viewMode='single',viewKey='iso',viewName=VIEWS.iso.name;
+setCam(cam.az,cam.el);
+function P(a,u,v){const x=-v,y=-a,z=u;return [OX+(CR[0]*x+CR[1]*y)*K, OY-(CU[0]*x+CU[1]*y+CU[2]*z)*K];}
+const f=n=>n.toFixed(1);
+const path=(pts,close)=>'M'+pts.map(p=>f(p[0])+' '+f(p[1])).join('L')+(close?'Z':'');
+const rot=(u,v,g)=>{const c=Math.cos(g),s=Math.sin(g);return [u*c-v*s,u*s+v*c];};
+const add=s=>out.push(s);
+const lerp=(a,b,t)=>a+(b-a)*t;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const dec=(n,d=1)=>n.toFixed(d).replace('.',',');
+function mix(h1,h2,t){const a=parseInt(h1.slice(1),16),b=parseInt(h2.slice(1),16);
+  const r=Math.round(lerp(a>>16,b>>16,t)),g=Math.round(lerp((a>>8)&255,(b>>8)&255,t)),bl=Math.round(lerp(a&255,b&255,t));
+  return '#'+((1<<24)|(r<<16)|(g<<8)|bl).toString(16).slice(1);}
+function ring(a,r,cu=0,cv=0,n=56,ph=0){const p=[];for(let i=0;i<n;i++){const t=i/n*2*Math.PI+ph;p.push(P(a,cu+r*Math.cos(t),cv+r*Math.sin(t)));}return p;}
+function hull(pts){const p=pts.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]);if(p.length<3)return p;
+  const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);const lo=[],up=[];
+  for(const q of p){while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],q)<=0)lo.pop();lo.push(q);}
+  for(let i=p.length-1;i>=0;i--){const q=p[i];while(up.length>=2&&cr(up[up.length-2],up[up.length-1],q)<=0)up.pop();up.push(q);}
+  up.pop();lo.pop();return lo.concat(up);}
+const stroke=(d,c,w=1.6,extra='')=>add(`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round" ${extra}/>`);
+const fill=(d,c,o)=>add(`<path d="${d}" fill="${c}" fill-opacity="${o}" stroke="none"/>`);
+const line=(p,q,c,w=1,extra='')=>stroke(path([p,q]),c,w,extra);
+const text=(x,y,s,c,size=14,anchor='start',extra='')=>add(`<text x="${f(x)}" y="${f(y)}" fill="${c}" font-size="${size}" text-anchor="${anchor}" ${extra}>${s}</text>`);
+function arrow(tip,from,c,s=9){const dx=tip[0]-from[0],dy=tip[1]-from[1],L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L;
+  const b=[tip[0]-ux*s,tip[1]-uy*s];add(`<path d="${path([tip,[b[0]-uy*s*.35,b[1]+ux*s*.35],[b[0]+uy*s*.35,b[1]-ux*s*.35]],true)}" fill="${c}"/>`);}
+
+/* Sólidos */
+function revolve(profile,off,col,fo,ringIdx,faintIdx=[]){
+  const L=[],R=[],q0=P(0,0,0),q1=P(1,0,0),ax=q1[0]-q0[0],ay=q1[1]-q0[1],al=Math.hypot(ax,ay);let NX=1,NY=0;if(al>0.02*K){NX=-ay/al;NY=ax/al;}
+  for(const [a,r] of profile){const pts=ring(a+off,r,0,0,64);let mn=1e9,mx=-1e9,pm,pM;
+    for(const p of pts){const d=p[0]*NX+p[1]*NY;if(d<mn){mn=d;pm=p;}if(d>mx){mx=d;pM=p;}}L.push(pm);R.push(pM);}
+  const first=profile[0],last=profile[profile.length-1];
+  add(`<g opacity="${fo}">`);
+  fill(path(L.concat(R.slice().reverse()),true),col,1);
+  fill(path(ring(first[0]+off,first[1]),true),col,1);
+  fill(path(ring(last[0]+off,last[1]),true),col,1);
+  add('</g>');
+  stroke(path(L),col,1.7);stroke(path(R),col,1.7);
+  for(const i of ringIdx) stroke(path(ring(profile[i][0]+off,profile[i][1]),true),col,i===0?1.6:1.1);
+  for(const i of faintIdx) stroke(path(ring(profile[i][0]+off,profile[i][1]),true),col,.6,'stroke-dasharray="3 5" opacity=".5"');
+}
+function cylinder(a0,a1,cu,cv,r,col,fo,w=1.5){
+  const r0=ring(a0,r,cu,cv,40),r1=ring(a1,r,cu,cv,40),h=hull(r0.concat(r1));
+  fill(path(h,true),col,fo);stroke(path(h,true),col,w);
+  stroke(path(r0,true),col,w*.8);stroke(path(r1,true),col,w*.6,'opacity=".6"');
+}
+function prism(sec,a0,a1,col,fo,w=1.3,extra=''){
+  const p0=sec.map(([u,v])=>P(a0,u,v)),p1=sec.map(([u,v])=>P(a1,u,v));
+  fill(path(hull(p0.concat(p1)),true),col,fo);
+  stroke(path(p0,true),col,w,extra);stroke(path(p1,true),col,w,extra);
+  for(let i=0;i<sec.length;i++)line(p0[i],p1[i],col,w,extra);
+}
+
+/* Geometría (mm) */
+const KNOB=[[-60,24.6],[-59.5,25.7],[-58,26],[-54,25.8],[-48,24.6],[-42,22.4],[-37,19.2],[-33,15.5],[-30,12],[-28,9.9],[-26.6,8.7],[-25.6,8.7],[-24.4,9.5],[-21,9.7],[-20,9.6]];
+const ROSE=[[-20,9.6],[-19,10.3],[-17.5,12.2],[-16,15.2],[-14.5,19.6],[-13.2,24.4],[-12,28.4],[-11,30.5],[-10.4,31],[-2,31],[-1,30.6],[0,30]];
+const RODU=17.5, RODR=6.45/2;
+const SPR={r:8.5,a0:1.5,a1:6.5,phi0:106.1,sweep:1260};
+const Q1=[-17.5,3.8], Q2=[17.5,-3.8];
+const offs=e=>({p1:-35*e,p3:12*e,p4:26*e,p5:40*e,p6:58*e,p7:-20*e,p9:96*e,p10:76*e,p11:66*e,p12:112*e,p13:132*e});
+const aKnobI=()=>servoVisible()?118:86;
+
+function computeView(e,reg=[70,1530,150,785]){
+  K=1;OX=0;OY=0;const o=offs(e),pts=[];
+  {const aK=aKnobI()+offs(e).p13;for(const du of [-27,27])for(const dv of [-27,27])pts.push(P(aK+44,du,dv),P(aK,du,dv));}
+  if(servoVisible()){for(const du of [-72,26])for(const dv of [-17,17])pts.push(P(66+o.p11,du,dv),P(126+o.p9,du,dv));}
+  pts.push(...ring(86+o.p6,6),P(-84+o.p1,10,0),P(-84+o.p1,-10,0),...ring(-60+o.p1,30),...ring(-11,31),...ring(40+o.p3,24),...ring(70+o.p6,4));
+  const aL=50+o.p6;
+  for(const da of [-12,12])for(const du of [-28,28])pts.push(P(aL+da,du,-75),P(aL+da,du,14));
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const p of pts){x0=Math.min(x0,p[0]);x1=Math.max(x1,p[0]);y0=Math.min(y0,p[1]);y1=Math.max(y1,p[1]);}
+  const [rx0,rx1,ry0,ry1]=reg;
+  K=Math.min((rx1-rx0)/Math.max(x1-x0,1e-6),(ry1-ry0)/Math.max(y1-y0,1e-6));
+  OX=(rx0+rx1)/2-(x0+x1)/2*K;OY=(ry0+ry1)/2-(y0+y1)/2*K;
+}
+
+/* Rejilla */
+function setGrid(iso){let s='';
+  if(!iso){for(let x=0;x<=W;x+=40)s+=`<path d="M${x} 0V${H}"/>`;for(let y=0;y<=H;y+=40)s+=`<path d="M0 ${y}H${W}"/>`;
+    document.getElementById('grid').innerHTML=`<g stroke="${COL.cyan}" stroke-opacity=".12" stroke-width="1">${s}</g>`;return;}const g=38,ang=30*D2R;
+  for(const sg of [1,-1]){const dx=Math.cos(ang),dy=sg*Math.sin(ang),nx=-dy,ny=dx;
+    for(let k=-60;k<=60;k++){const cx=800+nx*k*g,cy=450+ny*k*g;
+      s+=`<path d="M${f(cx-dx*2000)} ${f(cy-dy*2000)}L${f(cx+dx*2000)} ${f(cy+dy*2000)}"/>`;}}
+  for(let x=0;x<=W;x+=g*2*C30)s+=`<path d="M${f(x)} 0V${H}" opacity=".5"/>`;
+  document.getElementById('grid').innerHTML=`<g stroke="${COL.cyan}" stroke-opacity=".12" stroke-width="1">${s}</g>`;
+}
+setGrid(true);
+
+/* Piezas */
+function drawLatch(o,T){
+  const aL=50+o.p6, ret=12*T, dash='stroke-dasharray="6 5"';
+  const ringV=v=>{const p=[];for(let i=0;i<40;i++){const t=i/40*2*Math.PI;p.push(P(aL+10.5*Math.cos(t),10.5*Math.sin(t),v));}return p;};
+  const r0=ringV(14),r1=ringV(-58);
+  stroke(path(hull(r0.concat(r1)),true),COL.line,1,dash+' opacity=".45"');
+  stroke(path(r0,true),COL.line,1,dash+' opacity=".45"');
+  const fp=[[-12,-28],[12,-28],[12,28],[-12,28]].map(([da,du])=>P(aL+da,du,-60));
+  stroke(path(fp,true),COL.line,1,dash+' opacity=".45"');
+  const vb=-50+ret,vf1=-73+ret,vf2=-66+ret;
+  const B=[[-6,-8],[6,-8],[6,8],[-6,8]].map(([da,du])=>P(aL+da,du,vb));
+  const F=[[-6,-8,vf1],[6,-8,vf2],[6,8,vf2],[-6,8,vf1]].map(([da,du,v])=>P(aL+da,du,v));
+  const bc=mix(COL.muted,COL.cyan,T);
+  fill(path(hull(B.concat(F)),true),bc,.05+.1*T);
+  stroke(path(B,true),bc,1.2,dash);stroke(path(F,true),bc,1.4,dash);
+  for(let i=0;i<4;i++)line(B[i],F[i],bc,1.2,dash);
+  const lp=P(aL+12,-28,-60);
+  text(lp[0]+10,lp[1]+18,'Resbalón (referencia)',COL.muted,13);
+  if(T>0.01){const a1=P(aL,10,-75),a2=P(aL,10,-75+ret);line(a1,a2,COL.cyan,1.4);arrow(a2,a1,COL.cyan,8);}
+}
+function spindleSec(w,t,th){return [[-t/2,-w/2],[t/2,-w/2],[t/2,w/2],[-t/2,w/2]].map(([u,v])=>rot(u,v,-th));}
+function drawSpindle(o,th,tail){
+  const sh=-3*state.lock;
+  prism(spindleSec(4,1.5,tail),-38+o.p6+sh,78+o.p6+sh,COL.line,.12,1.1);
+  // cuadradillo 6×6 mm (hueco, aloja la barra de 4 mm)
+  prism(spindleSec(6,6,th),-28+o.p6,30+o.p6,COL.line,.08,1.3);
+  stroke(path(spindleSec(4.4,4.4,th).map(([u,v])=>P(-28+o.p6,u,v)),true),COL.line,.8,'opacity=".7"');
+  stroke(path(spindleSec(4.4,4.4,th).map(([u,v])=>P(30+o.p6,u,v)),true),COL.line,.8,'opacity=".5"');
+}
+function drawLug(o,th){
+  const L=state.lock, a0=2.5+o.p6, a1=5.5+o.p6;
+  // ranura en el casquillo fijo (P-02)
+  const slot=[[3.2,-16],[7,-16],[7,16],[3.2,16]].map(([r,g])=>[r*Math.cos(g*D2R),r*Math.sin(g*D2R)]);
+  prism(slot,2,6,COL.amber,.0,1,'stroke-dasharray="3 3" opacity=".8"');
+  const rin=lerp(1.6,3.2,L), rout=lerp(3.4,6.6,L);
+  const sec=[[rin,-11],[rout,-11],[rout,11],[rin,11]].map(([r,g])=>rot(r*Math.cos(g*D2R),r*Math.sin(g*D2R),-th));
+  const blocked=L>0.5&&state.att>2.6;
+  const c=L>0.5?COL.red:COL.line;
+  if(blocked){const p=sec.map(([u,v])=>P(a0,u,v));add(`<g filter="url(#glow)"><path d="${path(p,true)}" fill="${COL.red}" fill-opacity=".5" stroke="${COL.red}" stroke-width="2"/></g>`);}
+  prism(sec,a0,a1,c,.35,1.4);
+}
+/* Módulo servo MG996R */
+function gearFace(z,rp,a,cu,cv,phase){const m=2*rp/z,ra=rp+m,rf=rp-1.25*m,w=Math.PI/z,p=[];
+  for(let k=0;k<z;k++){const b=phase+2*w*k;for(const [r,d] of [[rf,-0.72*w],[ra,-0.36*w],[ra,0.36*w],[rf,0.72*w]])p.push(P(a,cu+r*Math.cos(b+d),cv+r*Math.sin(b+d)));}return p;}
+function gear(z,rp,a0,a1,cu,cv,phase,col){const f0=gearFace(z,rp,a0,cu,cv,phase),f1=gearFace(z,rp,a1,cu,cv,phase);
+  fill(path(hull(f0.concat(f1)),true),col,.1);stroke(path(f1,true),col,.8,'opacity=".5"');stroke(path(f0,true),col,1.3);
+  stroke(path(ring(a0,2.6,cu,cv,24),true),col,1);}
+function drawServo(o,bAng){
+  const sv=state.sv*D2R, SU=-22, BR=COL.muted, A=COL.amber, Z=22;
+  const S0=77+o.p9, S1=114+o.p9;
+  // cables
+  [['#78350F',-3],['#DC2626',0],['#EA580C',3]].forEach(([c,dv])=>{
+    stroke(path([P(S1-6,-52.7,dv),P(S1-2,-58,dv),P(S1+4,-64,dv*1.6),P(S1+12,-68,dv*2.2)]),c,2.2);});
+  const wp=P(S1+12,-68,0);text(wp[0]+8,wp[1]+22,'GND / V+ / PWM 50 Hz',COL.muted,12);
+  // cuerpo y orejetas
+  prism([[-52.7,-9.85],[-12,-9.85],[-12,9.85],[-52.7,9.85]],S0,S1,COL.line,.06,1.3);
+  prism([[-59.35,-9.85],[-5.35,-9.85],[-5.35,9.85],[-59.35,9.85]],81+o.p9,83.5+o.p9,COL.line,.08,1.1);
+  for(const hu of [-7.6,-57.1])for(const hv of [-5,5])stroke(path(ring(81+o.p9,2.2,hu,hv,20),true),COL.line,.8);
+  cylinder(73+o.p9,S0,SU,0,2.9,COL.line,.12,1.1);
+  gear(Z,11,70+o.p9,73+o.p9,SU,0,Math.PI/Z+sv,COL.line);
+  // separadores y soporte
+  for(const hu of [-7.6,-57.1])for(const hv of [-5,5])cylinder(69+o.p11,81+o.p11,hu,hv,2,BR,.12,1);
+  for(const u of [RODU,-RODU])line(P(66+o.p11,u,0),P(40+o.p3,u,0),COL.cyan,.9,'stroke-dasharray="3 4" opacity=".7"');
+  // rueda loca sobre la barra + tope
+  gear(Z,11,70+o.p10,73+o.p10,0,0,-state.sv*D2R,A);
+  const dog=[[3.8,7],[8.2,7],[8.2,21],[3.8,21]].map(([r,g])=>rot(r*Math.cos(g*D2R),r*Math.sin(g*D2R),-sv));
+  prism(dog,73+o.p10,76.5+o.p10,A,.35,1.2);
+  // soporte (placa)
+  const plate=[[-62,-16],[24,-16],[24,16],[-62,16]];
+  prism(plate,66+o.p11,69+o.p11,BR,.07,1.2);
+  for(const [hu,r] of [[0,7],[SU,4],[RODU,2.2],[-RODU,2.2]])stroke(path(ring(66+o.p11,r,hu,0,28),true),BR,1);
+  // cota entre ejes
+  if(state.c>0.01){add(`<g opacity="${f(state.c)}">`);const c=COL.cyan,aa=70+o.p10;
+    line(P(aa,0,14),P(aa,0,22),c,.8);line(P(aa,SU,14),P(aa,SU,22),c,.8);const q1=P(aa,0,20),q2=P(aa,SU,20);dimLine(q1,q2,c);
+    text((q1[0]+q2[0])/2-10,(q1[1]+q2[1])/2,'22 mm',c,15,'end','font-weight="bold"');add('</g>');}
+}
+/* Manguito de arrastre y lado interior (pomo interior + pulsador) */
+const KNOB_I=KNOB.map(([a,r])=>[-20-a,r]), ROSE_I=ROSE.map(([a,r])=>[-a,r]);
+function drawCoupler(o,bAng){
+  const A=COL.amber;cylinder(73+o.p10,77+o.p10,0,0,3.5,A,.15,1.1);
+  const pin=[[3.5,-6],[10.4,-6],[10.4,6],[3.5,6]].map(([r,g])=>rot(r*Math.cos(g*D2R),r*Math.sin(g*D2R),-bAng));
+  prism(pin,74.5+o.p10,76+o.p10,(state.sv>0.5||state.ik>0.5||state.key>0.5)?COL.orange:A,.45,1.3);
+}
+function drawInterior(o){
+  const ik=state.ik*D2R, aK=aKnobI()+o.p13, sv=servoVisible(), sh=-3*state.lock;
+  const T=state.ik/90;
+  // pomo interior (revolución) con marca de giro
+  revolve(KNOB_I,aK,COL.line,.07,[0,1,10,12,14],[4,6,8]);
+  const af=aK+40;
+  const m1=rot(13,0,-ik),m2=rot(22,0,-ik);line(P(af,m1[0],m1[1]),P(af,m2[0],m2[1]),COL.line,2.4);
+  // pulsador en el centro del pomo
+  const pb=lerp(3,0.3,state.lock), pc=state.lock>0.5?COL.red:COL.line;
+  cylinder(af-2,af+pb,0,0,4.2,pc,.2,1.3);
+  // varilla de empuje del pulsador a la barra
+  line(P(78+o.p6+sh,0,0),P(af-2,0,0),COL.line,1,'stroke-dasharray="2 3" opacity=".7"');
+  // eje hueco del pomo interior + tope sobre el pivote del manguito
+  cylinder(77+o.p13,aK,0,0,9.8,COL.line,.05,1);
+  const dog=[[8.6,7],[10.4,7],[10.4,21],[8.6,21]].map(([r,g])=>rot(r*Math.cos(g*D2R),r*Math.sin(g*D2R),-ik));
+  prism(dog,74.5+o.p13,77+o.p13,T>0.01?COL.orange:COL.line,.3,1.2);
+  // roseta interior o carcasa del servo
+  if(sv){const sec=[[-66,-24],[30,-24],[30,24],[-66,24]];prism(sec,64+o.p12,aK-0.5+o.p12-o.p13,COL.muted,.04,1,'stroke-dasharray="7 5"');
+    const cp=P(aK-0.5+o.p12-o.p13,30,24);text(cp[0]+8,cp[1]-6,'Carcasa interior',COL.muted,13);}
+  else revolve(ROSE_I,66+o.p12,COL.line,.06,[0,2,3,4,11],[]);
+  if(state.ik>0.4){const R=30,pts=[];const n=Math.max(2,Math.round(state.ik));for(let i=0;i<=n;i++){const g=-ik*i/n;pts.push(P(af,R*Math.cos(g),R*Math.sin(g)));}
+    stroke(path(pts),COL.orange,2);arrow(pts[pts.length-1],pts[pts.length-2],COL.orange,10);
+    const lp=P(af,R+6,0);text(lp[0]+8,lp[1]-8,'φ int '+dec(state.ik)+'°',COL.orange,16,'start','font-weight="bold"');}
+}
+function drawCylinder(o,th,kAng){
+  const a0=-59.5+o.p7,a1=-38+o.p7;
+  cylinder(a0,a1,0,0,6,COL.cyan,.08,1.2);
+  const kv=state.kv, bits=[3.4,2.6,3.8,3.0];
+  bits.forEach((b,i)=>{
+    const len=6-b, kb=lerp(1.2,b,kv), kt=kb+len, db=kt, dt=db+4.2;
+    const aP=-55+i*4+o.p7, aD=-55+i*4+o.p1;
+    const k1=rot(kb,0,-kAng),k2=rot(kt,0,-kAng);line(P(aP,k1[0],k1[1]),P(aP,k2[0],k2[1]),COL.amber,2.8);
+    const kd=kAng-th>0.05;const d1=rot(kd?6:db,0,-th),d2=rot(kd?10.2:dt,0,-th);
+    line(P(aD,d1[0],d1[1]),P(aD,d2[0],d2[1]),COL.line,2.8);
+  });
+}
+function drawKey(o,kAng){
+  if(state.kv<=0.02)return;const op=state.kv;add(`<g opacity="${f(op)}">`);
+  const ins=lerp(-25,0,op);
+  const d=rot(1,0,-kAng), n=rot(0,1,-kAng);
+  const Pw=(a,w,t)=>P(a+ins+o.p7,d[0]*w+n[0]*t,d[1]*w+n[1]*t);
+  const blade=[[-0.8,-3],[0.8,-3],[0.8,3],[-0.8,3]].map(([t,w])=>[d[0]*w+n[0]*t,d[1]*w+n[1]*t]);
+  prism(blade,-66+ins+o.p7,-41+ins+o.p7,COL.cyan,.18,1.2);
+  const bow=[],hole=[];for(let i=0;i<40;i++){const t=i/40*2*Math.PI;bow.push(Pw(-76+9*Math.cos(t),11*Math.sin(t),0));hole.push(Pw(-80+2.4*Math.cos(t),2.4*Math.sin(t),0));}
+  fill(path(bow,true),COL.cyan,.15);stroke(path(bow,true),COL.cyan,1.5);stroke(path(hole,true),COL.cyan,1.1);
+  const lp=Pw(-85,0,0);text(lp[0]-10,lp[1]+4,'Llave',COL.cyan,14,'end');
+  add('</g>');
+}
+function drawRods(o){
+  for(const u of [RODU,-RODU]){
+    cylinder(0+o.p3,40+o.p3,u,0,RODR,COL.amber,.16,1.5);
+    stroke(path(ring(40+o.p3,2.2,u,0,32),true),COL.amber,.9,'opacity=".7"');
+  }
+}
+function drawHub(){cylinder(0,7,0,0,7,COL.amber,.1,1.2);}
+function drawWasher(o,th){
+  const a0=7+o.p5,a1=8+o.p5;
+  const ro=ring(a0,10.6),ri=ring(a0,7.2).reverse();
+  cylinder(a0,a1,0,0,10.6,COL.amber,.12,1.3);
+  add(`<path d="${path(ro,true)}${path(ri,true)}" fill="${COL.amber}" fill-opacity=".22" fill-rule="evenodd" stroke="${COL.amber}" stroke-width="1.3"/>`);
+  for(const [g1,g2] of [[-31,-18],[130,143]]){
+    const sec=[[10.6,g1],[11.4,g1],[11.4,g2],[10.6,g2]].map(([r,g])=>rot(r*Math.cos(g*D2R),r*Math.sin(g*D2R),-th));
+    prism(sec,1+o.p5,a1,COL.amber,.3,1.2);
+  }
+}
+function legPts(Q,startPhi,a,th){
+  const T0=[SPR.r*Math.cos(startPhi*D2R),SPR.r*Math.sin(startPhi*D2R)];
+  const dx=Q[0]-T0[0],dy=Q[1]-T0[1],L=Math.hypot(dx,dy);
+  const E=[Q[0]+dx/L*2.6,Q[1]+dy/L*2.6];
+  const r1=rot(T0[0],T0[1],-th),r2=rot(E[0],E[1],-th);
+  return [P(a,r1[0],r1[1]),P(a,r2[0],r2[1])];
+}
+function drawSpring(o,th,T){
+  const col=mix(COL.line,COL.orange,T);let fr='',bk='',last=null,prev=null;const N=240;
+  for(let i=0;i<=N;i++){const t=i/N,phi=(SPR.phi0+SPR.sweep*t)*D2R-th*t,a=lerp(SPR.a0,SPR.a1,t)+o.p4;
+    const u=SPR.r*Math.cos(phi),v=SPR.r*Math.sin(phi),p=P(a,u,v),front=(CD[2]*u-CD[0]*v)>0;
+    if(prev){const seg=f(p[0])+' '+f(p[1]);
+      if(front){fr+=(last!=='f'?'M'+f(prev[0])+' '+f(prev[1]):'')+'L'+seg;last='f';}
+      else{bk+=(last!=='b'?'M'+f(prev[0])+' '+f(prev[1]):'')+'L'+seg;last='b';}}
+    prev=p;}
+  stroke(bk,col,1.4,'opacity=".4"');
+  const l1=legPts(Q1,SPR.phi0,SPR.a0+o.p4,0);
+  const l2=legPts(Q2,SPR.phi0+SPR.sweep,SPR.a1+o.p4,th);
+  if(T>0.02)add(`<g filter="url(#glow)" opacity="${f(T)}">`+`<path d="${fr}" fill="none" stroke="${COL.orange}" stroke-width="3.4"/><path d="${path(l2)}" fill="none" stroke="${COL.orange}" stroke-width="3.4"/></g>`);
+  stroke(fr,col,2.4);
+  stroke(path(l1),COL.line,2.2);stroke(path(l2),col,2.4);
+  // contacto patilla fija contra vástago
+  const c1=P(SPR.a0+o.p4,Q1[0],Q1[1]);add(`<circle cx="${f(c1[0])}" cy="${f(c1[1])}" r="3.5" fill="none" stroke="${COL.cyan}" stroke-width="1.2" opacity="${f(.4+.6*T)}"/>`);
+}
+function drawRosette(){
+  add(`<g opacity=".12">`);fill(path(ring(0,29.5),true),COL.amber,1);add('</g>');
+  stroke(path(ring(0,29.5),true),COL.amber,1.2);
+  for(const u of [RODU,-RODU])stroke(path(ring(0,5,u,0,32),true),COL.amber,.8,'opacity=".7"');
+  revolve(ROSE,0,COL.line,.06,[0,7,8,9,11],[]);
+}
+function drawKnob(o,th,kAng){
+  revolve(KNOB,o.p1,COL.line,.07,[0,1,10,12,14],[4,6,8]);
+  const a=-60+o.p1;
+  const kh=[];for(let i=0;i<24;i++){const t=i/24*2*Math.PI,[u,v]=rot(3+2.1*Math.cos(t),2.1*Math.sin(t),-kAng);kh.push(P(a,u,v));}
+  stroke(path(kh,true),COL.line,1.2);
+  const sl=[[2,-0.9],[-5,-0.9],[-5,0.9],[2,0.9]].map(([u,v])=>{const r=rot(u,v,-kAng);return P(a,r[0],r[1]);});
+  stroke(path(sl,true),COL.line,1.2);
+  if(state.lock>0.5&&state.att>2.6){const bp=P(a,-34,0);text(bp[0],bp[1]+30,'Bloqueado: el pomo no gira',COL.red,17,'middle','font-weight="bold"');}
+  if(th>0.4*D2R){
+    const R=33,pts=[];const n=Math.max(2,Math.round(th/D2R));for(let i=0;i<=n;i++){const g=-th*i/n;pts.push(P(a,R*Math.cos(g),R*Math.sin(g)));}
+    line(P(a,0,0),P(a,R+4,0),COL.cyan,1,'stroke-dasharray="4 4"');
+    const e=rot(R+4,0,-th);line(P(a,0,0),P(a,e[0],e[1]),COL.orange,1.4);
+    stroke(path(pts),COL.orange,2);arrow(pts[pts.length-1],pts[pts.length-2],COL.orange,10);
+    const lp=P(a,R+8,0);text(lp[0]-8,lp[1]-8,'θ '+dec(th/D2R)+'°',COL.orange,16,'end','font-weight="bold"');
+  }
+}
+
+/* Cotas */
+function dimLine(p,q,c){line(p,q,c,1.2);arrow(p,q,c);arrow(q,p,c);}
+function drawCotas(o,th,op){
+  if(op<=0.01)return;add(`<g opacity="${f(op)}">`);const c=COL.cyan;
+  const aR=40+o.p3;
+  for(const u of [RODU,-RODU])line(P(aR,u,-4.6),P(aR,u,-15),c,.8);
+  const d1=P(aR,RODU,-13),d2=P(aR,-RODU,-13);dimLine(d1,d2,c);
+  text((d1[0]+d2[0])/2+12,(d1[1]+d2[1])/2+5,'35 mm',c,17,'start','font-weight="bold"');
+  const e1=P(aR,RODU,RODR),e2=P(aR,RODU,-RODR),lead=P(aR,RODU,RODR+8);
+  line(e1,lead,c,.8);dimLine(e1,e2,c);
+  text(lead[0]-6,lead[1]-6,'Ø 6,45 mm',c,16,'end','font-weight="bold"');
+  for(const [w,a] of [[6,22+o.p6],[4,58+o.p6]]){
+    const u0=w===6?-3.2:-1;
+    const pts=[[u0,-w/2],[u0,w/2],[-9,-w/2],[-9,w/2]].map(([u,v])=>{const r=rot(u,v,-th);return P(a,r[0],r[1]);});
+    line(pts[0],pts[2],c,.8);line(pts[1],pts[3],c,.8);
+    const m1=rot(-7.5,-w/2,-th),m2=rot(-7.5,w/2,-th),q1=P(a,m1[0],m1[1]),q2=P(a,m2[0],m2[1]);
+    dimLine(q1,q2,c);if(w===6)text(Math.min(q1[0],q2[0])-10,Math.max(q1[1],q2[1])+18,'□ 6×6 mm',c,16,'end','font-weight="bold"');else text(Math.max(q1[0],q2[0])+8,Math.max(q1[1],q2[1])+14,w===6?'□ 6×6 mm':w+' mm',c,16,'start','font-weight="bold"');
+  }
+  add('</g>');
+}
+
+/* Etiquetas */
+function callouts(items,rowY,top,op){
+  if(op<=0.01)return;const BW=170,BH=46,GAP=178,MIN=top?420:30,MAX=top?1570-BW:1278-BW;
+  items.forEach(it=>it.x=it.p[0]-BW/2);items.sort((a,b)=>a.p[0]-b.p[0]);
+  for(let i=0;i<items.length;i++){items[i].x=clamp(items[i].x,MIN,MAX);if(i)items[i].x=Math.max(items[i].x,items[i-1].x+GAP);}
+  for(let i=items.length-1;i>=0;i--){if(items[i].x>MAX-(items.length-1-i)*GAP)items[i].x=MAX-(items.length-1-i)*GAP;}
+  add(`<g opacity="${f(op)}">`);
+  for(const it of items){const bx=it.x,by=rowY,cx=bx+BW/2,cy=top?by+BH:by;
+    line(it.p,[cx,cy],COL.cyan,.9,'stroke-dasharray="2 4"');
+    add(`<circle cx="${f(it.p[0])}" cy="${f(it.p[1])}" r="3.2" fill="${COL.cyan}"/>`);
+    add(`<rect x="${f(bx)}" y="${f(by)}" width="${BW}" height="${BH}" fill="${COL.bg}" fill-opacity=".9" stroke="${COL.cyan}" stroke-opacity=".6"/>`);
+    text(bx+12,by+19,it.code,COL.amber,15,'start','font-weight="bold"');
+    text(bx+12,by+37,it.name,COL.line,13);}
+  add('</g>');
+}
+
+function titleBlock(){
+  add(`<g><rect x="30" y="26" width="372" height="122" fill="${COL.bg}" fill-opacity=".85" stroke="${COL.line}" stroke-opacity=".55"/>`+
+      `<path d="M30 60H402M250 60V118M30 118H402" stroke="${COL.line}" stroke-opacity=".35"/></g>`);
+  text(44,139,'Autor:',COL.muted,13);
+  text(100,139,'NachoSC con Claude',COL.line,14,'start','font-weight="bold"');
+  text(44,50,'Pomo exterior / subconjunto',COL.line,17,'start','font-weight="bold"');
+  text(44,82,viewName,COL.muted,13);
+  text(44,104,'Cotas en mm',COL.muted,13);
+  text(264,82,'Hoja 1/1',COL.muted,13);
+  text(264,104,'Ref. croquis',COL.muted,13);
+}
+function readouts(){
+  const te=thEff(),T=te/45, torque=60+4.5*te, stroke_=12*latchT();
+  const sRows=servoVisible()?[['Servo MG996R',dec(state.sv)+'°',state.sv>0.5?COL.orange:COL.cyan],['Señal PWM',Math.round(1000+state.sv/90*1000)+' µs',COL.cyan]]:[];
+  const RY=874-(20+22*(7+sRows.length));
+  add(`<rect x="1290" y="${RY}" width="280" height="${874-RY}" fill="${COL.bg}" fill-opacity=".85" stroke="${COL.line}" stroke-opacity=".45"/>`);
+  const rows=[['Estado',state.lock>0.5?'Bloqueado':'Libre',state.lock>0.5?COL.red:COL.cyan],['Despiece',dec(state.e*100,0)+' %',COL.cyan],['Giro pomo',dec(te)+'°',COL.cyan],['Giro llave',dec(state.key)+'°',COL.cyan],['Pomo interior',dec(state.ik)+'°',state.ik>0.4?COL.orange:COL.cyan],
+    ['Par muelle ≈',dec(torque,0)+' N·mm',mix(COL.line,COL.orange,T)],['Carrera resbalón',dec(stroke_)+' mm',COL.cyan]].concat(sRows);
+  rows.forEach(([k,v,c],i)=>{text(1304,RY+26+i*22,k,COL.muted,13);text(1556,RY+26+i*22,v,c,14,'end','font-weight="bold"');});
+}
+
+function latchT(){return clamp(Math.max(thEff(),barRot()-45)/45,0,1);}
+function render(){
+  const e=state.e,th=thEff()*D2R,T=thEff()/45,kAng=th+state.key*D2R,bAng=th+barRot()*D2R;out=[];
+  if(viewMode==='plano'){
+    const VP=[[VIEWS.lat,[30,790,160,500],'Alzado lateral'],[VIEWS.fro,[810,1570,160,500],'Vista frontal (desde la izquierda)'],
+              [VIEWS.pla,[30,790,512,885],'Planta'],[VIEWS.iso,[810,1570,512,885],'Isométrica']];
+    for(const [v,r,nm] of VP){
+      add(`<rect x="${r[0]}" y="${r[2]}" width="${r[1]-r[0]}" height="${r[3]-r[2]}" fill="none" stroke="${COL.line}" stroke-opacity=".3" stroke-dasharray="6 6"/>`);
+      text(r[0]+12,r[2]+22,nm,COL.amber,15,'start','font-weight="bold"');
+      setCam(v.az,v.el);computeView(e,[r[0]+40,r[1]-40,r[2]+44,r[3]-24]);drawScene(e,th,T,kAng,false,bAng);
+    }
+    setCam(cam.az,cam.el);
+    viewName='Plano, sistema europeo';titleBlock();
+    text(1570,60,'Estado: '+(state.lock>0.5?'Bloqueado':'Libre'),state.lock>0.5?COL.red:COL.cyan,15,'end','font-weight="bold"');
+    text(1570,84,'Pomo '+dec(thEff())+'°   Llave '+dec(state.key)+'°   Despiece '+dec(e*100,0)+' %',COL.muted,13,'end');
+  } else {
+    setCam(cam.az,cam.el);computeView(e);
+    if(guide.on&&guide.z>1.001){const Fp=P(guide.F[0],guide.F[1],guide.F[2]),k=clamp(guide.z-1,0,1),cx=lerp(Fp[0],800,k),cy=lerp(Fp[1],420,k);
+      OX=cx-(Fp[0]-OX)*guide.z;OY=cy-(Fp[1]-OY)*guide.z;K*=guide.z;}
+    drawScene(e,th,T,kAng,!guide.on,bAng);if(guide.on)drawGuide();titleBlock();readouts();
+  }
+  document.getElementById('scene').innerHTML=out.join('');
+}
+/* Guía paso a paso del bloqueo: kf = [t, giro pomo, bloqueo, giro llave, llave visible] */
+const STEPS=[
+ {t:'Estado libre',f:null,z:1,kf:[[0,0,0,0,0],[1.4,30,0,0,0],[2.4,30,0,0,0],[3.4,0,0,0,0]],
+  l:['Con el pestillo de bloqueo (P-08) recogido dentro del cuadradillo 6×6 mm, el pomo gira',
+     'libremente: arrastra el eje, carga el muelle de torsión y retrae el resbalón.',
+     'Al soltarlo, el muelle de torsión lo devuelve a 0°.']},
+ {t:'Pulsar el botón interior',f:[4,2,0],z:2.6,kf:[[0,0,0,0,0],[0.8,0,0,0,0],[1.8,0,1,0,0],[2.4,0,1,0,0]],
+  l:['Desde el lado interior, el pulsador empuja la barra de mando de 4 mm unos 3 mm hacia el pomo.',
+     'Una rampa de la barra empuja el pestillo P-08 radialmente hacia fuera, a través de la pared',
+     'del cuadradillo 6×6 mm (en rojo: pestillo activado).']},
+ {t:'Pestillo dentro de la ranura',f:[4,2,0],z:2.6,kf:[[0,0,1,0,0],[0.8,0,1,0,0],[1.8,14,1,0,0],[2.6,14,1,0,0],[3.3,0,1,0,0]],
+  l:['El pestillo entra en la ranura del casquillo fijo de la roseta, que está atornillada a la puerta.',
+     'El cuadradillo queda solidario con ella: al forzar el pomo solo hay 2,5° de holgura, el muelle',
+     'apenas se carga y el resbalón no se mueve.']},
+ {t:'Cilindro sin llave',f:[-50,4,0],z:2.8,kf:[[0,0,1,0,0],[2.5,0,1,0,0]],
+  l:['Los contrapernos (trazo oscuro) cruzan la línea de corte entre el rotor y el cuerpo del cilindro.',
+     'El rotor no puede girar, de modo que desde el exterior no hay forma de mover la barra de',
+     'mando ni de retirar el pestillo.']},
+ {t:'Introducir la llave',f:[-50,4,0],z:2.8,kf:[[0,0,1,0,0],[0.5,0,1,0,0],[1.8,0,1,0,1],[2.4,0,1,0,1]],
+  l:['El dentado de la llave eleva cada perno (latón) hasta su altura exacta: todas las juntas',
+     'perno/contraperno quedan alineadas en la línea de corte y el rotor queda libre para girar.',
+     '']},
+ {t:'Girar la llave: desbloqueo',f:[-18,0,0],z:1.5,kf:[[0,0,1,0,1],[0.5,0,1,0,1],[1.8,0,1,30,1],[2.3,0,0,38,1],[3,0,0,38,1]],
+  l:['El rotor gira y arrastra la barra de 4 mm. Hacia los 30° su leva retira el pestillo de la',
+     'ranura y el pulsador interior vuelve a salir: el pomo queda libre de nuevo.',
+     '']},
+ {t:'Seguir girando: apertura',f:[50,0,-40],z:1.7,kf:[[0,0,0,38,1],[0.4,0,0,38,1],[2,0,0,90,1],[3,0,0,90,1]],
+  l:['A partir de 45° la barra hace girar la leva del resbalón y lo retrae (hasta 12 mm a 90°)',
+     'sin mover el pomo ni cargar su muelle de torsión.',
+     '']},
+ {t:'Retirar la llave',f:null,z:1,kf:[[0,0,0,90,1],[1.2,0,0,0,1],[1.8,0,0,0,0],[2.4,0,0,0,0]],
+  l:['El muelle del resbalón devuelve la barra y la llave a 0°, única posición en la que los pernos',
+     'permiten sacarla. El pomo sigue libre hasta la próxima pulsación del botón interior.',
+     '']},
+ {t:'Liberación motorizada (servo MG996R)',f:[72,-11,0],z:2.1,kf:[[0,0,0,0,0,0],[0.6,0,1,0,0,0],[1.4,0,1,0,0,0],[2.2,0,1,0,0,30],[2.5,0,0,0,0,40],[2.8,0,0,0,0,45],[3.6,0,0,0,0,45],[4.4,0,0,0,0,0]],
+  l:['Con el bloqueo puesto, el servo gira su piñón 45°. La rueda 1:1 empuja con su tope el pivote',
+     'del manguito y la barra de 4 mm gira como con la llave: retira el pestillo. Al volver a 0°, el',
+     'tope se separa y llave, pomo y pulsador siguen funcionando sin arrastrar el servo.']},
+ {t:'Apertura manual desde el interior',f:[100,0,0],z:1.4,kf:[[0,0,0,0,0,0,0],[0.6,0,1,0,0,0,0],[1.4,0,1,0,0,0,0],[2.4,0,1,0,0,0,30],[2.7,0,0,0,0,0,40],[3.6,0,0,0,0,0,90],[4.4,0,0,0,0,0,90],[5.4,0,0,0,0,0,0]],
+  l:['Desde dentro se abre siempre, con o sin bloqueo. El eje hueco del pomo interior empuja el',
+     'pivote del manguito con su propio tope: a 30° retira el pestillo y el pulsador salta, y de 45°',
+     'a 90° retrae el resbalón. Desde fuera, sin bloqueo abre el pomo; con bloqueo, solo la llave.']}];
+const guide={on:false,i:0,z:1,F:[5,0,0],auto:false,raf:0,timer:0};
+function drawGuide(){
+  const st=STEPS[guide.i];
+  if(st.f&&guide.z>1.2){const p=P(st.f[0],st.f[1],st.f[2]);
+    add(`<circle cx="${f(p[0])}" cy="${f(p[1])}" r="84" fill="none" stroke="${COL.cyan}" stroke-width="2" stroke-dasharray="8 6" opacity="${f(clamp(guide.z-1.2,0,1))}"/>`);
+    add(`<circle cx="${f(p[0]+60)}" cy="${f(p[1]-60)}" r="16" fill="${COL.cyan}"/>`);
+    text(p[0]+60,p[1]-54,String(guide.i+1),COL.bg,17,'middle','font-weight="bold"');}
+  add(`<rect x="30" y="748" width="1236" height="126" fill="${COL.bg}" fill-opacity=".94" stroke="${COL.cyan}" stroke-width="1.5"/>`);
+  text(48,778,`Paso ${guide.i+1} de ${STEPS.length}: ${st.t}`,COL.amber,18,'start','font-weight="bold"');
+  STEPS.forEach((_,j)=>add(`<circle cx="${1100+j*20}" cy="772" r="6" fill="${j<=guide.i?COL.cyan:'none'}" stroke="${COL.cyan}" stroke-width="1.4"/>`));
+  st.l.forEach((ln,j)=>{if(ln)text(48,808+j*24,ln,COL.line,15);});
+}
+function drawScene(e,th,T,kAng,labels,bAng){
+  const o=offs(e);
+  line(P(-72+o.p1,0,0),P(80+o.p6,0,0),COL.cyan,.9,'stroke-dasharray="14 5 3 5" opacity=".55"');
+  if(e>0.01){for(const u of [RODU,-RODU])line(P(0,u,0),P(o.p3,u,0),COL.cyan,.9,'stroke-dasharray="4 4" opacity=".6"');}
+  drawInterior(o);if(servoVisible())drawServo(o,bAng);drawCoupler(o,bAng);drawLatch(o,latchT());drawSpindle(o,th,bAng);drawRods(o);drawHub();drawLug(o,th);drawWasher(o,th);drawSpring(o,th,T);drawRosette();drawCylinder(o,th,kAng);drawKnob(o,th,kAng);drawKey(o,kAng);
+  drawCotas(o,th,state.c);
+  const cop=labels?clamp((e-0.15)/0.35,0,1):0;
+  callouts([
+    {code:'P-03',name:'Vástagos Ø 6,45',p:P(30+o.p3,RODU+RODR,0)},
+    {code:'P-05',name:'Arandela-leva',p:P(7.5+o.p5,10.6,0)},
+    {code:'P-06',name:'Cuadradillo 6×6',p:P(50+o.p6,1,0)},
+    {code:'P-08',name:'Pestillo bloqueo',p:P(4+o.p6,6,0)},{code:'P-12',name:servoVisible()?'Carcasa interior':'Roseta interior',p:P((servoVisible()?100:76)+o.p12,servoVisible()?24:26,0)}].concat(servoVisible()?[{code:'P-10',name:'Engranajes 1:1',p:P(71.5+o.p10,12,0)}]:[]),32,true,cop);
+  callouts([
+    {code:'P-01',name:'Pomo tulipán',p:P(-45+o.p1,-24.5,0)},
+    {code:'P-02',name:'Roseta + placa',p:P(-6,-31,0)},
+    {code:'P-04',name:'Muelle de torsión',p:P(4+o.p4,-8.5,0)},
+    {code:'P-07',name:'Cilindro de llave',p:P(-48+o.p7,-6,0)},{code:'P-13',name:'Pomo interior',p:P(aKnobI()+25+o.p13,-24,0)}].concat(servoVisible()?[{code:'P-09',name:'Servo MG996R',p:P(100+o.p9,-52.7,0)},{code:'P-11',name:'Soporte servo',p:P(67.5+o.p11,-16,-16)}]:[]),822,false,cop);
+}
+
+/* Controles */
+const sExp=document.getElementById('sExp'),sRot=document.getElementById('sRot'),oExp=document.getElementById('oExp'),oRot=document.getElementById('oRot');
+const sKey=document.getElementById('sKey'),oKey=document.getElementById('oKey'),bLock=document.getElementById('bLock');
+const bPlay=document.getElementById('bPlay'),bCotas=document.getElementById('bCotas'),bRet=document.getElementById('bRet');
+let cotasOn=true,retOn=true,playing=false,raf=0,retRaf=0,keyRaf=0,lockRaf=0;
+function syncUI(){if(typeof sInt!=='undefined'){sInt.value=state.ik;oInt.textContent=dec(state.ik)+'°';}if(typeof servoUI==='function')servoUI();sKey.value=state.key;oKey.textContent=dec(state.key)+'°';const L=state.lock>0.5;bLock.textContent=L?'Liberar desde interior':'Pulsar botón interior';bLock.setAttribute('aria-pressed',L);sExp.value=state.e*100;sRot.value=state.th;oExp.textContent=dec(state.e*100,0)+' %';oRot.textContent=dec(state.th)+'°';}
+let pending=false;function req(){if(!pending){pending=true;requestAnimationFrame(()=>{pending=false;render();});}}
+sExp.addEventListener('input',()=>{state.e=sExp.value/100;syncUI();req();});
+sRot.addEventListener('input',()=>{cancelAnimationFrame(retRaf);state.att=+sRot.value;state.th=state.lock>0.5?Math.min(state.att,2.5):state.att;syncUI();req();});
+function animLock(to){cancelAnimationFrame(lockRaf);const from=state.lock,t0=performance.now();
+  const st=now=>{const t=clamp((now-t0)/300,0,1);state.lock=lerp(from,to,ease(t));syncUI();render();if(t<1)lockRaf=requestAnimationFrame(st);};lockRaf=requestAnimationFrame(st);}
+bLock.addEventListener('click',()=>{if(playing)return;if(state.lock>0.5)animLock(0);else{if(state.th>1){state.th=0;state.att=0;}animLock(1);}});
+sKey.addEventListener('input',()=>{cancelAnimationFrame(keyRaf);state.key=+sKey.value;state.kv=state.key>0.2?1:0;if(state.key>=30&&state.lock>0.5)animLock(0);syncUI();req();});
+sKey.addEventListener('change',()=>{if(!retOn||playing)return;const from=state.key,t0=performance.now();
+  const st=now=>{const t=clamp((now-t0)/700,0,1);state.key=from*(1-(1-Math.pow(1-t,3)));state.kv=t<1?1:0;syncUI();render();if(t<1)keyRaf=requestAnimationFrame(st);};keyRaf=requestAnimationFrame(st);});
+const sInt=document.getElementById('sInt'),oInt=document.getElementById('oInt');let intRaf=0;
+sInt.addEventListener('input',()=>{cancelAnimationFrame(intRaf);state.ik=+sInt.value;if(barRot()>=30&&state.lock>0.5)animLock(0);syncUI();req();});
+sInt.addEventListener('change',()=>{if(!retOn||playing)return;const from=state.ik,t0=performance.now();
+  const st=now=>{const t=clamp((now-t0)/700,0,1);state.ik=from*Math.pow(1-t,3);syncUI();render();if(t<1)intRaf=requestAnimationFrame(st);};intRaf=requestAnimationFrame(st);});
+sRot.addEventListener('change',()=>{if(!retOn||playing)return;const from=state.th,t0=performance.now(),D=650;
+  const step=now=>{const t=clamp((now-t0)/D,0,1),k=1-Math.pow(1-t,3);state.th=from*(1-k);state.att=state.th;syncUI();render();if(t<1)retRaf=requestAnimationFrame(step);};
+  retRaf=requestAnimationFrame(step);});
+bCotas.addEventListener('click',()=>{cotasOn=!cotasOn;bCotas.setAttribute('aria-pressed',cotasOn);if(!playing&&!guide.on){state.c=cotasOn?1:0;req();}});
+bRet.addEventListener('click',()=>{retOn=!retOn;bRet.setAttribute('aria-pressed',retOn);});
+
+const KF_BASE=[[0,0,0,0,0,0,0],[1.2,0,0,1,0,0,0],[3.9,1,0,1,0,0,0],[5.7,1,0,1,0,0,0],[8.3,0,0,1,0,0,0],[9.1,0,0,1,0,0,0],[10.5,0,45,1,0,0,0],[11.1,0,45,1,0,0,0],[12.0,0,0,1,0,0,0],[12.8,0,0,1,0,0,0],[13.2,0,0,1,1,0,0],[14.0,0,0,1,1,0,0],[14.8,0,14,1,1,0,0],[15.6,0,14,1,1,0,0],[16.2,0,0,1,1,0,0],[16.6,0,0,1,1,0,0],[17.4,0,0,1,1,0,1],[18.4,0,0,1,1,30,1],[18.8,0,0,1,0,38,1],[19.9,0,0,1,0,90,1],[20.6,0,0,1,0,90,1],[21.6,0,0,1,0,0,1],[22.2,0,0,1,0,0,0],[22.8,0,0,1,0,0,0]];
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const KF_SERVO=[[23.2,0,0,1,1,0,0,0],[24.0,0,0,1,1,0,0,0],[24.6,0,6,1,1,0,0,0],[25.0,0,0,1,1,0,0,0],[25.8,0,0,1,1,0,0,30],[26.1,0,0,1,0,0,0,40],[26.4,0,0,1,0,0,0,45],[27.2,0,0,1,0,0,0,45],[28.0,0,0,1,0,0,0,0],[28.6,0,0,1,0,0,0,0]];
+let KF=KF_BASE.map(k=>k.concat([0,0]));
+function intSeg(t0){return [[0.6,1,0],[1.4,1,0],[2.0,1,0,6],[2.4,1,0],[3.4,1,30],[3.7,0,40],[4.6,0,90],[5.4,0,90],[6.4,0,0],[7.0,0,0]]
+  .map(([dt,lk,ik,th=0])=>[t0+dt,0,th,1,lk,0,0,0,ik]);}
+function sample(t){for(let i=1;i<KF.length;i++){if(t<=KF[i][0]){const a=KF[i-1],b=KF[i],k=ease((t-a[0])/(b[0]-a[0]));return a.slice(1).map((x,j)=>lerp(x,b[j+1],k));}}return KF[KF.length-1].slice(1);}
+function stop(){playing=false;cancelAnimationFrame(raf);sInt.disabled=false;sServo.disabled=bSvRel.disabled=bSvOpen.disabled=false;bPlay.textContent='Reproducir demo';sExp.disabled=sRot.disabled=sKey.disabled=bLock.disabled=false;cotasOn=true;bCotas.setAttribute('aria-pressed','true');state.c=1;render();}
+bPlay.addEventListener('click',()=>{if(playing){stop();return;}cancelAnimationFrame(retRaf);playing=true;bPlay.textContent='Detener demo';sExp.disabled=sRot.disabled=sKey.disabled=bLock.disabled=true;
+  KF=KF_BASE.map(k=>k.concat([0,0])).concat(servoOn?KF_SERVO.map(k=>k.concat([0])):[]);KF=KF.concat(intSeg(KF[KF.length-1][0]));sInt.disabled=true;sServo.disabled=bSvRel.disabled=bSvOpen.disabled=true;
+  const t0=performance.now();const end=KF[KF.length-1][0];
+  const step=now=>{const t=(now-t0)/1000;const [e,th,c,lk,ky,kv,sv,ik]=sample(t);state.sv=sv;state.ik=ik;state.e=e;state.att=th;state.lock=lk;state.th=lk>0.5?Math.min(th,2.5):th;state.c=c;state.key=ky;state.kv=kv;syncUI();render();if(t<end&&playing)raf=requestAnimationFrame(step);else stop();};
+  raf=requestAnimationFrame(step);});
+
+const vBtns=[...document.querySelectorAll('[data-view]')];
+function markView(k){vBtns.forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===k));}
+let viewRaf=0;
+function goView(k){cancelAnimationFrame(viewRaf);markView(k);viewKey=k;
+  if(k==='plano'){viewMode='plano';setGrid(false);render();return;}
+  viewMode='single';const tg=VIEWS[k],az0=cam.az,el0=cam.el,daz=((tg.az-az0+540)%360)-180,t0=performance.now();
+  setGrid(false);
+  const st=now=>{const t=clamp((now-t0)/650,0,1),q=ease(t);cam.az=az0+daz*q;cam.el=lerp(el0,tg.el,q);viewName=t<1?'Transición':tg.name;
+    if(t>=1){cam.az=tg.az;setGrid(k==='iso');}render();if(t<1)viewRaf=requestAnimationFrame(st);};
+  viewRaf=requestAnimationFrame(st);}
+vBtns.forEach(b=>b.addEventListener('click',()=>goView(b.dataset.view)));
+const svgEl=document.getElementById('svg');let drag=null;
+svgEl.addEventListener('pointerdown',ev=>{if(viewMode!=='single')return;drag={x:ev.clientX,y:ev.clientY};svgEl.setPointerCapture(ev.pointerId);});
+svgEl.addEventListener('pointermove',ev=>{if(!drag)return;cancelAnimationFrame(viewRaf);const dx=ev.clientX-drag.x,dy=ev.clientY-drag.y;drag={x:ev.clientX,y:ev.clientY};
+  cam.az-=dx*0.45;cam.el=clamp(cam.el+dy*0.35,-89,89);viewKey='libre';viewName='Vista libre (orbitada)';markView('');setGrid(false);req();});
+const endDrag=()=>{drag=null;};svgEl.addEventListener('pointerup',endDrag);svgEl.addEventListener('pointercancel',endDrag);
+svgEl.addEventListener('dblclick',()=>goView('iso'));
+const sServo=document.getElementById('sServo'),oServo=document.getElementById('oServo'),bServo=document.getElementById('bServo'),bSvRel=document.getElementById('bSvRel'),bSvOpen=document.getElementById('bSvOpen');
+let svRaf=0;
+function servoUI(){sServo.value=state.sv;oServo.textContent=dec(state.sv)+'° · '+Math.round(1000+state.sv/90*1000)+' µs';}
+function servoCheck(){if(barRot()>=30&&state.lock>0.5)animLock(0);}
+sServo.addEventListener('input',()=>{cancelAnimationFrame(svRaf);state.sv=+sServo.value;servoCheck();servoUI();req();});
+function servoSeq(kf){cancelAnimationFrame(svRaf);const t0=performance.now(),dur=kf[kf.length-1][0];
+  const st=now=>{const t=(now-t0)/1000;state.sv=kfSample(kf,t)[0];servoCheck();servoUI();render();if(t<dur)svRaf=requestAnimationFrame(st);};svRaf=requestAnimationFrame(st);}
+bSvRel.addEventListener('click',()=>servoSeq([[0,state.sv],[0.6,45],[1.3,45],[1.9,0]]));
+bSvOpen.addEventListener('click',()=>servoSeq([[0,state.sv],[1.0,90],[2.4,90],[3.2,0]]));
+bServo.addEventListener('click',()=>{servoOn=!servoOn;bServo.setAttribute('aria-pressed',servoOn);[sServo,bSvRel,bSvOpen].forEach(b=>b.disabled=!servoOn||playing||guide.on);if(!servoOn){state.sv=0;servoUI();}render();});
+const bGuide=document.getElementById('bGuide'),bPrev=document.getElementById('bPrev'),bNext=document.getElementById('bNext'),bRep=document.getElementById('bRep'),bAuto=document.getElementById('bAuto'),gText=document.getElementById('gText');
+function kfSample(kf,t){for(let i=1;i<kf.length;i++){if(t<=kf[i][0]){const a=kf[i-1],b=kf[i],k=ease((t-a[0])/(b[0]-a[0]));return a.slice(1).map((x,j)=>lerp(x,b[j+1],k));}}return kf[kf.length-1].slice(1);}
+function playStep(i){
+  cancelAnimationFrame(guide.raf);clearTimeout(guide.timer);guide.i=i;const st=STEPS[i];
+  gText.textContent=`Paso ${i+1} de ${STEPS.length}: ${st.t}. `+st.l.join(' ');
+  bPrev.disabled=i===0;bNext.disabled=i===STEPS.length-1;
+  const z0=guide.z,F0=guide.F.slice(),F1=st.f||F0,z1=st.z,t0=performance.now(),dur=st.kf[st.kf.length-1][0];
+  const loop=now=>{const t=(now-t0)/1000,zt=ease(clamp(t/0.8,0,1));
+    guide.z=lerp(z0,z1,zt);guide.F=F0.map((x,j)=>lerp(x,F1[j],zt));
+    const [th,lk,ky,kv,sv=0,ik=0]=kfSample(st.kf,t);state.sv=sv;state.ik=ik;state.att=th;state.lock=lk;state.th=lk>0.5?Math.min(th,2.5):th;state.key=ky;state.kv=kv;
+    syncUI();render();
+    if(t<Math.max(dur,0.8))guide.raf=requestAnimationFrame(loop);
+    else if(guide.auto)guide.timer=setTimeout(()=>{if(guide.i<STEPS.length-1)playStep(guide.i+1);else setAuto(false);},3800);};
+  guide.raf=requestAnimationFrame(loop);
+}
+function setAuto(v){guide.auto=v;bAuto.setAttribute('aria-pressed',v);bAuto.textContent=v?'Pausar':'Reproducir todos los pasos';if(!v)clearTimeout(guide.timer);}
+function setGuide(on){
+  if(on&&playing)stop();
+  guide.on=on;bGuide.setAttribute('aria-pressed',on);bGuide.textContent=on?'Salir de la guía':'Explicar el bloqueo paso a paso';
+  [bPrev,bNext,bRep,bAuto,gText].forEach(b=>b.hidden=!on);
+  sExp.disabled=sRot.disabled=sKey.disabled=bLock.disabled=bPlay.disabled=sServo.disabled=bSvRel.disabled=bSvOpen.disabled=sInt.disabled=on;
+  cancelAnimationFrame(guide.raf);clearTimeout(guide.timer);setAuto(false);
+  if(on){state.e=0;state.c=0;guide.z=1;guide.F=[5,0,0];goView('isoP');playStep(0);}
+  else{guide.z=1;state.c=cotasOn?1:0;state.th=state.att=state.key=state.kv=state.lock=state.sv=state.ik=0;syncUI();render();}
+}
+bGuide.addEventListener('click',()=>setGuide(!guide.on));
+bPrev.addEventListener('click',()=>{setAuto(false);if(guide.i>0)playStep(guide.i-1);});
+bNext.addEventListener('click',()=>{setAuto(false);if(guide.i<STEPS.length-1)playStep(guide.i+1);});
+bRep.addEventListener('click',()=>{setAuto(false);playStep(guide.i);});
+bAuto.addEventListener('click',()=>{if(guide.auto){setAuto(false);return;}setAuto(true);playStep(guide.i===STEPS.length-1?0:guide.i);});
+syncUI();render();
+})();
+</script>
+</body>
+</html>
