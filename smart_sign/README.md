@@ -86,3 +86,18 @@ sudo cp panel_profesor.html /var/www/html/index.html     # el profesor abre http
 | Metodología ágil y documentación | 25 % | Kanban, Dailys, Sprint Reviews y README en GitHub |
 
 La app evalúa además cada sección (ejercicios autocorregidos + foto obligatoria del montaje en las secciones de taller).
+
+## F. Variante: letrero tipo bandera (carril + pieza de pared)
+
+Diseño alternativo para el pasillo: carril de 200 mm con letras, dos placas WS2812 de 8 LED tras PLA translúcido,
+ESP32-C3 SuperMini y reductor 12 → 5 V dentro del carril; pieza de pared con alimentación de 12 V. Unión por espiga
+pentagonal (0,15 mm por cara) + 2 Molex que conectan al empujar + 2 tornillos M3×16 desde abajo.
+
+| Archivo | Qué es |
+|---|---|
+| `letrero_bandera/letrero_aulas.py` | Modelo paramétrico (Python + trimesh). Medidas de Molex, placa LED, ESP32 y reductor al principio |
+| `letrero_bandera/letrero_bandera_stl.zip` | Carril, pieza de pared, tapas, letras y **galgas `00a`/`00b`** (imprimir primero) |
+| `/simuladores/letrero_bandera_3d.html` | Visor 3D interactivo del montaje (también en *Recursos* de la app) |
+
+Pinout propuesto del Molex: amarillo +12 V · negros GND · rojo libre (bus de datos futuro). Las medidas de los Molex
+son estimadas: que cada grupo las mida con el calibre e imprima la galga `00a` antes de las piezas grandes.

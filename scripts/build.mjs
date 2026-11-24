@@ -49,6 +49,8 @@ for (const f of fs.readdirSync(path.join(root, 'firmware'))) {
 }
 // Proyecto Smart Sign (misiones 4-6): modelo OpenSCAD, STL, mosquitto.conf, panel del profesor y guía
 fs.cpSync(path.join(root, 'smart_sign'), path.join(desc, 'smart_sign'), { recursive: true })
+// Letrero tipo bandera: el ZIP de STL vive en la raíz del repositorio y se publica junto a letrero_aulas.py
+fs.copyFileSync(path.join(root, 'letrero_bandera_stl.zip'), path.join(desc, 'smart_sign/letrero_bandera/letrero_bandera_stl.zip'))
 // Pomo motorizado con servo MG996R (misión 3, sección 5): STL de los prototipos
 fs.cpSync(path.join(root, 'pomo_mg996r'), path.join(desc, 'pomo_mg996r'), { recursive: true })
 const guia = marked.parse(fs.readFileSync(path.join(root, 'smart_sign/README.md'), 'utf8'))

@@ -315,6 +315,20 @@ sections:
 
       [Abrir el montaje 3D del letrero a pantalla completa](/simuladores/letrero_bandera_3d.html)
 
+      | Ajuste | Holgura | Cómo se comprueba antes de imprimir |
+      |---|---|---|
+      | Espiga del carril ↔ alojamiento de la pieza de pared | 0,15 mm por cara | Galga `00b` |
+      | Conectores Molex en sus huecos | 0,2 mm + nervios de aplastamiento | Galga `00a` |
+      | Tapa LED translúcida ↔ rebaje del carril | 0,15 mm por cara | Galga `00a` |
+
+      **¿Por qué los Molex entran rectos?** La espiga ya está **11,5 mm dentro** de su alojamiento cuando los
+      conectores se tocan, así que llegan alineados. Es el mismo principio que la ranura del metacrilato: una
+      **guía mecánica con poca holgura** hace el trabajo de precisión.
+
+      Modelo paramétrico en Python (se cambian las medidas al principio y se regeneran los STL):
+      [`letrero_aulas.py`](/descargas/smart_sign/letrero_bandera/letrero_aulas.py) ·
+      [todas las piezas y galgas (ZIP de STL)](/descargas/smart_sign/letrero_bandera/letrero_bandera_stl.zip).
+
       **Secuencia de montaje**
 
       1. Encajar el Molex de la base en su cuna (queda con 0,4 mm de juego para centrarse solo) y meter detrás el calzo de 1,0 mm.
@@ -384,8 +398,10 @@ sections:
       5. **Impresión**: imprime el soporte en la A1; si la A1 está ocupada, el capuchón en la Sidewinder.
       6. **Comprobación**: mide la ranura impresa, prueba el metacrilato y la tira dentro del canal. Si no
          encaja, cambia el parámetro y reimprime (eso también es avanzar: apúntalo en el Kanban).
-      7. **Variante bandera**: abre el montaje 3D del letrero tipo bandera, haz el corte por el eje y el detalle
-         de la unión, y explica en la bitácora para qué sirven la espiga y el calzo.
+      7. **Variante bandera** (si el grupo hace el letrero tipo bandera): abre el montaje 3D, haz el corte por el
+         eje y el detalle de la unión, y explica en la bitácora para qué sirven la espiga y el calzo. Mide con el
+         calibre los Molex y la placa LED, cambia las medidas en `letrero_aulas.py` e imprime primero las galgas
+         `00a` y `00b`.
     evaluation:
       intro: "Necesitas un 75 %."
       items:
@@ -414,6 +430,15 @@ sections:
             - {id: a, text: "Con la ranura hacia arriba, para que salga limpia y sin soportes."}
             - {id: b, text: "Con la ranura hacia abajo, apoyada en la cama.", feedback: "Necesitaría soportes dentro de la ranura y la medida saldría peor."}
             - {id: c, text: "De pie, sobre su lado más pequeño.", feedback: "Es inestable y las capas quedarían débiles en los ojales."}
+          answer: a
+        - id: q4
+          type: quiz
+          points: 1
+          question: "En el letrero tipo bandera, ¿por qué los conectores Molex entran rectos al empujar el carril contra la pieza de pared?"
+          options:
+            - {id: a, text: "Porque la espiga entra 11,5 mm en su alojamiento antes de que los conectores se toquen, y llegan ya alineados."}
+            - {id: b, text: "Porque los cables doblan los conectores hasta alinearlos.", feedback: "Los cables no guían nada: la alineación la da una pieza rígida con poca holgura."}
+            - {id: c, text: "Porque los tornillos M3 los empujan a su sitio.", feedback: "Los tornillos se ponen al final, con el carril ya enchufado: solo lo bloquean."}
           answer: a
         - id: c1
           type: code

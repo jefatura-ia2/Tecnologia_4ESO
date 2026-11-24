@@ -1,103 +1,199 @@
-# 🪧 Smart Sign IoT · Guía del profesor
+# TEC_IVJP_lab27 · 4º ESO
 
-Proyecto de las **misiones 4, 5 y 6** de TEC_IVJP_lab27 (semanas 10-18, primer trimestre, después del
-control de acceso NFC). El alumnado trabaja como un equipo de producto ágil: un cartel de aula de metacrilato
-iluminado por el canto, con batería, que el profesor controla desde un panel web del servidor del instituto.
+Plataforma web para un **curso completo de Tecnología de 4º ESO** (45 semanas × 3 h = **135 h**; ver la nota sobre la duración más abajo) del IES Valle del Jerte (Plasencia). Combina **programación en MicroPython** (Raspberry Pi Pico W y ESP32-S3-DevKit), un **laboratorio de electrónica** (osciloscopio PROMAX serie 600, lector NFC PN532 y cerradura de solenoide de 12 V), el proyecto ágil **Smart Sign IoT** (CAD e impresión 3D, energía con batería, MQTT y sensores) y **neumática y electroneumática**: compresor, unidad de acondicionamiento, válvulas selectoras y antirretorno, **electroválvulas de 12 V 2/2 y 3/2** gobernadas con un **módulo MOSFET**, **cilindros de simple y doble efecto** y **finales de carrera**.
 
-| Fase | Misión · semanas | Contenido |
-|---|---|---|
-| Sprint 1 · dos equipos en paralelo | M4 · 10-12 | **Equipo A** (mecánica): CAD, tolerancias, impresión 3D · **Equipo B** (electrónica): energía, PCB, LED y deepsleep · Sprint Review |
-| Hito de integración + Sprint 2 | M5 · 13-15 | Cartel autónomo (uniformidad ≥ 0,7, ≥ 8 h de batería) · Mosquitto 1883/9001 · MQTT en la ESP32-C3 · panel del profesor |
-| Sprint 3 + Sprint 4 | M6 · 16-18 | Investigación de campo · PIR y BH1750 · PCB v2 · topics `aula/{id}/status` · panel del pasillo · demo final |
+| Trim. | | Misión | Semanas |
+|---|---|---|---|
+| 1.º | 🐍 | 1. MicroPython I: fundamentos y entradas/salidas | 1-3 |
+| 1.º | ⏱️ | 2. MicroPython II: tiempo, estados y clases | 4-6 |
+| 1.º | 🔐 | 3. Laboratorio: osciloscopio y control de acceso NFC | 7-9 |
+| 1.º | 🪧 | 4. Smart Sign I: dos equipos en paralelo | 10-12 |
+| 1.º | 📶 | 5. Smart Sign II: integración y control remoto | 13-15 |
+| 1.º | 🛰️ | 6. Smart Sign III: sensores y red de carteles | 16-18 |
+| 2.º | 💨 | 7. Neumática I: aire comprimido y cilindros | 19-21 |
+| 2.º | 🔀 | 8. Neumática II: válvulas y circuitos básicos | 22-24 |
+| 2.º | ⚡ | 9. Electroválvulas con MicroPython | 25-27 |
+| 2.º | ↔️ | 10. Cilindros de doble efecto y enclavamientos | 28-30 |
+| 3.º | 🎯 | 11. Finales de carrera: ciclos por posición | 31-33 |
+| 3.º | 🔁 | 12. Secuencias de varios cilindros | 34-36 |
+| 3.º | 🛑 | 13. Seguridad y modos de marcha | 37-39 |
+| 3.º | 📡 | 14. Control WiFi, registro y mantenimiento | 40-42 |
+| 3.º | 🏭 | 15. Proyecto final: automatiza una máquina | 43-45 |
 
-> El backlog original del proyecto tiene 10 semanas; aquí ocupa **9** (Sprint 3 y Sprint 4 comparten la misión 6).
+- **60 secciones** (4 por misión) con teoría, ejemplos para las dos placas (y la ESP32-C3 en el Smart Sign), práctica de aula/taller y evaluación obligatoria (test, completar huecos y **95 ejercicios de código** corregidos automáticamente en un simulador de MicroPython).
+- Cada misión acaba con un **proyecto corto** (3 h): contador de piezas, semáforo, **control de acceso NFC**, elevador, puerta desde dos puntos, expulsor, barrera, prensa, estampadora A+ B+ B− A−, prensa segura con bimanual, panel web… y un **proyecto final** con GRAFCET.
+- **Smart Sign IoT** (misiones 4-6): dos equipos en paralelo (mecánica: CAD paramétrico, tolerancias e impresión 3D en Bambu Lab A1 / Artillery Sidewinder; electrónica: 18650 + TP4056 + MT3608 y deepsleep), hito de integración, broker Mosquitto (1883/9001), panel del profesor en React y sensores PIR/BH1750. Material en `smart_sign/` (guía del profesor, `marco_cartel.scad`, STL, `mosquitto.conf`, `panel_profesor.html`) y `firmware/cartel_mqtt.py`.
+- **Fotos obligatorias de los montajes**: en 44 secciones (los 15 proyectos cortos y las prácticas de taller o laboratorio) el alumno debe subir una foto de su montaje (desde el móvil, se reduce sola a ~1600 px). La sección no cuenta como superada hasta que hay foto; el profesor las revisa en **Panel → 📷 Fotos** (aceptar / rechazar con comentario). Una foto rechazada vuelve a pedirse, pero no bloquea lo que el alumno ya tenía desbloqueado. Qué secciones piden foto se indica en el YAML con `foto: { indicaciones: "…" }`.
+- **Desbloqueo progresivo**, **pistas** que no revelan la respuesta, **anti-trampa** (tiempo mínimo, espera tras fallos seguidos, alertas de código copiado).
+- **Panel del profesorado**: progreso, alertas, dificultad por pregunta, soluciones, desbloqueo para toda la clase, notas manuales y exportación CSV.
+- **Ilustraciones** de los montajes de prácticas, del osciloscopio y de los circuitos neumáticos dentro de las lecciones.
+- **Recursos** (material complementario de acceso libre, en paralelo a las sesiones): taller **PicoLab·IA** para diseñar, fabricar y soldar una PCB para la Pico con ayuda de IA. Para añadir otro recurso: copia su HTML a `frontend/public/recursos/` y añádelo en `frontend/src/lib/recursos.js`.
+- **Calendario** del curso que salta las semanas de vacaciones. Programación sesión a sesión en [`docs/temporalizacion.md`](docs/temporalizacion.md).
 
-## Archivos de esta carpeta
+---
 
-| Archivo | Qué es |
-|---|---|
-| `marco_cartel.scad` | Modelo **paramétrico** de OpenSCAD: soporte de pared, tapa, capuchón y probeta de tolerancias (variable `pieza`) |
-| `stl/*.stl` | Las cuatro piezas ya exportadas con metacrilato de 5 mm y holgura de 0,2 mm |
-| `mosquitto.conf` | Configuración del broker: 1883 (TCP, carteles) y 9001 (WebSockets, panel) con contraseña |
-| `panel_profesor.html` | Panel del profesor (React + mqtt.js en un solo archivo). Modo pasillo: varias aulas separadas por comas |
-| `../firmware/cartel_mqtt.py` | Programa del cartel para la ESP32-C3 SuperMini (se guarda como `main.py`) |
 
-Todo se descarga también desde la app: `/descargas/smart_sign/…` y `/descargas/cartel_mqtt.py`.
+> **Duración**: con el Smart Sign el temario suma 45 semanas, más que un curso escolar (≈ 35 semanas lectivas). Cada año hay que elegir qué se trabaja: el profesor puede desbloquear misiones a mano para toda la clase desde su panel (por ejemplo, saltar parte de la neumática o del Smart Sign) y el calendario se ajusta con `COURSE_START_DATE` y `SKIP_WEEKS`.
 
-## A. Organización de los equipos (Sprint 1)
+## 🚀 Publicar en Netlify (recomendado)
 
-- Grupos de 4-6: la mitad en el **Equipo A** (mecánica) y la otra mitad en el **Equipo B** (electrónica).
-- **Rotación de roles** semanal: uno o dos miembros cambian de equipo cada semana para que todos aprendan las dos
-  disciplinas. Se anota en el Kanban.
-- **Daily Scrum** de 5 minutos al empezar cada sesión. Pregunta clave del Equipo A al B: *«¿Las medidas de la caja
-  son las correctas para que quepa la batería?»*. Las respuestas actualizan el **contrato de medidas** del README.
-- Repositorio en GitHub por grupo con README, tablero (GitHub Projects o papel fotografiado) y fotos de cada demo.
+Todo funciona en Netlify, sin servidor propio:
 
-## B. Impresoras 3D
+- **Web** (Vue) → archivos estáticos.
+- **API** (`/api/*`) → una Netlify Function (`netlify/functions/api.mjs`).
+- **Datos** (cuentas, progreso, entregas) → **Netlify Blobs** (se activa solo, sin configurar nada).
+- **Corrección del código Python** → en el navegador del alumno con **Pyodide** (Python compilado a WebAssembly, incluido en la web, no depende de CDNs externos).
 
-| Impresora | Volumen | Uso en el proyecto |
-|---|---|---|
-| **Bambu Lab A1** | 256 × 256 × 256 mm | Probeta de tolerancias (≈ 10 min), soporte con la ranura, tapa y capuchón. Caben 2-3 iteraciones por sesión |
-| **Artillery Sidewinder X1** | 300 × 300 × 400 mm | Piezas grandes, versiones en **PETG** (resiste ≈ 80 °C frente a ≈ 60 °C del PLA) o lotes mientras la A1 está ocupada |
+### Opción A · Desde GitHub (despliegue automático)
 
-Parámetros: capa 0,2 mm (0,12 en la probeta), 4 perímetros, relleno 15-20 % giroide, soporte con la ranura hacia
-arriba y sin soportes (el hueco del USB-C tiene techo en punta). Soporte ≈ 40 cm³ ≈ 50 g de PLA.
+1. Sube esta carpeta a un repositorio de GitHub (ya incluye un commit inicial):
+   ```bash
+   git remote add origin https://github.com/TU_USUARIO/Tecnologia_4ESO.git
+   git push -u origin main
+   ```
+2. En Netlify: **Add new site → Import an existing project → GitHub** y elige el repositorio.
+   La configuración de compilación se lee de `netlify.toml` (no hay que tocar nada).
+3. Antes del primer despliegue, en **Site configuration → Environment variables**, añade las variables de la tabla de abajo (como mínimo `SECRET_KEY` y `TEACHER_PASSWORD`).
+4. **Deploy**. Abre la web, entra con usuario `profesor` y tu `TEACHER_PASSWORD`, y comparte con la clase el **código de clase** que aparece en el panel.
 
-**Tolerancias**: el metacrilato «de 5 mm» suele medir entre 4,8 y 5,3 mm. Que cada grupo mida el suyo e imprima la
-probeta (ranuras 5,0 · 5,1 · 5,2 · 5,3 · 5,4 mm) antes de imprimir el soporte. Juego correcto: 0,1-0,4 mm.
-
-## C. Electrónica y energía
-
-- ESP32-C3 SuperMini: tira WS2812 en **IO3** (IO8 es pin de arranque y lleva el LED de la placa; el código base del
-  proyecto usaba `Pin(8)`). PIR en IO4; BH1750 por I2C en IO5 (SDA) / IO6 (SCL), dirección 0x23.
-- **Ajustar el MT3608 a 5,0 V antes de conectar la placa** (suele venir a otra tensión).
-- TP4056 **con protección** (DW01, salidas OUT+/OUT−). Polímetro siempre en serie para medir corriente.
-- MicroPython no tiene `np.brightness`: el brillo se aplica escalando el color.
-- Cada WS2812 consume ≈ 1 mA aunque esté apagado: en la PCB v2, MOSFET de canal P para cortar la tira.
-
-## D. Servidor (Sprint 2)
+### Opción B · Desde tu ordenador con Netlify CLI
 
 ```bash
-sudo apt install mosquitto mosquitto-clients nginx
-sudo cp mosquitto.conf /etc/mosquitto/conf.d/smart_sign.conf
-sudo mosquitto_passwd -c /etc/mosquitto/passwd cartel
-sudo mosquitto_passwd /etc/mosquitto/passwd panel
-sudo systemctl restart mosquitto
-sudo ufw allow from 192.168.0.0/16 to any port 1883 proto tcp
-sudo ufw allow from 192.168.0.0/16 to any port 9001 proto tcp
-sudo cp panel_profesor.html /var/www/html/index.html     # el profesor abre http://IP-del-servidor/
+npm install
+npx netlify-cli login
+npx netlify-cli init              # crea o enlaza el sitio
+npx netlify-cli env:set SECRET_KEY "una-cadena-larga-y-aleatoria-de-32-o-mas-caracteres"
+npx netlify-cli env:set TEACHER_PASSWORD "tu-contraseña"
+npx netlify-cli deploy --build --prod
 ```
 
-- Los carteles se conectan al **1883** (TCP) y el panel al **9001** (WebSockets). Si el router o el cortafuegos del
-  centro bloquean esos puertos, pide al administrador de red que los abra **solo para la LAN**.
-- El panel **no** se publica en Netlify: una página `https://` no puede abrir `ws://` (contenido mixto) y el broker
-  no es accesible desde Internet. Para notificaciones push reales hay que servir el panel por HTTPS y usar `wss://`.
-- Prueba rápida: `mosquitto_sub -h IP -u cartel -P *** -t 'aula/#' -v` y
-  `mosquitto_pub -h IP -u panel -P *** -t aula/203/status -m rojo -r`.
+> ⚠️ No uses el despliegue «arrastrar y soltar» de Netlify: no ejecuta la compilación ni publica la función de la API.
 
-## E. Evaluación (rúbrica ágil del proyecto)
+### Variables de entorno
 
-| Criterio | Peso | Descripción |
+| Variable | Obligatoria | Ejemplo | Para qué |
+|---|---|---|---|
+| `SECRET_KEY` | **Sí** | 40 caracteres aleatorios | Firma las sesiones. Genera una con `openssl rand -hex 32`. |
+| `TEACHER_PASSWORD` | **Sí** | `MiClaveSegura` | Contraseña del usuario `profesor`. Si la cambias, la cuenta se actualiza al entrar con la nueva. |
+| `TEACHER_USERNAME` | No | `profesor` | Usuario del profesorado. |
+| `TEACHER_FULLNAME` | No | `José (Tecnología)` | Nombre que se muestra. |
+| `CLASS_CODE` | No | `4ESO-NEUMA` (por defecto) | Código para que el alumnado se registre. |
+| `COURSE_START_DATE` | No | `2026-09-14` | Primer día del curso (se usa su lunes). |
+| `SKIP_WEEKS` | No | `2026-12-21,2026-12-28,2027-03-22` | Fechas de semanas sin clase (Navidad, Semana Santa…); el calendario las salta. |
+| `MIN_SECONDS_BEFORE_SUBMIT` | No | `120` | Tiempo mínimo en una sección antes del primer envío. |
+| `FREE_ATTEMPTS` | No | `3` | Fallos seguidos permitidos antes de imponer espera. |
+| `COOLDOWN_BASE_SECONDS` | No | `60` | Espera (crece con cada fallo extra). |
+| `PLAGIARISM_THRESHOLD` | No | `0.92` | Similitud de código a partir de la cual se crea una alerta. |
+
+### Cómo se corrige y qué hay que saber
+
+- **Test y huecos** se corrigen en la función de Netlify: las respuestas **nunca** llegan al navegador.
+- **Código**: el navegador ejecuta las pruebas con Pyodide (la primera vez descarga ~13 MB, luego queda en caché) y la función calcula la nota y el feedback. La solución de referencia nunca sale del servidor, pero **un alumno con conocimientos avanzados podría manipular los resultados de las pruebas** desde las herramientas del navegador. Para una corrección 100 % en servidor usa la opción con Docker (abajo). El historial de entregas del panel muestra siempre el código enviado.
+- Plan gratuito de Netlify: suele bastar para varias clases; consulta los límites actuales de funciones y Blobs de tu plan.
+
+### Probar en local sin Netlify
+
+```bash
+npm install
+npm run build
+npm run dev          # http://localhost:8888 · usuario profesor / profe123 · datos en .datos-locales/
+npm test             # 153 pruebas: API + todas las soluciones ejecutadas en Pyodide
+```
+
+---
+
+## 🏫 Alternativa: servidor del centro con Docker
+
+El mismo frontend funciona con un servidor Python (FastAPI + SQLite) que corrige el código **en el servidor** dentro de un sandbox.
+
+```bash
+cp .env.example .env          # edita contraseña, código de clase y fecha
+docker compose up -d --build  # http://IP-del-servidor:8080
+```
+
+Pruebas del servidor Python: `cd backend && pip install -r requirements.txt pytest httpx && python -m pytest`.
+
+---
+
+## Estructura
+
+```
+netlify.toml                    configuración de Netlify
+netlify/functions/api.mjs       API (Netlify Function) · lib/: auth, corrección, anti-trampa, almacenamiento
+frontend/                       Vue 3 + Vite · public/recursos/: material complementario (HTML autocontenidos) · public/sandbox/worker.mjs (Pyodide en un Web Worker)
+backend/app/content/missions/   ← EL TEMARIO (YAML, editable sin programar). Lo usan Netlify y Docker.
+backend/app/sandbox/harness.py  simulador de MicroPython (machine, time, neopixel, network, bluetooth…)
+backend/                        servidor alternativo FastAPI (Docker)
+scripts/build.mjs               genera el temario para la función y copia Pyodide y el simulador
+scripts/dev-server.mjs          servidor local que imita Netlify
+scripts/ilustraciones/          generadores de las imágenes SVG de las lecciones (frontend/public/img)
+tests/                          pruebas Node (API y soluciones en Pyodide)
+firmware/                       taller.py (Electrovalvula, CilindroDE, Seta), pn532_i2c.py (lector NFC), cartel_mqtt.py (Smart Sign), secretos.py
+pomo_mg996r/                    STL del pomo motorizado con servo MG996R (puente y acoplamiento, misión 3)
+smart_sign/                     Smart Sign IoT: guía del profesor, marco_cartel.scad + STL, mosquitto.conf, panel_profesor.html
+docs/temporalizacion.md         programación sesión a sesión y calificación sugerida
+```
+
+## Editar el temario
+
+Cada misión es un archivo YAML en `backend/app/content/missions/`. Tipos de pregunta:
+
+```yaml
+- id: q1
+  type: quiz
+  question: "..."
+  options:
+    - {id: a, text: "...", feedback: "pista si eligen esta"}
+    - {id: b, text: "..."}
+  answer: b
+- id: f1
+  type: fill_blank
+  text: "led = Pin(___, Pin.OUT)"
+  blanks: [{accept: ["15"], hint: "..."}]
+- id: c1
+  type: code
+  prompt: "..."
+  starter: "def f(x):\n    pass"
+  solution: "def f(x):\n    return x * 2"
+  tests:
+    - {desc: "f(2) = 4", call: "f(2)", expected: 4}
+    - {desc: "Enciende el LED", check: "any(e[2] == 'value' for e in _log)"}
+```
+
+Tras editar, ejecuta `npm test` (comprueba que todas las soluciones pasan) y haz `git push`: Netlify vuelve a publicar solo.
+
+## Banco neumático: material y conexiones
+
+**Neumática:** compresor con depósito, unidad de acondicionamiento (filtro-regulador-lubricador con manómetro), válvulas selectoras (función O) y antirretorno, electroválvulas **2/2 NC** y **3/2 NC** de **12 V DC**, cilindros de simple y doble efecto, reguladores de caudal, tubo de 4/6 mm y racores rápidos. Un cilindro de doble efecto se gobierna con **dos 3/2 NC** (una por cámara) y un **enclavamiento por software** que nunca activa las dos a la vez.
+
+**Electrónica:** módulo MOSFET de **nivel lógico** de 4 canales (AOD4184/IRLZ44N; los de IRF520 no conducen bien a 3,3 V) con **diodo de libre circulación** (1N4007) en cada bobina, fuente de 12 V (≥ 2 A), pulsadores MARCHA/PARO, **seta de emergencia NC** y finales de carrera (microrruptores con rodillo o reed). GND común entre placa, módulo y fuente.
+
+| Señal | Pico W | ESP32-S3 |
 |---|---|---|
-| Trabajo en paralelo (Sprint 1) | 20 % | Coordinación entre equipos, cumplimiento del Sprint Goal, calidad de la mecánica o la electrónica |
-| Hito de integración | 15 % | El cartel ensamblado funciona con batería y los LED iluminan correctamente |
-| Conexión y software (Sprint 2) | 25 % | Mosquitto 1883/9001, despliegue del panel y comunicación con la ESP32 por MQTT |
-| Investigación y sensores | 15 % | Calidad de los datos de campo y justificación del rediseño (PCB v2 y lógica de sensores) |
-| Metodología ágil y documentación | 25 % | Kanban, Dailys, Sprint Reviews y README en GitHub |
+| EV1-EV4 → módulo MOSFET | GP10-GP13 | GPIO 4-7 |
+| MARCHA · PARO/2.º bimanual · SETA (NC) | GP14 · GP15 · GP16 | GPIO 14 · 15 · 16 |
+| Finales de carrera a0 · a1 · b0 · b1 | GP18 · GP19 · GP20 · GP21 | GPIO 17 · 18 · 8 · 9 |
+| LED de estado | `Pin("LED")` | NeoPixel en GPIO 48 |
 
-La app evalúa además cada sección (ejercicios autocorregidos + foto obligatoria del montaje en las secciones de taller).
+Todas las entradas usan `Pin.PULL_UP` y van a GND (pulsado/pisado = 0). La seta NC da 0 en reposo y 1 si se pulsa **o si se corta el cable**.
 
-## F. Variante: letrero tipo bandera (carril + pieza de pared)
+## Laboratorio de electrónica (misión 3): material y conexiones
 
-Diseño alternativo para el pasillo: carril de 200 mm con letras, dos placas WS2812 de 8 LED tras PLA translúcido,
-ESP32-C3 SuperMini y reductor 12 → 5 V dentro del carril; pieza de pared con alimentación de 12 V. Unión por espiga
-pentagonal (0,15 mm por cara) + 2 Molex que conectan al empujar + 2 tornillos M3×16 desde abajo.
+- **Osciloscopio PROMAX serie OD-600** con sonda x1/x10. Práctica con la PWM de la placa (GP22 en la Pico W, GPIO 21 en la ESP32-S3).
+- **PN532 NFC RFID Module V3** por **I2C** (interruptores 1 = ON, 2 = OFF, dirección 0x24) con la librería `firmware/pn532_i2c.py` y el programa de prueba `firmware/pn532_i2c_main.py`: SDA → GP6 y SCL → GP7 en la Pico W (GPIO 10 y 11 en la ESP32-S3). Simulador 3D del montaje en `frontend/public/simuladores/`.
+- **Tira WS2812 de 8 LED** como semáforo del control de acceso (DIN en GP22 · GPIO 21 · IO3 en la ESP32-C3 SuperMini), con `firmware/tira_colores.py` y su simulador 3D.
+- **Cerradura de solenoide de 12 V** (fail-secure) en el canal 1 del módulo MOSFET (GP10 · GPIO 4), con diodo 1N4007 y como máximo 3 s activada.
 
-| Archivo | Qué es |
-|---|---|
-| `letrero_bandera/letrero_aulas.py` | Modelo paramétrico (Python + trimesh). Medidas de Molex, placa LED, ESP32 y reductor al principio |
-| `letrero_bandera/letrero_bandera_stl.zip` | Carril, pieza de pared, tapas, letras y **galgas `00a`/`00b`** (imprimir primero) |
-| `/simuladores/letrero_bandera_3d.html` | Visor 3D interactivo del montaje (también en *Recursos* de la app) |
+**Seguridad en el taller:** gafas siempre que haya aire; 3-4 bar en el aula (2 bar en las primeras pruebas); nunca conectar/desconectar tubos con presión; los 12 V nunca llegan a la placa.
 
-Pinout propuesto del Molex: amarillo +12 V · negros GND · rojo libre (bus de datos futuro). Las medidas de los Molex
-son estimadas: que cada grupo las mida con el calibre e imprima la galga `00a` antes de las piezas grandes.
+## Smart Sign IoT (misiones 4-6): material y conexiones
+
+- **ESP32-C3 SuperMini**: tira WS2812 de 12 LED en **IO3** (no en IO8: pin de arranque con el LED de la placa), PIR en IO4, BH1750 por I2C en IO5/IO6 (0x23).
+- Energía: batería **18650** + **TP4056** con protección + elevador **MT3608 ajustado a 5,0 V**.
+- Mecánica: metacrilato de 5 mm (160 × 120) en un soporte impreso con ranura de 5,2 mm; modelo paramétrico `smart_sign/marco_cartel.scad`.
+- Servidor: Mosquitto con `smart_sign/mosquitto.conf` (1883 TCP + 9001 WebSockets) y el panel `panel_profesor.html` servido por **http desde el servidor del centro** (no desde Netlify: el navegador bloquea `ws://` en una página `https://`).
+
+## Notas sobre el hardware
+
+- **ESP32-S3**: el LED de la placa es un RGB direccionable (NeoPixel) en GPIO 48 (GPIO 38 en algunas revisiones). Evita GPIO 0, 3, 45, 46 (arranque) y 19-20 (USB).
+- **Pico W**: el LED es `Pin("LED")`. GP23-25 y GP29 los usa el chip WiFi.

@@ -185,7 +185,7 @@ Temario completo: **45 semanas × 3 sesiones de 1 h = 135 h** en quince misiones
 | Sección | Tipo | Horas | Ítems evaluados |
 |---|---|---|---|
 | m4s1 · El reto Smart Sign y el método ágil | Lección | 2 | 2 test · 0 completar · 2 código |
-| m4s2 · Equipo A: diseño CAD y fabricación del soporte y el marco | Lección | 3 | 3 test · 0 completar · 3 código |
+| m4s2 · Equipo A: diseño CAD y fabricación del soporte y el marco | Lección | 3 | 4 test · 0 completar · 3 código |
 | m4s3 · Equipo B: electrónica y energía del cartel | Lección | 2 | 2 test · 0 completar · 2 código |
 | m4s4 · Sprint Review 1: demo de los dos equipos | Proyecto corto | 2 | 1 test · 0 completar · 1 código |
 

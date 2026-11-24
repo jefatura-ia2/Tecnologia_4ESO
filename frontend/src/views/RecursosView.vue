@@ -49,7 +49,7 @@ function abrir(r) {
 
 <style scoped>
 .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
-.recurso p { margin: 10px 0 0; }
+.recurso p { margin: 10px 0 0; overflow-wrap: anywhere; }
 .ico { font-size: 2rem; line-height: 1; }
 .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .tag { font-size: 0.78rem; padding: 2px 8px; border-radius: 999px; background: #e0f2f1; color: #0f766e; }
